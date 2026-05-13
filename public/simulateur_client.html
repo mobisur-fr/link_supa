@@ -7,14 +7,15 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #f6f8fb;
-      --ink: #0f172a;
-      --muted: #64748b;
-      --line: #e2e8f0;
-      --blue: #2563eb;
-      --green: #16a34a;
-      --dark: #0f172a;
-      --shadow: 0 22px 70px rgba(15, 23, 42, .12);
+      --bg: #fbf8f2;
+      --ink: #280c10;
+      --muted: #6f5b5f;
+      --line: #eadfe1;
+      --blue: #3633d2;
+      --blue-dark: #3431d1;
+      --yellow: #ffff66;
+      --dark: #280c10;
+      --shadow: 0 22px 70px rgba(40, 12, 16, .14);
       --radius: 28px;
     }
 
@@ -23,7 +24,7 @@
     body {
       margin: 0;
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background: radial-gradient(circle at top left, #dbeafe, #f8fafc 38%, #eef2f7);
+      background: radial-gradient(circle at top left, #ffffe6, #fbf8f2 38%, #f0f0ff);
       color: var(--ink);
     }
 
@@ -33,7 +34,7 @@
       position: relative;
       overflow: hidden;
       border-radius: 36px;
-      background: linear-gradient(135deg, #0f172a, #164e63 58%, #166534);
+      background: linear-gradient(135deg, #280c10 0%, #3633d2 68%, #3431d1 100%);
       color: white;
       padding: 34px;
       box-shadow: var(--shadow);
@@ -63,7 +64,7 @@
       font-size: 13px;
     }
 
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #ffff66; }
 
     .hero h1 {
       max-width: 920px;
@@ -76,7 +77,7 @@
     .hero p {
       max-width: 780px;
       margin: 0;
-      color: #dbeafe;
+      color: #f0f0ff;
       font-size: 18px;
       line-height: 1.55;
     }
@@ -86,14 +87,14 @@
       margin-top: 18px;
       padding: 8px 12px;
       border-radius: 999px;
-      background: #fef3c7;
+      background: #ffffe6;
       color: #92400e;
       font-size: 13px;
       font-weight: 800;
     }
 
-    .status.ok { background: #dcfce7; color: #166534; }
-    .status.err { background: #fee2e2; color: #991b1b; }
+    .status.ok { background: #ffffe6; color: #280c10; }
+    .status.err { background: #fef2f2; color: #991b1b; }
 
     .journey {
       display: grid;
@@ -120,8 +121,8 @@
       place-items: center;
       margin-bottom: 10px;
       border-radius: 12px;
-      background: #eff6ff;
-      color: #1d4ed8;
+      background: #f0f0ff;
+      color: #3633d2;
       font-weight: 950;
     }
 
@@ -140,7 +141,7 @@
 
     .sub { margin: 0 0 18px; color: var(--muted); font-size: 14px; line-height: 1.45; }
 
-    label { display: block; margin: 14px 0 7px; color: #334155; font-size: 13px; font-weight: 900; }
+    label { display: block; margin: 14px 0 7px; color: #280c10; font-size: 13px; font-weight: 900; }
 
     select, input, textarea {
       width: 100%;
@@ -157,13 +158,13 @@
       border: 0;
       border-radius: 15px;
       padding: 12px 14px;
-      background: #0f172a;
+      background: #280c10;
       color: white;
       font-weight: 900;
       cursor: pointer;
     }
 
-    .secondary { background: #e2e8f0; color: #0f172a; }
+    .secondary { background: #eadfe1; color: #280c10; }
 
     .hint { margin-top: 10px; color: var(--muted); font-size: 12px; line-height: 1.4; }
 
@@ -181,15 +182,15 @@
     .badge {
       white-space: nowrap;
       border-radius: 999px;
-      background: #eff6ff;
-      color: #1d4ed8;
+      background: #f0f0ff;
+      color: #3633d2;
       padding: 7px 10px;
       font-size: 12px;
       font-weight: 900;
     }
 
     .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
-    .kpi { background: #f8fafc; border: 1px solid var(--line); border-radius: 20px; padding: 14px; }
+    .kpi { background: #fbf8f2; border: 1px solid var(--line); border-radius: 20px; padding: 14px; }
     .kpi span { color: var(--muted); font-size: 12px; }
     .kpi b { display: block; margin-top: 3px; font-size: 28px; }
 
@@ -202,9 +203,9 @@
       display: grid;
       place-items: center;
       border-radius: 18px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1d4ed8;
+      background: #f0f0ff;
+      border: 1px solid #d9d8ff;
+      color: #3633d2;
       font-weight: 950;
     }
 
@@ -217,19 +218,19 @@
       cursor: pointer;
       transition: .18s;
       text-align: left;
-      color: #0f172a;
+      color: #280c10;
       font-weight: 400;
     }
 
     .step-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 14px 35px rgba(15,23,42,.12);
-      border-color: #bfdbfe;
+      border-color: #d9d8ff;
     }
 
     .step-title {
       margin: 0;
-      color: #0f172a;
+      color: #280c10;
       font-size: 17px;
       font-weight: 850;
       line-height: 1.25;
@@ -237,7 +238,7 @@
 
     .step-subtitle {
       margin: 6px 0 0;
-      color: #64748b;
+      color: #6f5b5f;
       font-size: 13px;
       font-weight: 500;
       line-height: 1.35;
@@ -249,15 +250,15 @@
       display: inline-block;
       padding: 6px 9px;
       border-radius: 999px;
-      background: #f8fafc;
+      background: #fbf8f2;
       border: 1px solid var(--line);
-      color: #475569;
+      color: #6f5b5f;
       font-size: 12px;
       font-weight: 650;
     }
 
-    .tag.email { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
-    .tag.sms { background: #ecfdf5; color: #166534; border-color: #bbf7d0; }
+    .tag.email { background: #f0f0ff; color: #3633d2; border-color: #d9d8ff; }
+    .tag.sms { background: #ffffe6; color: #280c10; border-color: #e6e65c; }
 
 
 
@@ -269,17 +270,17 @@
       margin-top:12px;
       padding:10px 12px;
       border-radius:16px;
-      background:#f0fdf4;
-      border:1px solid #bbf7d0;
-      color:#166534;
+      background:#ffffe6;
+      border:1px solid #e6e65c;
+      color:#280c10;
       font-size:13px;
       font-weight:800;
     }
 
     .group-info.single {
-      background:#f8fafc;
-      border-color:#e2e8f0;
-      color:#475569;
+      background:#fbf8f2;
+      border-color:#eadfe1;
+      color:#6f5b5f;
     }
 
     .block-list {
@@ -294,9 +295,9 @@
       gap:9px;
       align-items:start;
       padding:10px;
-      border:1px solid #e2e8f0;
+      border:1px solid #eadfe1;
       border-radius:15px;
-      background:#f8fafc;
+      background:#fbf8f2;
     }
 
     .block-chip-num {
@@ -305,21 +306,21 @@
       display:grid;
       place-items:center;
       border-radius:9px;
-      background:#e0f2fe;
-      color:#075985;
+      background:#ffff66;
+      color:#3431d1;
       font-size:12px;
       font-weight:950;
     }
 
     .block-chip-title {
-      color:#0f172a;
+      color:#280c10;
       font-size:13px;
       font-weight:850;
       line-height:1.25;
     }
 
     .block-chip-code {
-      color:#64748b;
+      color:#6f5b5f;
       font-size:11px;
       margin-top:2px;
       line-height:1.25;
@@ -327,7 +328,7 @@
 
     .message-excerpt {
       margin-top: 12px;
-      color: #475569;
+      color: #6f5b5f;
       font-size: 14px;
       line-height: 1.5;
       font-weight: 400;
@@ -337,7 +338,7 @@
 
     .calculation-note {
       margin-top: 10px;
-      color: #64748b;
+      color: #6f5b5f;
       font-size: 12px;
       line-height: 1.4;
       font-weight: 400;
@@ -348,17 +349,17 @@
       align-items: center;
       gap: 8px;
       margin-top: 12px;
-      color: #1d4ed8;
+      color: #3633d2;
       font-weight: 850;
       font-size: 13px;
     }
 
     .empty {
       padding: 18px;
-      border: 1px dashed #cbd5e1;
+      border: 1px dashed #d8c8cb;
       border-radius: 20px;
-      background: #f8fafc;
-      color: #64748b;
+      background: #fbf8f2;
+      color: #6f5b5f;
       line-height: 1.45;
     }
 
@@ -368,8 +369,8 @@
     .note-card span { color: var(--muted); font-size: 13px; line-height: 1.45; }
 
     .technical { margin-top: 18px; }
-    .technical summary { cursor: pointer; color: #475569; font-weight: 900; }
-    .raw { max-height: 260px; overflow: auto; margin-top: 10px; white-space: pre-wrap; background: #0f172a; color: #dbeafe; border-radius: 16px; padding: 14px; font-size: 12px; }
+    .technical summary { cursor: pointer; color: #6f5b5f; font-weight: 900; }
+    .raw { max-height: 260px; overflow: auto; margin-top: 10px; white-space: pre-wrap; background: #280c10; color: #f0f0ff; border-radius: 16px; padding: 14px; font-size: 12px; }
 
     .modal-backdrop {
       position: fixed;
@@ -393,20 +394,23 @@
     }
 
     .modal h2 { margin: 0 0 8px; font-size: 24px; }
-    .modal p { margin: 0 0 16px; color: #64748b; line-height: 1.45; }
+    .modal p { margin: 0 0 16px; color: #6f5b5f; line-height: 1.45; }
 
     .small-preview {
       margin: 12px 0;
       border: 1px solid var(--line);
       border-radius: 18px;
-      background: #f8fafc;
+      background: #fbf8f2;
       padding: 13px;
-      color: #334155;
+      color: #280c10;
       font-size: 14px;
       line-height: 1.45;
     }
 
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    input:focus, textarea:focus, select:focus { outline:3px solid rgba(255,255,102,.8); border-color:var(--blue); }
+    .step-card:hover { border-color:var(--blue); }
+    .open-link { color:var(--blue); }
 
     @media (max-width: 1050px) {
       .layout { grid-template-columns: 1fr; }
@@ -790,7 +794,7 @@
         const subject = firstSubject || "Prévention routière";
         const bodyHtml = blocks.map(function (block) {
           return `<h3>${escapeHtml(block.subject)}</h3>\n${block.bodyHtml}`;
-        }).join('\n<hr style="border:none;border-top:1px solid #e2e8f0;margin:18px 0;" />\n');
+        }).join('\n<hr style="border:none;border-top:1px solid #eadfe1;margin:18px 0;" />\n');
         const bodyText = blocks.map(function (block) {
           return block.subject + "\n" + block.bodyText;
         }).join("\n\n---\n\n");
@@ -1002,27 +1006,27 @@
       return `
         <style>
           * { box-sizing: border-box; }
-          body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; background: #f1f5f9; color: #0f172a; }
+          body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; background: #fbf8f2; color: #280c10; }
           .preview-wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
           .preview-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
-          .preview-pill { display: inline-flex; border-radius: 999px; background: #e0f2fe; color: #075985; padding: 8px 12px; font-weight: 900; font-size: 13px; }
+          .preview-pill { display: inline-flex; border-radius: 999px; background: #ffff66; color: #3431d1; padding: 8px 12px; font-weight: 900; font-size: 13px; }
           h1 { margin: 14px 0 8px; font-size: 32px; letter-spacing: -.04em; line-height: 1.05; }
-          .preview-meta { color: #64748b; font-size: 14px; line-height: 1.5; }
-          .card { background: white; border: 1px solid #e2e8f0; border-radius: 28px; box-shadow: 0 22px 70px rgba(15,23,42,.12); overflow: hidden; }
-          .email-head { padding: 22px; border-bottom: 1px solid #e2e8f0; background: #fff; }
-          .from { color: #64748b; font-size: 13px; line-height: 1.55; }
+          .preview-meta { color: #6f5b5f; font-size: 14px; line-height: 1.5; }
+          .card { background: white; border: 1px solid #eadfe1; border-radius: 28px; box-shadow: 0 22px 70px rgba(15,23,42,.12); overflow: hidden; }
+          .email-head { padding: 22px; border-bottom: 1px solid #eadfe1; background: #fff; }
+          .from { color: #6f5b5f; font-size: 13px; line-height: 1.55; }
           .subject { margin-top: 10px; font-size: 24px; font-weight: 950; letter-spacing: -.03em; }
-          .body { padding: 24px; color: #334155; font-size: 15px; line-height: 1.65; }
-          .auto-message { border-left: 4px solid #2563eb; background: #f8fafc; border-radius: 16px; padding: 16px; margin: 16px 0 0; }
-          .manager-note { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 16px; padding: 16px; margin: 0 0 16px; color: #7c2d12; }
-          .phone { max-width: 430px; margin: 0 auto; background: #111827; border-radius: 38px; padding: 13px; box-shadow: 0 22px 70px rgba(15,23,42,.25); }
-          .screen { min-height: 620px; overflow: hidden; background: #eef6ff; border-radius: 28px; }
-          .sms-top { background: #1d4ed8; color: white; padding: 18px; font-weight: 950; }
+          .body { padding: 24px; color: #280c10; font-size: 15px; line-height: 1.65; }
+          .auto-message { border-left: 4px solid #3633d2; background: #fbf8f2; border-radius: 16px; padding: 16px; margin: 16px 0 0; }
+          .manager-note { background: #ffffe6; border: 1px solid #e6e65c; border-radius: 16px; padding: 16px; margin: 0 0 16px; color: #280c10; }
+          .phone { max-width: 430px; margin: 0 auto; background: #280c10; border-radius: 38px; padding: 13px; box-shadow: 0 22px 70px rgba(15,23,42,.25); }
+          .screen { min-height: 620px; overflow: hidden; background: #f0f0ff; border-radius: 28px; }
+          .sms-top { background: #3633d2; color: white; padding: 18px; font-weight: 950; }
           .sms-body { padding: 16px; }
           .bubble { margin: 0 0 12px; padding: 13px 14px; border-radius: 18px 18px 18px 6px; background: white; box-shadow: 0 1px 2px rgba(0,0,0,.15); font-size: 15px; line-height: 1.45; }
-          .time { margin-top: 8px; color: #64748b; text-align: right; font-size: 11px; }
+          .time { margin-top: 8px; color: #6f5b5f; text-align: right; font-size: 11px; }
           .preview-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
-          .print { border: 0; border-radius: 14px; background: #0f172a; color: white; padding: 12px 15px; font-weight: 950; cursor: pointer; }
+          .print { border: 0; border-radius: 14px; background: #280c10; color: white; padding: 12px 15px; font-weight: 950; cursor: pointer; }
           @media print { .preview-actions, .preview-top { display: none; } .preview-wrap { padding: 0; } .card, .phone { box-shadow: none; border: 0; } }
         </style>
       `;

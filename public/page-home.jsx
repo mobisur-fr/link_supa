@@ -204,7 +204,7 @@ function HomePage({ setPage, t }) {
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <span className="eyebrow">Pourquoi ça marche</span>
             <h2 className="h-display h2" style={{ margin: "16px auto", maxWidth: "20ch" }}>
-              4 raisons que vos concurrents n'ont pas comprises.
+              Ces 4 facteurs qui optimisent la prévention au travail
             </h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }} className="why-grid">
@@ -282,7 +282,7 @@ function HomePage({ setPage, t }) {
       {/* ============ CTA STRIP ============ */}
       <section className="cta-strip">
         <div className="container container-tight">
-          <h2>Vos salariés prennent la route. Vous, vous prenez les devants.</h2>
+          <h2>Vos salariés n'y prennent pas garde. Vous prenez les devants.</h2>
           <p>Rejoignez les pilotes. 3 mois offerts en 2026.</p>
           <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
             <a className="btn btn-dark btn-lg" href="mailto:hello@mobisur.fr">
@@ -308,7 +308,7 @@ const COPY = {
       titleA: "Vos salariés",
       titleAccent: "prennent la route.",
       titleB: "Vous, prenez les devants.",
-      sub: "Chaque salarié qui vient au travail prend un risque routier. C'est la 1re cause d'accident du travail. MobiSûr envoie au bon moment les bons messages — signés par vous.",
+      sub: "À pied, à vélo, à moto ou au volant, l'accident de trajet est la 1re cause d'accident du travail. Avec MobiSûr, vous aurez fait ce qu'il fallait. MobiSûr envoie au bon moment les bons messages, signés par vous.",
     },
     stat: {
       title: "L'accident le plus fréquent ne se passe pas au bureau.",

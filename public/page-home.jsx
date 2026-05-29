@@ -306,9 +306,9 @@ const COPY = {
     hero: {
       eyebrow: "Prévention routière des PME",
       titleA: "Vos salariés",
-      titleAccent: "n'y prennent pas garde.",
+      titleAccent: "prennent la route.",
       titleB: "Vous, prenez les devants.",
-      sub: "À pied, à vélo, à moto ou au volant, l'accident de trajet est la 1re cause d'accident du travail. Avec MobiSûr, vous aurez fait ce qu'il fallait. MobiSûr envoie au bon moment les bons messages, signés par vous.",
+      sub: "À pied, à vélo, à moto ou au volant, la route est la 1re cause d'accident du travail. Avec MobiSûr, vous aurez fait ce qu'il fallait. MobiSûr envoie au bon moment les bons messages, signés par vous.",
     },
     stat: {
       title: "L'accident le plus fréquent ne se passe pas au bureau.",

@@ -204,7 +204,7 @@ function HomePage({ setPage, t }) {
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <span className="eyebrow">Pourquoi ça marche</span>
             <h2 className="h-display h2" style={{ margin: "16px auto", maxWidth: "20ch" }}>
-              Ces 4 facteurs qui optimisent la prévention au travail
+              Ces 4 facteurs qui optimisent vos actions de prévention
             </h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }} className="why-grid">

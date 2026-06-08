@@ -41,7 +41,7 @@ function HomePage({ setPage, t }) {
                 </a>
               </div>
               <div style={{ marginTop: 28, display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
-                <span className="hero-price-note"><strong>2&nbsp;€ HT</strong></span>
+                <span className="hero-price-note"><strong>2&nbsp;€ HT / salarié / mois</strong></span>
                 <span style={{ fontSize: 14, color: "var(--ms-brown)", fontWeight: 700 }}>· 3 mois offerts en 2026 pour les pilotes</span>
               </div>
             </div>
@@ -259,10 +259,10 @@ function HomePage({ setPage, t }) {
               <div className="pilot-badge">3 mois<br/>offerts</div>
               <div className="pre">Tarif transparent</div>
               <div className="big">
-                2&nbsp;€<span className="unit">/ salarié / mois</span>
+                2&nbsp;€ HT<span className="unit">/ salarié / mois</span>
               </div>
               <div style={{ fontSize: 14, color: "var(--ms-brown-soft)", fontWeight: 600 }}>
-                soit 24 € par salarié et par an — moins qu'un déjeuner d'équipe.
+                soit 24 € HT par salarié et par an — soit à peine le prix d'un café !.
               </div>
               <ul>
                 <li>Messages illimités par email & SMS</li>

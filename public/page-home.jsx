@@ -75,7 +75,7 @@ function HomePage({ setPage, t }) {
             </div>
             <div className="stat-cell blue">
               <div className="figure">159k</div>
-              <div className="label">patrons de PME en France. Tous concernés et tous responsables</div>
+              <div className="label">patrons de PME en France. Tous concernés et tous responsables.</div>
             </div>
           </div>
         </div>

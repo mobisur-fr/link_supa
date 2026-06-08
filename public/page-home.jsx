@@ -209,10 +209,10 @@ function HomePage({ setPage, t }) {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }} className="why-grid">
             {[
-              { n: "01", t: "Au bon moment", d: "Un message sur le brouillard la veille d'un brouillard. Une alerte travaux le jour où la rue ferme. La pertinence rend la lecture inévitable." },
-              { n: "02", t: "Sans coût en temps", d: "Pas de réunion, pas de formation à organiser, pas de DRH à mobiliser. Zéro minute consommée sur le temps de travail." },
-              { n: "03", t: "Signé par vous", d: "Vos salariés savent que c'est leur direction qui s'engage. Pas un prestataire anonyme. Vous valorisez votre démarche RSE au passage." },
-              { n: "04", t: "Documenté", d: "Chaque envoi est tracé, daté, archivé. En cas de contrôle ou de litige, vous avez la preuve que vous avez agi en continu — pas une fois par an." },
+              { n: "01", t: "Au bon moment", d: "Des rappels sur la conduite en cas d'abscence de visibilité la veille d'une matinée de brouillard; une alerte travaux avant la fermeture des rues : la pertinence fait lire !" },
+              { n: "02", t: "Sans perte de temps", d: "Pas de réunion, pas de formation à organiser, pas de DRH à mobiliser. Zéro minute consommée sur le temps de travail." },
+              { n: "03", t: "Votre implication réelle", d: "Vos salariés savent que c'est leur patron qui s'engage personnellement. Vous valorisez ainsi votre démarche RSE." },
+              { n: "04", t: "Une preuve opposable", d: "Chaque envoi est tracé, daté, archivé. En cas de contrôle ou de litige, vous avez la preuve que vous avez agi en continu — et pas seulement une fois par an." },
             ].map((it) => (
               <div key={it.n} style={{ background: "white", border: "1.5px solid var(--ms-line)", borderRadius: 16, padding: 32 }}>
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 36, color: "var(--ms-yellow)", letterSpacing: "-0.04em", lineHeight: 1, WebkitTextStroke: "1.5px var(--ms-brown)" }}>{it.n}</div>

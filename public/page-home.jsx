@@ -58,7 +58,7 @@ function HomePage({ setPage, t }) {
       <section className="section">
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <span className="eyebrow">Le risque que tout le monde sous-estime</span>
+            <span className="eyebrow">L'angle mort</span>
             <h2 className="h-display h2" style={{ margin: "16px auto 16px", maxWidth: "20ch" }}>
               {copy.stat.title}
             </h2>
@@ -66,7 +66,7 @@ function HomePage({ setPage, t }) {
           </div>
           <div className="stat-block">
             <div className="stat-cell yellow">
-              <div className="figure">1<sup style={{ fontSize: "0.45em" }}>re</sup></div>
+              <div className="figure">1<sup style={{ fontSize: "0.45em" }}>ère</sup></div>
               <div className="label">cause de mortalité au travail. Devant les chutes. Devant les machines.</div>
             </div>
             <div className="stat-cell dark">
@@ -75,7 +75,7 @@ function HomePage({ setPage, t }) {
             </div>
             <div className="stat-cell blue">
               <div className="figure">159k</div>
-              <div className="label">patrons de PME en France. Combien font de la prévention routière ?</div>
+              <div className="label">patrons de PME en France. Tous concernés et tous responsables</div>
             </div>
           </div>
         </div>
@@ -311,8 +311,8 @@ const COPY = {
       sub: "À pied, à vélo, à moto ou au volant, la route est la 1re cause d'accident du travail. Avec MobiSûr, vous aurez fait ce qu'il fallait. MobiSûr envoie au bon moment les bons messages, signés par vous.",
     },
     stat: {
-      title: "L'accident le plus fréquent ne se passe pas au bureau.",
-      sub: "Il se passe sur la route — entre la maison et le travail, ou pendant un déplacement pro. Et c'est vous qu'on va venir chercher.",
+      title: "L'accident du travail le plus fréquent ne se passe pas où l'on croit !.",
+      sub: "Et dans ce cas, aussi c'est vous qu'on viendra chercher",
     },
     how: {
       title: "Vos salariés reçoivent les bons messages au bon moment.",

@@ -139,17 +139,17 @@ function HomePage({ setPage, t }) {
             <div className="step">
               <div className="num">1</div>
               <h3>Vous abonnez vos salariés</h3>
-              <p>2 € par salarié et par mois. Pas de set-up, pas de formation, pas de logiciel à installer. Vous fournissez la liste des emails et numéros de mobile. C'est tout.</p>
+              <p>2 € HT par salarié et par mois. Vous avez juste à établir votre propre liste des emails et/ou des numéros de mobile de vos collaborateurs. C'est tout.</p>
             </div>
             <div className="step">
               <div className="num">2</div>
               <h3>On envoie au bon moment</h3>
-              <p>Brouillard demain&nbsp;? Travaux rue Jean-Jaurès&nbsp;? Pot d'entreprise vendredi&nbsp;? Le message part automatiquement, ciblé sur le risque réel — par email ou SMS.</p>
+              <p>Brouillard demain&nbsp;? Travaux dans les environs&nbsp;? Pot d'entreprise vendredi&nbsp;? Le message part automatiquement, ciblé sur le risque réel — par email ou SMS.</p>
             </div>
             <div className="step">
               <div className="num">3</div>
               <h3>Signé par vous</h3>
-              <p>Votre nom. Votre photo. Vos mots si vous voulez. Vos salariés voient que c'est <em>vous</em> qui faites de la prévention — pas un robot anonyme. Et vous, vous avez la preuve.</p>
+              <p>Vous signez systématiquement les messages et pouvez même les personnaliser à votre convenance. Ainsi vos salariés sont sûr de la provenance des messages de prévention et vous en avez une preuve tangible.</p>
             </div>
           </div>
         </div>
@@ -316,7 +316,7 @@ const COPY = {
     },
     how: {
       title: "Vos salariés reçoivent les bons messages au bon moment.",
-      sub: "Sans réunion. Sans formation. Sans temps perdu. Et vous gardez la preuve de votre démarche.",
+      sub: "Sans réunion. Sans formation. \n Sans temps perdu. Et vous gardez la preuve de votre démarche.",
     },
   },
   serious: {

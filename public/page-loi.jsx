@@ -66,8 +66,8 @@ function LoiPage({ setPage, t }) {
             <div className="ttl">L'employeur prend les mesures nécessaires pour assurer la sécurité et protéger la santé physique et mentale des travailleurs.</div>
             <ul>
               <li><span><strong>Évaluer</strong> les risques professionnels, y compris le risque routier — quels que soient le poste et le mode de déplacement.</span></li>
-              <li><strong>Mettre en place</strong> des actions de prévention, d'information et de formation adaptées.</li>
-              <li><strong>Adapter</strong> les mesures en continu pour améliorer la sécurité, dès que la situation évolue.</li>
+              <li><span><strong>Mettre en place</strong> des actions de prévention, d'information et de formation adaptées.</span></li>
+              <li><span><strong>Adapter</strong> les mesures en continu pour améliorer la sécurité, dès que la situation évolue.</span></li>
             </ul>
           </div>
 
@@ -75,10 +75,10 @@ function LoiPage({ setPage, t }) {
             <div className="ref">Décret du 5 novembre 2001 · Mise en œuvre du DUERP</div>
             <div className="ttl">Le Document Unique d'Évaluation des Risques Professionnels est obligatoire pour toute entreprise ayant au moins un salarié.</div>
             <ul>
-              <li>Il vise à <strong>identifier, évaluer et prioriser</strong> les risques professionnels — risque routier inclus — auxquels sont exposés les travailleurs.</li>
-              <li>Il doit définir un <strong>plan d'action</strong> pour prévenir ces risques.</li>
-              <li>Dans les entreprises de <strong>plus de 11 salariés</strong>, il doit être <strong>mis à jour au moins une fois par an</strong>.</li>
-              <li>Il doit aussi être actualisé dès qu'une décision modifie les conditions de travail ou que la perception des risques évolue.</li>
+              <li><span>Il vise à <strong>identifier, évaluer et prioriser</strong> les risques professionnels — risque routier inclus — auxquels sont exposés les travailleurs.</span></li>
+              <li><span>Il doit définir un <strong>plan d'action</strong> pour prévenir ces risques.</span></li>
+              <li><span>Dans les entreprises de <strong>plus de 11 salariés</strong>, il doit être <strong>mis à jour au moins une fois par an</strong>.</span></li>
+              <li><span>Il doit aussi être actualisé dès qu'une décision modifie les conditions de travail ou que la perception des risques évolue.</span></li>
             </ul>
           </div>
 
@@ -86,9 +86,9 @@ function LoiPage({ setPage, t }) {
             <div className="ref">Jurisprudence · Faute inexcusable</div>
             <div className="ttl">La faute inexcusable de l'employeur est retenue quand il avait conscience du danger et n'a pas pris les mesures pour l'éviter.</div>
             <ul>
-              <li>Elle peut donner lieu à une <strong>majoration de la rente</strong> versée à la victime — à la charge de l'entreprise.</li>
-              <li>Elle peut être doublée d'une <strong>action pénale</strong> contre le dirigeant pour manquement aux obligations de sécurité.</li>
-              <li>L'absence de démarche de prévention documentée est un élément à charge déterminant.</li>
+              <li><span>Elle peut donner lieu à une <strong>majoration de la rente</strong> versée à la victime — à la charge de l'entreprise.</span></li>
+              <li><span>Elle peut être doublée d'une <strong>action pénale</strong> contre le dirigeant pour manquement aux obligations de sécurité.</span></li>
+              <li><span>L'absence de démarche de prévention documentée est un élément à charge déterminant.</span></li>
             </ul>
           </div>
         </div>
@@ -144,10 +144,10 @@ function LoiPage({ setPage, t }) {
             <div className="law-card">
               <div className="ref">Comment MobiSûr s'intègre dans votre DUERP</div>
               <ul>
-                <li><strong>Section "Risques routiers"</strong> — vous documentez l'identification du risque et son évaluation (1 ligne, 30 secondes).</li>
-                <li><strong>Plan d'action</strong> — "abonnement MobiSûr, X € / mois, sensibilisation permanente, messages déclenchés par contexte météo et travaux locaux".</li>
-                <li><strong>Preuve d'exécution</strong> — votre tableau de bord MobiSûr liste tous les messages envoyés, daté par destinataire. C'est joint en annexe.</li>
-                <li><strong>Mise à jour</strong> — la traçabilité est automatique. Vous mettez à jour le DUERP une fois par an, en 10 minutes.</li>
+                <li><span><strong>Section "Risques routiers"</strong> — vous documentez l'identification du risque et son évaluation (1 ligne, 30 secondes).</span></li>
+                <li><span><strong>Plan d'action</strong> — "abonnement MobiSûr, X € / mois, sensibilisation permanente, messages déclenchés par contexte météo et travaux locaux".</span></li>
+                <li><span><strong>Preuve d'exécution</strong> — votre tableau de bord MobiSûr liste tous les messages envoyés, daté par destinataire. C'est joint en annexe.</span></li>
+                <li><span><strong>Mise à jour</strong> — la traçabilité est automatique. Vous mettez à jour le DUERP une fois par an, en 10 minutes.</span></li>
               </ul>
             </div>
           </div>

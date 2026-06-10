@@ -58,7 +58,7 @@ function HomePage({ setPage, t }) {
       <section className="section">
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <span className="eyebrow">L'angle mort</span>
+            <span className="eyebrow">Ni à l'atelier, ni au bureau</span>
             <h2 className="h-display h2" style={{ margin: "16px auto 16px", maxWidth: "20ch" }}>
               {copy.stat.title}
             </h2>
@@ -304,8 +304,8 @@ const COPY = {
       sub: "À pied, à vélo, à moto ou au volant, la route est la 1ère cause d'accident de mortalité par accident du travail. Avec MobiSûr, vous aurez fait ce qu'il fallait pour l'éviter.",
     },
     stat: {
-      title: "L'accident du travail le plus fréquent ne se passe pas où l'on croit !.",
-      sub: "Et dans ce cas, aussi c'est vous qu'on viendra chercher",
+      title: "L'accident du travail le plus fréquent ne survient pas là où l'on croit",
+      sub: "Il se passe sur la route, entre la maison et le travail, ou pendant un déplacement profesionnel. Et dans ce cas, aussi c'est vous qu'on viendra chercher",
     },
     how: {
       title: "Vos salariés reçoivent les bons messages au bon moment.",

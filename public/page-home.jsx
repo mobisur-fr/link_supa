@@ -169,9 +169,9 @@ function HomePage({ setPage, t }) {
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[
-                  { ic: "chat", t: "Quiz prévention", s: "Question + réponse argumentée. Le truc qu'on lit jusqu'au bout." },
+                  { ic: "chat", t: "Quiz", s: "Question + réponse argumentée. Le truc qu'on lit jusqu'au bout." },
                   { ic: "cloud", t: "Alertes locales", s: "Météo, travaux, événements. Déclenchées au plus près du risque." },
-                  { ic: "user", t: "Mot de la direction", s: "Signé par le chef d'entreprise, avec sa photo. Ça change tout." },
+                  { ic: "user", t: "Mot du patron", s: "Signé par le chef d'entreprise, avec sa photo. Ça change tout." },
                   { ic: "paper", t: "Affichettes", s: "Pour l'atelier, l'accueil, la salle de pause. Imprimables A4." },
                 ].map((it, i) => (
                   <div key={i} style={{ display: "flex", gap: 16, padding: "14px 18px", background: "white", borderRadius: 14, border: "1px solid var(--ms-line)" }}>

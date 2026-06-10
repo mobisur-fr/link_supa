@@ -155,9 +155,9 @@ function PhoneMockup({ activeKey, onSelectKey, showSwitcher = true }) {
 
   const order = ["quiz", "weather", "boss", "local"];
   const meta = {
-    quiz: { name: "Quiz prévention", sub: "Ludique · 1×/sem.", initial: "Q" },
+    quiz: { name: "Quiz", sub: "Ludique · 1×/sem.", initial: "Q" },
     weather: { name: "Alerte météo", sub: "Au moment du risque", initial: "M" },
-    boss: { name: "Mot du directeur", sub: "Gérard Grison", initial: "G" },
+    boss: { name: "Mot du Patron", sub: "Gérard Grison", initial: "G" },
     local: { name: "Travaux à proximité", sub: "Géolocalisé", initial: "L" },
   };
 

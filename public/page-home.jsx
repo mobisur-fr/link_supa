@@ -275,14 +275,14 @@ function HomePage({ setPage, t }) {
       {/* ============ CTA STRIP ============ */}
       <section className="cta-strip">
         <div className="container container-tight">
-          <h2>Vos salariés n'y prennent pas garde. Vous prenez les devants.</h2>
+          <h2>Vos salariés prennent la route. Vous prenez les devants.</h2>
           <p>Rejoignez les pilotes. 3 mois offerts en 2026.</p>
           <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
             <a className="btn btn-dark btn-lg" href="mailto:hello@mobisur.fr">
               Devenir pilote <Icon name="arrow" size={18} stroke={2.5} />
             </a>
             <a className="btn btn-ghost btn-lg" href="#" onClick={(e) => { e.preventDefault(); setPage("loi"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
-              D'abord, comprendre la loi
+              Ce que dit la loi
             </a>
           </div>
         </div>

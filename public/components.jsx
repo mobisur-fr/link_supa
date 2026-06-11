@@ -11,7 +11,7 @@ function Header({ page, setPage }) {
     <header className="site-header">
       <div className="site-header-inner">
         <button className="site-logo" onClick={() => setPage("home")} aria-label="Accueil MobiSûr">
-          <img src="assets/logo-mobisur.png" alt="MobiSûr — Prévention routière des PME" style={{ height: 100}}/>
+          <img src="assets/logo-mobisur.png" alt="MobiSûr — Prévention routière des PME" style={{ height: 88}}/>
         </button>
         <nav className="site-nav">
           {PAGES.map((p) => (
@@ -38,7 +38,7 @@ function Footer({ setPage }) {
       <div className="container">
         <div className="footer-grid">
           <div className="footer-col">
-            <img src="assets/logo-mobisur.png" alt="MobiSûr" style={{ height: 44, filter: "brightness(0) invert(1)", marginBottom: 18 }} />
+            <img src="assets/logo-mobisur.png" alt="MobiSûr" style={{ height: 44, marginBottom: 18 }} />
             <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "rgba(253,250,242,0.7)", maxWidth: 320 }}>
               La prévention routière des PME, livrée aux salariés au bon moment, signée par leur direction. Pour 2 €&nbsp;/&nbsp;salarié&nbsp;/&nbsp;mois.
             </p>
@@ -63,8 +63,9 @@ function Footer({ setPage }) {
           <div className="footer-col">
             <h4>Contact</h4>
             <ul>
-              <li><a href="mailto:hello@mobisur.fr">hello@mobisur.fr</a></li>
-              <li><a href="tel:+33180000000">01 80 00 00 00</a></li>
+              <li><a href="mailto:annelavaud@mobisur.fr">annelavaud@mobisur.net</a></li>
+              <li><a href="mailto:philippecoll@mobisur.fr">philippecoll@mobisur.net</a></li>
+              <li><a href="tel:+33608539393">06 08 53 93 93</a></li>
               <li style={{ color: "rgba(253,250,242,0.6)" }}>Paris — France</li>
             </ul>
           </div>

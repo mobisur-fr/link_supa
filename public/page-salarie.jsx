@@ -46,7 +46,7 @@ function SalariePage({ setPage, t }) {
                     <div style={{ fontSize: 11, color: "var(--ms-muted)", fontWeight: 700 }}>MobiSûr · maintenant</div>
                   </div>
                   <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 15, color: "var(--ms-brown)", lineHeight: 1.2, marginBottom: 6 }}>Brouillard demain matin</div>
-                  <div style={{ fontSize: 12, color: "var(--ms-brown-soft)", lineHeight: 1.45 }}>Pensez à rester visible sur votre trottinette…</div>
+                  <div style={{ fontSize: 12, color: "var(--ms-brown-soft)", lineHeight: 1.45 }}>Ne prenez pas votre trotinette pour venir au travail</div>
                 </div>
                 <div style={{ background: "var(--ms-yellow)", border: "2px solid var(--ms-brown)", borderRadius: 14, padding: 18, maxWidth: 260, transform: "rotate(2deg) translateY(-20px)" }}>
                   <div style={{ fontSize: 11, color: "var(--ms-brown)", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>SMS · Quiz du jour</div>

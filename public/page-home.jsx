@@ -133,7 +133,7 @@ function HomePage({ setPage, t }) {
             <h2 className="h-display h2" style={{ margin: "16px auto", maxWidth: "22ch" }}>
               {copy.how.title}
             </h2>
-            <p className="lead" style={{ maxWidth: 680, margin: "0 auto" }} dangerouslySetInnerHTML={{ __html: COPY.punchy.how.sub }}>{copy.how.sub}</p>
+            <p className="lead" style={{ maxWidth: 680, margin: "0 auto" }} dangerouslySetInnerHTML={{ __html: COPY.punchy.how.sub }}></p>
           </div>
           <div className="steps-grid">
             <div className="step">

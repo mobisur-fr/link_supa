@@ -216,7 +216,7 @@ function MetaLocal() {
       <h3>Alerte locale</h3>
       <p>Travaux, météo, événement de quartier — le message part automatiquement quand un risque est identifié à proximité de votre établissement.</p>
       <ul className="msg-meta-list">
-        <li>Sources : préfecture, mairie, Météo-France</li>
+        <li>Sources : Mairie, Météo-France, Conseil départemental</li>
         <li>Géolocalisation à l'adresse de l'établissement</li>
         <li>Délai : 12 à 24 h avant l'événement</li>
         <li>Carte intégrée + conseils d'itinéraire</li>

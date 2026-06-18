@@ -918,11 +918,9 @@
           <div class="step-number">${escapeHtml(stepLabel)}</div>
           <button class="step-card" type="button" data-message-id="${escapeHtml(message.id)}">
             <h3 class="step-title">${escapeHtml(stepTitle)}</h3>
-            <p class="step-subtitle">${escapeHtml(stepSubtitle)}</p>
             <div class="meta">
               <span class="tag ${escapeHtml(message.channel)}">${escapeHtml(message.channel)}</span>
               <span class="tag">Envoi prévu : ${escapeHtml(formatDate(message.plannedAt))}</span>
-              <span class="tag">Moment ${escapeHtml(index + 1)} de la séquence</span>
             </div>
             <div class="group-info ${isGrouped ? "" : "single"}">${escapeHtml(groupLabel)}</div>
             ${isGrouped ? `<div class="block-list">${blockList}</div>` : ""}

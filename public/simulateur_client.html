@@ -856,7 +856,7 @@
       state.messages = messages;
 
       const stepCount = new Set(messages.map(function (message) { return message.step.id; })).size;
-      const channelNames = Array.from(new Set(messages.map(function (message) { return channelLabel(message.channel); })));
+      const channelNames = Array.from(new Set(messages.map(function (message) { return message.channel; })));
 
       getElement("title").textContent = scenario ? (scenario.label || scenario.code) : "Aucun scénario actif";
       const totalBlocks = messages.reduce(function (sum, message) { return sum + ((message.blocks || []).length || 1); }, 0);
@@ -920,7 +920,7 @@
             <h3 class="step-title">${escapeHtml(stepTitle)}</h3>
             <p class="step-subtitle">${escapeHtml(stepSubtitle)}</p>
             <div class="meta">
-              <span class="tag ${escapeHtml(message.channel)}">${escapeHtml(channelLabel(message.channel))}</span>
+              <span class="tag ${escapeHtml(message.channel)}">${escapeHtml(message.channel)}</span>
               <span class="tag">Envoi prévu : ${escapeHtml(formatDate(message.plannedAt))}</span>
               <span class="tag">Moment ${escapeHtml(index + 1)} de la séquence</span>
             </div>
@@ -961,7 +961,7 @@
 
       const excerpt = message.bodyText.length > 220 ? message.bodyText.slice(0, 220) + "…" : message.bodyText;
       getElement("modalSummary").innerHTML = `
-        <strong>${escapeHtml(channelLabel(message.channel))} · ${escapeHtml(message.subject)}</strong><br>
+        <strong>${escapeHtml(message.channel)} · ${escapeHtml(message.subject)}</strong><br>
         <span>${escapeHtml(formatDate(message.plannedAt))}</span><br>
         ${escapeHtml(excerpt)}
       `;
@@ -1006,14 +1006,14 @@
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Aperçu ${escapeHtml(channelLabel(channel))}</title>
+          <title>Aperçu ${escapeHtml(channel)}</title>
           ${buildPreviewStyles()}
         </head>
         <body>
           <div class="preview-wrap">
             <div class="preview-top">
               <div>
-                <span class="preview-pill">Aperçu ${escapeHtml(channelLabel(channel))} destiné aux équipes</span>
+                <span class="preview-pill">Aperçu ${escapeHtml(channel)} destiné aux équipes</span>
                 <h1>${escapeHtml(message.subject)}</h1>
                 <div class="preview-meta">
                   Entreprise <br>

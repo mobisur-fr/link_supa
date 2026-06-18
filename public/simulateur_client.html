@@ -803,7 +803,7 @@
           const subject = renderTemplate(version.sujet_template || item.sujet || "Prévention routière", context);
           const bodyHtml = renderTemplate(version.corps_template || "", context);
           const bodyText = stripHtml(bodyHtml);
-          const channel = normaliseChannel(item.channel);
+          const channel = item.channel;
 
           if (!firstSubject && subject) firstSubject = subject;
           if (!firstItem) firstItem = item;
@@ -995,7 +995,7 @@
     }
 
     function buildPreviewPageHtml(message, note) {
-      const channel = normaliseChannel(message.channel);
+      const channel = message.channel;
       const previewContent = channel === "sms"
         ? buildSmsPreview(message, note)
         : buildEmailPreview(message, note);

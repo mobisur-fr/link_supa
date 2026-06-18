@@ -511,9 +511,6 @@
         <label for="eventDate">Date de l’événement</label>
         <input id="eventDate" type="datetime-local" />
 
-        <label for="email">Contact destinataire</label>
-        <input id="email" value="responsable@entreprise.fr" />
-
         <button id="simulate" style="width:100%;margin-top:16px">Envoi</button>
       </aside>
 
@@ -627,11 +624,6 @@
       });
     }
 
-    function normaliseChannel(channel) {
-      const value = String(channel || "email").toLowerCase();
-      return value === "sms" ? "sms" : "email";
-    }
-
     function channelLabel(channel) {
       return normaliseChannel(channel) === "sms" ? "SMS" : "Email";
     }
@@ -727,7 +719,7 @@
         predicted_end_at: event ? event.predicted_end_at || "" : "",
         severity: event ? event.severity || "" : "",
         client_name: "Entreprise",
-        client_email: getElement("email").value,
+        client_email: "entreprise@contact.fr",
         scenario_code: scenario ? scenario.code || "" : "",
         scenario_label: scenario ? scenario.label || "" : "",
         step_code: step ? step.code || "" : ""
@@ -1028,7 +1020,7 @@
                 <span class="preview-pill">Aperçu ${escapeHtml(channelLabel(channel))} destiné aux équipes</span>
                 <h1>${escapeHtml(message.subject)}</h1>
                 <div class="preview-meta">
-                  Entreprise : Entreprise<br>
+                  Entreprise <br>
                   Envoi prévu : ${escapeHtml(formatDate(message.plannedAt))}
                 </div>
               </div>
@@ -1125,7 +1117,6 @@
       getElement("scenario").addEventListener("change", refreshSimulation);
       getElement("eventDate").addEventListener("input", refreshSimulation);
       getElement("simulate").addEventListener("click", refreshSimulation);
-      getElement("email").addEventListener("input", refreshSimulation);
       getElement("cancelModal").addEventListener("click", closeModal);
       getElement("openPreview").addEventListener("click", openFinalPreview);
 

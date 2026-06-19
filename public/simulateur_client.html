@@ -1005,7 +1005,7 @@
           <div class="preview-wrap">
             <div class="preview-top">
               <div>
-                <span class="preview-pill">Aperçu ${escapeHtml(channel)} destiné aux équipes</span>
+                <span class="preview-pill">Aperçu ${escapeHtml(channel)} reçu par vos équipes</span>
                 <h1>${escapeHtml(message.subject)}</h1>
                 <div class="preview-meta">
                   Envoi prévu : ${escapeHtml(formatDate(message.plannedAt))}
@@ -1045,7 +1045,7 @@
           .time { margin-top: 8px; color: #6f5b5f; text-align: right; font-size: 11px; }
           .preview-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
           .print { border: 0; border-radius: 14px; background: #280c10; color: white; padding: 12px 15px; font-weight: 950; cursor: pointer; }
-          .sign { text-align: right }
+          .sign { text-align: right; }
           @media print { .preview-actions, .preview-top { display: none; } .preview-wrap { padding: 0; } .card, .phone { box-shadow: none; border: 0; } }
         </style>
       `;

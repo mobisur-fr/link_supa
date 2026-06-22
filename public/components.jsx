@@ -52,15 +52,6 @@ function Footer({ setPage }) {
             </ul>
           </div>
           <div className="footer-col">
-            <h4>Ressources</h4>
-            <ul>
-              <li><a href="#">Brochure PDF</a></li>
-              <li><a href="#">Affichettes</a></li>
-              <li><a href="#">FAQ employeur</a></li>
-              <li><a href="#">Modèles de DUERP</a></li>
-            </ul>
-          </div>
-          <div className="footer-col">
             <h4>Contact</h4>
             <ul>
               <li><a href="mailto:annelavaud@mobisur.fr">annelavaud@mobisur.net</a></li>

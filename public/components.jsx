@@ -63,7 +63,7 @@ function Footer({ setPage }) {
         </div>
         <div className="footer-bottom">
           <span>© 2026 MobiSûr — Tous droits réservés</span>
-          <span>Mentions légales · CGV · Politique de confidentialité</span>
+          <span><a href="legal.html">Mentions légales</a> · CGV · Politique de confidentialité</span>
         </div>
       </div>
     </footer>

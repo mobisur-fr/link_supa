@@ -820,7 +820,7 @@
           return block.bodyHtml;
         }).join('\n<hr style="border:none;border-top:1px solid #eadfe1;margin:18px 0;" />\n');
         const bodyText = blocks.map(function (block) {
-          return block.subject + "\n" + block.bodyText;
+          return block.bodyText;
         }).join("\n\n---\n\n");
 
         messages.push({

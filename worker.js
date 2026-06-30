@@ -2,7 +2,7 @@ const SESSION_COOKIE = 'mobisur_admin_session';
 const SESSION_TTL_SECONDS = 12 * 60 * 60;
 const LOGIN_PATH = '/login';
 const LOGOUT_PATH = '/logout';
-const DEFAULT_ADMIN_PATH = '/admin.html';
+const DEFAULT_ADMIN_PATH = '/admin';
 
 export default {
   async fetch(request, env) {

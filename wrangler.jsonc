@@ -1,5 +1,5 @@
 {
-  "name": "bd-vp",
+  "name": "mobisur",
   "main": "worker.js",
   "compatibility_date": "2026-03-31",
   "keep_vars": true,

@@ -2,7 +2,7 @@ const SESSION_COOKIE = 'mobisur_admin_session';
 const SESSION_TTL_SECONDS = 12 * 60 * 60;
 const LOGIN_PATH = '/login';
 const LOGOUT_PATH = '/logout';
-const DEFAULT_ADMIN_PATH = '/admin';
+const ADMIN_PATH = '/admin/';
 
 export default {
   async fetch(request, env) {
@@ -12,7 +12,7 @@ export default {
       const session = await readSession(request, env);
 
       if (request.method === 'GET') {
-        if (session.ok) return redirect(DEFAULT_ADMIN_PATH);
+        if (session.ok) return redirect(ADMIN_PATH);
         return htmlResponse(renderLoginPage(''));
       }
 
@@ -34,7 +34,11 @@ export default {
         return htmlResponse(renderLoginPage('Identifiez-vous pour accéder à l’administration.'), 401);
       }
 
-      const adminUrl = new URL(DEFAULT_ADMIN_PATH, url.origin);
+      if (url.pathname !== ADMIN_PATH) {
+        return redirect(ADMIN_PATH);
+      }
+
+      const adminUrl = new URL(ADMIN_PATH, url.origin);
       const adminRequest = new Request(adminUrl, request);
       return env.ASSETS.fetch(adminRequest);
     }
@@ -44,7 +48,10 @@ export default {
 };
 
 function isAdminPath(pathname) {
-  return pathname === '/admin' || pathname === '/admin/' || pathname === '/admin.html';
+  return pathname === '/admin' ||
+    pathname === '/admin/' ||
+    pathname === '/admin.html' ||
+    pathname.startsWith('/admin/');
 }
 
 async function handleLogin(request, env) {
@@ -68,7 +75,7 @@ async function handleLogin(request, env) {
 
   const token = await createSession(username, env);
   const headers = new Headers();
-  headers.set('Location', DEFAULT_ADMIN_PATH);
+  headers.set('Location', ADMIN_PATH);
   headers.append('Set-Cookie', `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_TTL_SECONDS}`);
   return new Response(null, { status: 303, headers });
 }

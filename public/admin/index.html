@@ -218,6 +218,29 @@
       .brand-logo { width:min(300px, 86vw); }
     }
 
+
+    /* Assistant de création de message */
+    .composer-layout { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr); gap:16px; align-items:start; }
+    .composer-section-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+    .composer-section-title h2 { margin:0; }
+    .composer-step { border:1px solid var(--line); border-radius:16px; padding:14px; background:#fff; margin-bottom:12px; }
+    .composer-step h3 { margin:0 0 10px; font-size:16px; }
+    .composer-step .number { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:999px; background:var(--brand-yellow); color:var(--dark); font-weight:800; margin-right:8px; }
+    .composer-vars { display:grid; gap:8px; }
+    .var-pill { display:flex; justify-content:space-between; gap:10px; align-items:center; border:1px solid var(--line); background:#fbf8f2; padding:8px 10px; border-radius:12px; }
+    .var-pill code { color:var(--brand-blue); font-weight:800; }
+    .var-pill button { padding:6px 8px; border-radius:8px; font-size:12px; }
+    .composer-preview { background:#f9f5e8; border:1px solid var(--line); border-radius:14px; padding:14px; white-space:pre-wrap; min-height:160px; }
+    .composer-preview-subject { margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--line); }
+    .composer-preview-html { white-space:normal; }
+    .composer-preview-html p { margin:0 0 10px; }
+    .composer-preview-html ul, .composer-preview-html ol { margin-top:8px; margin-bottom:8px; padding-left:22px; }
+    .composer-policy { max-height:220px; overflow:auto; }
+    .composer-mini-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .composer-hint { font-size:13px; color:var(--muted); margin-top:-4px; margin-bottom:12px; }
+    .danger-zone-soft { border-left:5px solid var(--brand-blue); }
+    @media (max-width:1050px) { .composer-layout, .composer-mini-grid { grid-template-columns:1fr; } }
+
   </style>
 </head>
 <body>
@@ -239,7 +262,8 @@
 
   <div class="app">
     <aside>
-      <button class="nav-btn active" onclick="showPage('dashboard', this)">Tableau de bord</button>
+      <button class="nav-btn active" onclick="showPage('content-composer', this); initContentComposer();">Créer un message</button>
+      <button class="nav-btn" onclick="showPage('dashboard', this)">Tableau de bord</button>
       <button class="nav-btn" onclick="showPage('content-items', this)">Briques de contenu</button>
       <button class="nav-btn" onclick="showPage('content-versions', this)">Versions des contenus</button>
       <button class="nav-btn" onclick="showPage('trigger-types', this)">Types de déclencheur</button>
@@ -251,7 +275,105 @@
     </aside>
 
     <main>
-      <section id="dashboard" class="page active">
+
+      <section id="content-composer" class="page active">
+        <div id="composerNotice"></div>
+        <div class="notice info danger-zone-soft">
+          <strong>Assistant de création de contenu</strong><br>
+          Cette page crée automatiquement une <strong>brique</strong> dans <code>content_items</code> et sa première <strong>version</strong> dans <code>content_versions</code>.
+          Les champs techniques restent disponibles dans les écrans avancés, mais le rédacteur n’a pas besoin de les remplir ici.
+        </div>
+
+        <div class="composer-layout">
+          <div class="card">
+            <div class="composer-section-title">
+              <h2>Nouveau message</h2>
+              <span class="chip">production simple</span>
+            </div>
+
+            <div class="composer-step">
+              <h3><span class="number">1</span>Situation traitée</h3>
+              <label>Type de situation</label>
+              <select id="cc_context"></select>
+              <div id="cc_context_help" class="composer-hint"></div>
+            </div>
+
+            <div class="composer-step">
+              <h3><span class="number">2</span>Rôle du message</h3>
+              <label>Ce message sert à</label>
+              <select id="cc_role"></select>
+              <div id="cc_role_help" class="composer-hint"></div>
+            </div>
+
+            <div class="composer-step">
+              <h3><span class="number">3</span>Canal et moment</h3>
+              <div class="composer-mini-grid">
+                <div>
+                  <label>Canal</label>
+                  <select id="cc_channel">
+                    <option value="email">Email</option>
+                    <option value="sms">SMS</option>
+                  </select>
+                </div>
+                <div>
+                  <label>Moment d’utilisation</label>
+                  <select id="cc_timing"></select>
+                </div>
+              </div>
+              <div id="cc_timing_help" class="composer-hint"></div>
+            </div>
+
+            <div class="composer-step">
+              <h3><span class="number">4</span>Texte du message</h3>
+              <label>Nom interne du message</label>
+              <input id="cc_title" placeholder="Ex. Alerte route fermée pour conducteurs">
+              <label>Code technique généré</label>
+              <input id="cc_code" placeholder="ROAD_CLOSURE_RISK_EMAIL">
+              <div class="composer-hint">Le code est généré automatiquement mais reste modifiable si besoin.</div>
+
+              <div id="cc_subject_wrap">
+                <label>Objet email</label>
+                <input id="cc_subject" placeholder="Objet du message">
+              </div>
+
+              <label>Corps du message</label>
+              <textarea id="cc_body" placeholder="Texte avec variables comme {road_number}, {description}, {start_at}"></textarea>
+              <div id="cc_body_help" class="composer-hint">Pour les emails, ce champ utilise TinyMCE : tu peux mettre en forme le message en HTML. Pour les SMS, le champ repasse en texte brut.</div>
+              <div class="row">
+                <button type="button" class="secondary" onclick="fillComposerDefaultText()">Réinitialiser le texte proposé</button>
+                <button type="button" class="secondary" onclick="renderComposerPreview()">Mettre à jour l’aperçu</button>
+              </div>
+            </div>
+
+            <div class="composer-step">
+              <h3><span class="number">5</span>Publication</h3>
+              <label>Statut de la version</label>
+              <select id="cc_status">
+                <option value="draft">Brouillon</option>
+                <option value="published" selected>Publié</option>
+              </select>
+              <div class="row">
+                <button type="button" onclick="createComposerContent()">Créer le message</button>
+                <button type="button" class="secondary" onclick="clearComposerForm()">Vider</button>
+              </div>
+            </div>
+          </div>
+
+          <aside class="card" style="position:sticky; top:18px;">
+            <h2>Variables disponibles</h2>
+            <p class="muted small">Cliquez sur une variable pour l’insérer dans le champ actuellement sélectionné.</p>
+            <div id="cc_variables" class="composer-vars"></div>
+
+            <h3 style="margin-top:18px;">Aperçu avec exemple</h3>
+            <div id="cc_preview" class="composer-preview">L’aperçu apparaîtra ici.</div>
+
+            <h3 style="margin-top:18px;">Règles générées</h3>
+            <div id="cc_policy_preview" class="mono composer-policy">{}</div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="dashboard" class="page">
         <div id="globalNotice"></div>
         <div class="notice info">
           <strong>Comment utiliser l’interface</strong><br>
@@ -623,7 +745,107 @@
       events: []
     };
 
+
+    const composerContextTypes = {
+      road_closure: {
+        label: 'Route fermée',
+        description: 'Événement DATEX conservé lorsqu’une route est fermée ou rendue indisponible.',
+        source: 'datex_national_non_concede',
+        topic_code: 'road_closure',
+        trigger_type_code: 'road_closure',
+        code_base: 'ROAD_CLOSURE',
+        variables: [
+          ['road_number', 'Route concernée'],
+          ['zone_cible', 'Zone / département'],
+          ['from_town', 'Commune de début'],
+          ['to_town', 'Commune de fin'],
+          ['description', 'Description de l’événement'],
+          ['start_at', 'Début prévu'],
+          ['end_at', 'Fin prévue'],
+          ['detour_description', 'Description de la déviation']
+        ],
+        sample: {
+          road_number: 'N125', zone_cible: '31', from_town: 'Eup', to_town: 'Lez',
+          description: 'Route fermée avec déviation locale mise en place.',
+          start_at: '06/08 08:30', end_at: '06/08 16:30', detour_description: 'Suivre la déviation signalée S9 et S10.'
+        }
+      },
+      lane_closure: {
+        label: 'Voie fermée',
+        description: 'Événement DATEX conservé lorsqu’une ou plusieurs voies sont neutralisées.',
+        source: 'datex_national_non_concede', topic_code: 'lane_closure', trigger_type_code: 'lane_closure', code_base: 'LANE_CLOSURE',
+        variables: [['road_number','Route concernée'],['zone_cible','Zone / département'],['description','Description'],['start_at','Début prévu'],['end_at','Fin prévue'],['management_types','Mesures de circulation']],
+        sample: { road_number:'N118', zone_cible:'92', description:'Neutralisation d’une voie pour travaux.', start_at:'31/07 22:00', end_at:'01/08 05:00', management_types:'laneClosures' }
+      },
+      alternating_traffic: {
+        label: 'Circulation alternée',
+        description: 'Événement DATEX conservé lorsqu’un alternat modifie les conditions normales de conduite.',
+        source: 'datex_national_non_concede', topic_code: 'alternating_traffic', trigger_type_code: 'alternating_traffic', code_base: 'ALTERNATING_TRAFFIC',
+        variables: [['road_number','Route concernée'],['zone_cible','Zone / département'],['from_town','Commune de début'],['to_town','Commune de fin'],['description','Description'],['start_at','Début prévu'],['end_at','Fin prévue']],
+        sample: { road_number:'N85', zone_cible:'38', from_town:'Vizille', to_town:'Laffrey', description:'Circulation alternée pendant une phase de chantier.', start_at:'05/08 09:00', end_at:'05/08 17:00' }
+      },
+      road_detour: {
+        label: 'Déviation',
+        description: 'Événement DATEX conservé lorsqu’un itinéraire de substitution est nécessaire.',
+        source: 'datex_national_non_concede', topic_code: 'road_detour', trigger_type_code: 'road_detour', code_base: 'ROAD_DETOUR',
+        variables: [['road_number','Route concernée'],['zone_cible','Zone / département'],['description','Description'],['detour_description','Description de la déviation'],['start_at','Début prévu'],['end_at','Fin prévue']],
+        sample: { road_number:'N164', zone_cible:'22', description:'Déviation en place en raison de travaux.', detour_description:'Suivre l’itinéraire de déviation balisé.', start_at:'07/08 08:00', end_at:'14/08 18:00' }
+      },
+      traffic_restriction: {
+        label: 'Restriction de circulation',
+        description: 'Restrictions de poids, gabarit, voies étroites ou sortie fermée.',
+        source: 'datex_national_non_concede', topic_code: 'traffic_restriction', trigger_type_code: 'traffic_restriction', code_base: 'TRAFFIC_RESTRICTION',
+        variables: [['road_number','Route concernée'],['zone_cible','Zone / département'],['description','Description'],['management_types','Restriction détectée'],['start_at','Début prévu'],['end_at','Fin prévue']],
+        sample: { road_number:'N20', zone_cible:'09', description:'Restriction de circulation pour certains véhicules.', management_types:'weightRestrictionInOperation', start_at:'12/08 07:00', end_at:'12/08 19:00' }
+      },
+      road_work: {
+        label: 'Travaux avec impact conduite',
+        description: 'Travaux conservés uniquement s’ils modifient réellement les conditions de conduite.',
+        source: 'datex_national_non_concede', topic_code: 'road_work', trigger_type_code: 'road_work', code_base: 'ROAD_WORK',
+        variables: [['road_number','Route concernée'],['zone_cible','Zone / département'],['description','Description'],['location_descriptor','Localisation'],['start_at','Début prévu'],['end_at','Fin prévue']],
+        sample: { road_number:'N12', zone_cible:'78', description:'Travaux avec modification temporaire des voies.', location_descriptor:'Secteur de Jouars-Pontchartrain', start_at:'10/08 21:00', end_at:'11/08 06:00' }
+      },
+      storm: {
+        label: 'Orage / météo dangereuse',
+        description: 'Alerte météo utile pour prévenir les risques d’aquaplaning, visibilité réduite ou conduite sous pluie intense.',
+        source: 'weather_api', topic_code: 'storm', trigger_type_code: 'STORM_ALERT', code_base: 'STORM',
+        variables: [['zone_cible','Zone concernée'],['predicted_start_at','Début prévu'],['predicted_end_at','Fin prévue'],['description','Description'],['risk_level','Niveau de risque']],
+        sample: { zone_cible:'Vannes', predicted_start_at:'05/08 18:00', predicted_end_at:'05/08 23:00', description:'Orages localement forts attendus en soirée.', risk_level:'élevé' }
+      },
+      radar: {
+        label: 'Nouveau radar',
+        description: 'Installation ou signalement d’un nouveau radar sur une zone de circulation.',
+        source: 'manual_or_open_data', topic_code: 'new_radar', trigger_type_code: 'NEW_RADAR_INSTALLATION', code_base: 'NEW_RADAR',
+        variables: [['lieu','Lieu'],['road_number','Route concernée'],['speed_limit_kmh','Limitation'],['source_url','Source']],
+        sample: { lieu:'D980 entre Montbard et Semur-en-Auxois', road_number:'D980', speed_limit_kmh:'80', source_url:'https://exemple.fr' }
+      },
+      speed_limit_change: {
+        label: 'Changement de limitation',
+        description: 'Modification locale de limitation de vitesse utile pour anticiper les comportements à risque.',
+        source: 'manual_or_open_data', topic_code: 'speed_limit_change', trigger_type_code: 'LOCAL_SPEED_LIMIT_CHANGE', code_base: 'SPEED_LIMIT_CHANGE',
+        variables: [['territory','Territoire'],['old_speed_limit_kmh','Ancienne limitation'],['new_speed_limit_kmh','Nouvelle limitation'],['affected_km','Kilomètres concernés'],['source_url','Source']],
+        sample: { territory:'Morbihan', old_speed_limit_kmh:'80', new_speed_limit_kmh:'90', affected_km:'344', source_url:'https://exemple.fr' }
+      }
+    };
+
+    const composerRoles = {
+      risk_alert: { label: 'Prévenir d’un risque', help: 'Alerter clairement le conducteur ou le responsable sur une situation à anticiper.', categorie: 'alert', type: 'risk_alert', code_suffix: 'RISK' },
+      safety_advice: { label: 'Donner une consigne de prudence', help: 'Transformer l’événement en consigne simple et actionnable.', categorie: 'advice', type: 'safety_advice', code_suffix: 'ADVICE' },
+      operational_cta: { label: 'Proposer une action au responsable', help: 'Aider le responsable à relayer une consigne ou organiser les déplacements.', categorie: 'cta', type: 'operational_cta', code_suffix: 'CTA' },
+      legal_info: { label: 'Expliquer une conséquence juridique', help: 'Rappeler une règle, une responsabilité ou une conséquence liée à la conduite.', categorie: 'legal', type: 'legal_info', code_suffix: 'LEGAL' },
+      intro: { label: 'Introduire une alerte', help: 'Phrase d’introduction pour un email ou un récapitulatif.', categorie: 'alert', type: 'intro', code_suffix: 'INTRO' },
+      closing: { label: 'Conclure un message', help: 'Phrase de conclusion ou rappel final de prudence.', categorie: 'cta', type: 'closing', code_suffix: 'CLOSING' }
+    };
+
+    const composerTimings = {
+      detection: { label: 'À la détection', help: 'Message utilisable dès qu’un événement est enregistré.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'detection' } },
+      before_start: { label: 'Avant le début prévu', help: 'Message d’anticipation à utiliser avant predicted_start_at.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'before_start', preferred_window_ref: 'predicted_start_at' } },
+      during: { label: 'Pendant l’événement', help: 'Message utilisable lorsque l’événement est en cours.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'during_event' } },
+      digest: { label: 'Dans un récap quotidien', help: 'Message conçu pour être regroupé avec d’autres informations.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'daily_digest', timing: 'digest' } }
+    };
+
     let tinyReady = false;
+    let composerTinyReady = false;
 
     let editingContentVersionId = null;
     let editingScenarioId = null;
@@ -980,6 +1202,84 @@ async function deleteScenarioStep(id) {
       });
     }
 
+    function ensureComposerTinyMCE() {
+      const textarea = document.getElementById('cc_body');
+      if (!textarea || !window.tinymce) return;
+
+      if (tinymce.get('cc_body')) {
+        composerTinyReady = true;
+        return;
+      }
+
+      tinymce.init({
+        selector: '#cc_body',
+        height: 360,
+        menubar: false,
+        branding: false,
+        plugins: 'lists link table code',
+        toolbar: 'undo redo | blocks | bold italic underline | bullist numlist | link table | code',
+        convert_urls: false,
+        language: 'fr_FR',
+        entity_encoding: 'raw',
+        encoding: 'xml',
+        browser_spellcheck: true,
+        setup(editor) {
+          editor.on('Change KeyUp SetContent NodeChange', () => {
+            renderComposerPreview();
+          });
+        }
+      }).then(() => {
+        composerTinyReady = true;
+        renderComposerPreview();
+      }).catch(err => {
+        composerTinyReady = false;
+        console.error('Erreur TinyMCE composer :', err);
+      });
+    }
+
+    function destroyComposerTinyMCE() {
+      const editor = window.tinymce ? tinymce.get('cc_body') : null;
+      if (editor) editor.remove();
+      composerTinyReady = false;
+    }
+
+    function getComposerBodyValue() {
+      if (currentComposerChannel() === 'email') {
+        const editor = window.tinymce ? tinymce.get('cc_body') : null;
+        return editor ? editor.getContent() : val('cc_body');
+      }
+      return val('cc_body');
+    }
+
+    function setComposerBodyValue(value) {
+      const text = String(value || '');
+      const editor = window.tinymce ? tinymce.get('cc_body') : null;
+      const textarea = document.getElementById('cc_body');
+      if (textarea) textarea.value = text;
+      if (editor) editor.setContent(text);
+    }
+
+    function insertIntoComposerBody(token) {
+      if (currentComposerChannel() === 'email') {
+        const editor = window.tinymce ? tinymce.get('cc_body') : null;
+        if (editor) {
+          editor.focus();
+          editor.insertContent(token);
+          renderComposerPreview();
+          return;
+        }
+      }
+
+      const target = document.getElementById('cc_body');
+      if (!target) return;
+      const start = target.selectionStart || 0;
+      const end = target.selectionEnd || 0;
+      target.value = target.value.slice(0, start) + token + target.value.slice(end);
+      target.focus();
+      target.selectionStart = target.selectionEnd = start + token.length;
+      renderComposerPreview();
+    }
+
     function updateContentVersionEditorMode() {
       const plainWrap = document.getElementById('cv_plain_editor_wrap');
       const htmlWrap = document.getElementById('cv_html_editor_wrap');
@@ -1292,6 +1592,7 @@ async function deleteScenarioStep(id) {
       updateContentVersionEditorMode();
       prefillContentVersionFromPrevious();
       fillScenarioPlannerSelect();
+      initContentComposer();
     }
 
     function renderContentItems() {
@@ -2128,6 +2429,312 @@ async function deleteScenarioStep(id) {
     }
 
 
+
+
+    function initContentComposer() {
+      const contextSelect = document.getElementById('cc_context');
+      if (!contextSelect) return;
+      fillComposerSelect('cc_context', composerContextTypes);
+      fillComposerSelect('cc_role', composerRoles);
+      fillComposerSelect('cc_timing', composerTimings);
+      updateComposerContextHelp();
+      updateComposerRoleHelp();
+      updateComposerTimingHelp();
+      updateComposerChannelVisibility();
+      updateComposerGeneratedFields({ preserveText: true });
+      renderComposerVariables();
+      if (!getComposerBodyValue()) fillComposerDefaultText();
+      renderComposerPreview();
+    }
+
+    function fillComposerSelect(id, dict) {
+      const el = document.getElementById(id);
+      if (!el || el.dataset.filled === '1') return;
+      Object.entries(dict).forEach(([code, cfg]) => {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = cfg.label;
+        el.appendChild(opt);
+      });
+      el.dataset.filled = '1';
+    }
+
+    function currentComposerContext() { return composerContextTypes[val('cc_context')] || composerContextTypes.road_closure; }
+    function currentComposerRole() { return composerRoles[val('cc_role')] || composerRoles.risk_alert; }
+    function currentComposerTiming() { return composerTimings[val('cc_timing')] || composerTimings.detection; }
+    function currentComposerChannel() { return val('cc_channel') || 'email'; }
+
+    function updateComposerContextHelp() {
+      const ctx = currentComposerContext();
+      const box = document.getElementById('cc_context_help');
+      if (box) box.textContent = ctx.description || '';
+      renderComposerVariables();
+    }
+
+    function updateComposerRoleHelp() {
+      const role = currentComposerRole();
+      const box = document.getElementById('cc_role_help');
+      if (box) box.textContent = role.help || '';
+    }
+
+    function updateComposerTimingHelp() {
+      const timing = currentComposerTiming();
+      const box = document.getElementById('cc_timing_help');
+      if (box) box.textContent = timing.help || '';
+    }
+
+    function updateComposerChannelVisibility() {
+      const channel = currentComposerChannel();
+      const subjectWrap = document.getElementById('cc_subject_wrap');
+      const bodyHelp = document.getElementById('cc_body_help');
+      if (subjectWrap) subjectWrap.classList.toggle('hidden', channel !== 'email');
+
+      if (channel === 'email') {
+        if (bodyHelp) bodyHelp.textContent = 'Éditeur HTML TinyMCE : ce contenu sera affiché dans un navigateur, avec mise en forme.';
+        ensureComposerTinyMCE();
+      } else {
+        if (bodyHelp) bodyHelp.textContent = 'SMS : texte brut uniquement. La mise en forme HTML est désactivée.';
+        destroyComposerTinyMCE();
+      }
+    }
+
+    function updateComposerGeneratedFields(options = {}) {
+      const ctx = currentComposerContext();
+      const role = currentComposerRole();
+      const channel = currentComposerChannel();
+      const codeInput = document.getElementById('cc_code');
+      const titleInput = document.getElementById('cc_title');
+      const generatedCode = nextAvailableContentCode(`${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
+      if (codeInput && (!codeInput.value || !options.preserveCode)) codeInput.value = generatedCode;
+      if (titleInput && !titleInput.value) titleInput.value = `${ctx.label} — ${role.label}`;
+      if (!options.preserveText) fillComposerDefaultText();
+      renderComposerPolicyPreview();
+    }
+
+    function nextAvailableContentCode(base) {
+      const clean = toComposerCode(base);
+      const existing = new Set((state.contentItems || []).map(i => String(i.code || '').toUpperCase()));
+      if (!existing.has(clean)) return clean;
+      let n = 2;
+      while (existing.has(`${clean}_${n}`)) n++;
+      return `${clean}_${n}`;
+    }
+
+    function toComposerCode(value) {
+      return String(value || '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .slice(0, 80);
+    }
+
+    function fillComposerDefaultText() {
+      const ctx = currentComposerContext();
+      const role = currentComposerRole();
+      const channel = currentComposerChannel();
+      const subject = document.getElementById('cc_subject');
+      if (subject) subject.value = defaultComposerSubject(ctx, role, channel);
+      setComposerBodyValue(defaultComposerBody(ctx, role, channel));
+      renderComposerPreview();
+      renderComposerPolicyPreview();
+    }
+
+    function defaultComposerSubject(ctx, role, channel) {
+      if (channel !== 'email') return '';
+      if (ctx.topic_code === 'road_closure') return 'Route fermée sur {road_number} : anticipez les déplacements';
+      if (ctx.topic_code === 'lane_closure') return 'Voie fermée sur {road_number} : prudence dans le secteur';
+      if (ctx.topic_code === 'alternating_traffic') return 'Circulation alternée sur {road_number} : adaptez votre conduite';
+      if (ctx.topic_code === 'road_detour') return 'Déviation sur {road_number} : vérifiez votre itinéraire';
+      if (ctx.topic_code === 'traffic_restriction') return 'Restriction de circulation sur {road_number}';
+      if (ctx.topic_code === 'storm') return 'Risque météo sur {zone_cible} : prudence sur la route';
+      if (ctx.topic_code === 'new_radar') return 'Nouveau radar : rappel de vigilance sur {lieu}';
+      if (ctx.topic_code === 'speed_limit_change') return 'Changement de limitation dans le {territory}';
+      return `${ctx.label} : message de prévention`;
+    }
+
+    function defaultComposerBody(ctx, role, channel) {
+      const cta = role.type === 'operational_cta'
+        ? 'Action recommandée : relayez cette information aux collaborateurs concernés avant leurs trajets.'
+        : 'Consigne MobiSûr : invitez les conducteurs à anticiper, réduire leur vitesse à l’approche de la zone et suivre la signalisation temporaire.';
+
+      if (channel === 'sms') {
+        if (ctx.topic_code === 'road_closure') return 'MobiSûr : route fermée sur {road_number} ({zone_cible}). Anticipez l’itinéraire, réduisez la vitesse et suivez la déviation si indiquée.';
+        if (ctx.topic_code === 'road_detour') return 'MobiSûr : déviation signalée sur {road_number}. Vérifiez l’itinéraire, gardez une marge de temps et suivez la signalisation.';
+        if (ctx.topic_code === 'storm') return 'MobiSûr : risque météo sur {zone_cible}. Augmentez les distances, réduisez la vitesse et évitez les manœuvres brusques.';
+        return 'MobiSûr : événement routier sur {road_number} ({zone_cible}). Anticipez votre trajet et adaptez votre conduite.';
+      }
+
+      return `<p>Un événement routier est signalé sur <strong>{road_number}</strong>, dans la zone <strong>{zone_cible}</strong>.</p>
+
+<p>{description}</p>
+
+<p><strong>Période prévue :</strong> du {start_at} au {end_at}.</p>
+
+<p>{detour_description}</p>
+
+<p>${cta}</p>`;
+    }
+
+    function buildComposerPolicy() {
+      const ctx = currentComposerContext();
+      const role = currentComposerRole();
+      const timing = currentComposerTiming();
+      return {
+        ...timing.policy,
+        mobisur_context: ctx.topic_code,
+        trigger_type_code: ctx.trigger_type_code,
+        role: role.type,
+        exclude_realtime_traffic: true,
+        available_variables: (ctx.variables || []).map(v => v[0])
+      };
+    }
+
+    function renderComposerPolicyPreview() {
+      const box = document.getElementById('cc_policy_preview');
+      if (box) box.textContent = JSON.stringify(buildComposerPolicy(), null, 2);
+    }
+
+    function renderComposerVariables() {
+      const ctx = currentComposerContext();
+      const box = document.getElementById('cc_variables');
+      if (!box) return;
+      box.innerHTML = (ctx.variables || []).map(([key, label]) => `
+        <div class="var-pill">
+          <div><strong>${escapeHtml(label)}</strong><br><code>{${escapeHtml(key)}}</code></div>
+          <button type="button" class="secondary" onclick="insertComposerVariable('${escapeHtml(key)}')">Insérer</button>
+        </div>
+      `).join('');
+    }
+
+    function insertComposerVariable(key) {
+      const token = `{${key}}`;
+      const active = document.activeElement;
+
+      if (active && ['cc_subject', 'cc_title'].includes(active.id)) {
+        const start = active.selectionStart || 0;
+        const end = active.selectionEnd || 0;
+        active.value = active.value.slice(0, start) + token + active.value.slice(end);
+        active.focus();
+        active.selectionStart = active.selectionEnd = start + token.length;
+        renderComposerPreview();
+        return;
+      }
+
+      insertIntoComposerBody(token);
+    }
+
+    function renderComposerPreview() {
+      const ctx = currentComposerContext();
+      const channel = currentComposerChannel();
+      const subject = val('cc_subject');
+      const body = getComposerBodyValue();
+      const sample = ctx.sample || {};
+      const renderedSubject = renderComposerTemplate(subject, sample);
+      const renderedBody = renderComposerTemplate(body, sample);
+      const box = document.getElementById('cc_preview');
+      if (box) {
+        if (!renderedBody && !renderedSubject) {
+          box.textContent = 'L’aperçu apparaîtra ici.';
+        } else if (channel === 'email') {
+          box.innerHTML = `<div class="composer-preview-subject"><strong>Objet :</strong> ${escapeHtml(renderedSubject)}</div><div class="composer-preview-html">${renderedBody}</div>`;
+        } else {
+          box.textContent = renderedBody;
+        }
+      }
+      renderComposerPolicyPreview();
+    }
+
+    function renderComposerTemplate(template, context) {
+      return String(template || '').replace(/\{([a-zA-Z0-9_]+)\}/g, (m, key) => {
+        const value = context[key];
+        return value === undefined || value === null || value === '' ? m : String(value);
+      });
+    }
+
+    function clearComposerForm() {
+      ['cc_title', 'cc_code', 'cc_subject'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      setComposerBodyValue('');
+      updateComposerGeneratedFields({ preserveText: false, preserveCode: false });
+      setComposerNotice('', 'info');
+    }
+
+    function setComposerNotice(text, type) {
+      const box = document.getElementById('composerNotice');
+      if (!box) return;
+      box.innerHTML = text ? `<div class="notice ${type}">${escapeHtml(text)}</div>` : '';
+    }
+
+    async function createComposerContent() {
+      try {
+        if (!db()) throw new Error('Connexion Supabase non disponible.');
+        const ctx = currentComposerContext();
+        const role = currentComposerRole();
+        const channel = currentComposerChannel();
+        const code = toComposerCode(val('cc_code'));
+        const title = val('cc_title') || `${ctx.label} — ${role.label}`;
+        const subject = channel === 'email' ? val('cc_subject') : null;
+        const body = getComposerBodyValue();
+        const status = val('cc_status') || 'draft';
+
+        if (!code) throw new Error('Le code technique est obligatoire.');
+        if ((state.contentItems || []).some(i => String(i.code || '').toUpperCase() === code)) {
+          throw new Error('Ce code existe déjà. Modifiez le code ou videz le formulaire pour en générer un nouveau.');
+        }
+        if (!body) throw new Error('Le corps du message est obligatoire.');
+        if (channel === 'email' && !subject) throw new Error('L’objet email est obligatoire pour un contenu email.');
+
+        setComposerNotice('Création du message en cours…', 'info');
+
+        const itemPayload = {
+          code,
+          categorie: role.categorie,
+          sujet: title,
+          type: role.type,
+          source: ctx.source,
+          topic_code: ctx.topic_code,
+          channel,
+          policy: buildComposerPolicy(),
+          active: true
+        };
+
+        const { data: item, error: itemError } = await db()
+          .from('content_items')
+          .insert(itemPayload)
+          .select('id,code')
+          .maybeSingle();
+        if (itemError) throw itemError;
+        if (!item || !item.id) throw new Error('La brique a été créée sans identifiant retourné. Vérifiez les droits Supabase.');
+
+        const versionPayload = {
+          content_item_id: item.id,
+          version_no: 1,
+          sujet_template: subject,
+          corps_template: body,
+          status,
+          source_ref: 'admin-composer',
+          change_note: 'création depuis l’assistant de contenu'
+        };
+
+        const { error: versionError } = await db().from('content_versions').insert(versionPayload);
+        if (versionError) throw versionError;
+
+        setComposerNotice(`Message créé : ${code}. Il est maintenant disponible dans les briques et versions.`, 'ok');
+        setGlobalNotice(`Message créé : ${code}`, 'ok');
+        await refreshAll();
+        const codeInput = document.getElementById('cc_code');
+        if (codeInput) codeInput.value = nextAvailableContentCode(`${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
+      } catch (e) {
+        console.error('Erreur createComposerContent()', e);
+        setComposerNotice(e.message || 'Erreur lors de la création du message.', 'err');
+        setGlobalNotice(e.message || 'Erreur lors de la création du message.', 'err');
+      }
+    }
+
+
     document.addEventListener('change', e => {
       if (e.target && e.target.id === 'pv_content_item_id') syncPreviewVersions();
       if (e.target && e.target.id === 'sc_aggregation_mode') updateScenarioAggregationHelp();
@@ -2143,6 +2750,14 @@ async function deleteScenarioStep(id) {
       if (e.target && e.target.id === 'pl_scenario_id') {
         renderScenarioPlanner();
       }
+      if (e.target && ['cc_context', 'cc_role', 'cc_channel', 'cc_timing', 'cc_status'].includes(e.target.id)) {
+        updateComposerContextHelp();
+        updateComposerRoleHelp();
+        updateComposerTimingHelp();
+        updateComposerChannelVisibility();
+        updateComposerGeneratedFields({ preserveText: false, preserveCode: false });
+        renderComposerPreview();
+      }
       if (e.target && e.target.closest && e.target.closest('#scenarioPlannerRows')) {
         updatePlannerPreview();
       }
@@ -2155,6 +2770,9 @@ async function deleteScenarioStep(id) {
       if (e.target && (e.target.closest && e.target.closest('#scenarioPlannerRows') || e.target.id === 'pl_demo_date')) {
         updatePlannerPreview();
       }
+      if (e.target && ['cc_title', 'cc_code', 'cc_subject', 'cc_body'].includes(e.target.id)) {
+        renderComposerPreview();
+      }
     });
 
     window.addEventListener('load', async () => {
@@ -2166,6 +2784,7 @@ async function deleteScenarioStep(id) {
       updateContentVersionButtons();
       updateScenarioButtons();
       updateScenarioStepButtons();
+      initContentComposer();
       if (db()) {
         await refreshAll();
       }

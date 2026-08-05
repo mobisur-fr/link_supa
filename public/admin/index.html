@@ -836,9 +836,7 @@
 
     const composerTimings = {
       detection: { label: 'À la détection', help: 'Message utilisable dès qu’un événement est enregistré.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'detection' } },
-      before_start: { label: 'Avant le début prévu', help: 'Message d’anticipation à utiliser avant predicted_start_at.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'before_start', preferred_window_ref: 'predicted_start_at' } },
-      during: { label: 'Pendant l’événement', help: 'Message utilisable lorsque l’événement est en cours.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'during_event' } },
-      digest: { label: 'Dans un récap quotidien', help: 'Message conçu pour être regroupé avec d’autres informations.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'daily_digest', timing: 'digest' } }
+      before_start: { label: 'Avant le début prévu', help: 'Message d’anticipation à utiliser avant predicted_start_at.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'before_start', preferred_window_ref: 'predicted_start_at' } }
     };
 
     let tinyReady = false;

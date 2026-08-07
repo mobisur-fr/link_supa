@@ -280,8 +280,7 @@
         <div id="composerNotice"></div>
         <div class="notice info danger-zone-soft">
           <strong>Assistant de création de contenu</strong><br>
-          Cette page crée automatiquement une <strong>brique</strong> dans <code>content_items</code> et sa première <strong>version</strong> dans <code>content_versions</code>.
-          Les champs techniques restent disponibles dans les écrans avancés, mais le rédacteur n’a pas besoin de les remplir ici.
+          Cette page crée automatiquement une <strong>brique</strong> dans <code>content_items</code> et sa première <strong>version</strong> dans <code>content_versions</code>. Pour les SMS, on ne rédige pas une information brute : on crée une <strong>alerte courte</strong> qui renvoie vers une <strong>page d’information HTML</strong>.
         </div>
 
         <div class="composer-layout">
@@ -336,9 +335,16 @@
                 <input id="cc_subject" placeholder="Objet du message">
               </div>
 
-              <label>Corps du message</label>
+              <div id="cc_sms_wrap" class="hidden">
+                <label>Texte court du SMS</label>
+                <textarea id="cc_sms_text" rows="3" placeholder="Ex. MobiSûr : alerte sur {road_number}. Détails : {info_url}"></textarea>
+                <div class="composer-hint">Le SMS doit rester court et renvoyer vers une page d’information. Insère toujours <code>{info_url}</code> ou <code>{short_url}</code>.</div>
+                <div class="small muted" id="cc_sms_counter">0 caractère</div>
+              </div>
+
+              <label id="cc_body_label">Corps du message</label>
               <textarea id="cc_body" placeholder="Texte avec variables comme {road_number}, {description}, {start_at}"></textarea>
-              <div id="cc_body_help" class="composer-hint">Pour les emails, ce champ utilise TinyMCE : tu peux mettre en forme le message en HTML. Pour les SMS, le champ repasse en texte brut.</div>
+              <div id="cc_body_help" class="composer-hint">Éditeur HTML TinyMCE : ce contenu sera affiché dans un navigateur, avec mise en forme.</div>
               <div class="row">
                 <button type="button" class="secondary" onclick="fillComposerDefaultText()">Réinitialiser le texte proposé</button>
                 <button type="button" class="secondary" onclick="renderComposerPreview()">Mettre à jour l’aperçu</button>
@@ -831,12 +837,17 @@
     const composerRoles = {
       risk_alert: { label: 'Prévenir d’un risque', help: 'Alerter clairement le conducteur ou le responsable sur une situation à anticiper.', categorie: 'alert', type: 'risk_alert', code_suffix: 'RISK' },
       safety_advice: { label: 'Donner une consigne de prudence', help: 'Transformer l’événement en consigne simple et actionnable.', categorie: 'advice', type: 'safety_advice', code_suffix: 'ADVICE' },
-      legal_info: { label: 'Expliquer une conséquence juridique', help: 'Rappeler une règle, une responsabilité ou une conséquence liée à la conduite.', categorie: 'legal', type: 'legal_info', code_suffix: 'LEGAL' }
+      operational_cta: { label: 'Proposer une action au responsable', help: 'Aider le responsable à relayer une consigne ou organiser les déplacements.', categorie: 'cta', type: 'operational_cta', code_suffix: 'CTA' },
+      legal_info: { label: 'Expliquer une conséquence juridique', help: 'Rappeler une règle, une responsabilité ou une conséquence liée à la conduite.', categorie: 'legal', type: 'legal_info', code_suffix: 'LEGAL' },
+      intro: { label: 'Introduire une alerte', help: 'Phrase d’introduction pour un email ou un récapitulatif.', categorie: 'alert', type: 'intro', code_suffix: 'INTRO' },
+      closing: { label: 'Conclure un message', help: 'Phrase de conclusion ou rappel final de prudence.', categorie: 'cta', type: 'closing', code_suffix: 'CLOSING' }
     };
 
     const composerTimings = {
       detection: { label: 'À la détection', help: 'Message utilisable dès qu’un événement est enregistré.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'detection' } },
-      before_start: { label: 'Avant le début prévu', help: 'Message d’anticipation à utiliser avant predicted_start_at.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'before_start', preferred_window_ref: 'predicted_start_at' } }
+      before_start: { label: 'Avant le début prévu', help: 'Message d’anticipation à utiliser avant predicted_start_at.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'before_start', preferred_window_ref: 'predicted_start_at' } },
+      during: { label: 'Pendant l’événement', help: 'Message utilisable lorsque l’événement est en cours.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'event', timing: 'during_event' } },
+      digest: { label: 'Dans un récap quotidien', help: 'Message conçu pour être regroupé avec d’autres informations.', policy: { once_per_event: true, cooldown_days: 1, cooldown_scope: 'daily_digest', timing: 'digest' } }
     };
 
     let tinyReady = false;
@@ -1239,11 +1250,12 @@ async function deleteScenarioStep(id) {
     }
 
     function getComposerBodyValue() {
-      if (currentComposerChannel() === 'email') {
-        const editor = window.tinymce ? tinymce.get('cc_body') : null;
-        return editor ? editor.getContent() : val('cc_body');
-      }
-      return val('cc_body');
+      const editor = window.tinymce ? tinymce.get('cc_body') : null;
+      return editor ? editor.getContent() : val('cc_body');
+    }
+
+    function getComposerSmsValue() {
+      return val('cc_sms_text');
     }
 
     function setComposerBodyValue(value) {
@@ -1254,15 +1266,25 @@ async function deleteScenarioStep(id) {
       if (editor) editor.setContent(text);
     }
 
+    function setComposerSmsValue(value) {
+      const el = document.getElementById('cc_sms_text');
+      if (el) el.value = String(value || '');
+      updateComposerSmsCounter();
+    }
+
+    function updateComposerSmsCounter() {
+      const box = document.getElementById('cc_sms_counter');
+      const text = getComposerSmsValue();
+      if (box) box.textContent = `${text.length} caractère${text.length > 1 ? 's' : ''}`;
+    }
+
     function insertIntoComposerBody(token) {
-      if (currentComposerChannel() === 'email') {
-        const editor = window.tinymce ? tinymce.get('cc_body') : null;
-        if (editor) {
-          editor.focus();
-          editor.insertContent(token);
-          renderComposerPreview();
-          return;
-        }
+      const editor = window.tinymce ? tinymce.get('cc_body') : null;
+      if (editor) {
+        editor.focus();
+        editor.insertContent(token);
+        renderComposerPreview();
+        return;
       }
 
       const target = document.getElementById('cc_body');
@@ -2481,16 +2503,24 @@ async function deleteScenarioStep(id) {
     function updateComposerChannelVisibility() {
       const channel = currentComposerChannel();
       const subjectWrap = document.getElementById('cc_subject_wrap');
+      const smsWrap = document.getElementById('cc_sms_wrap');
       const bodyHelp = document.getElementById('cc_body_help');
-      if (subjectWrap) subjectWrap.classList.toggle('hidden', channel !== 'email');
+      const bodyLabel = document.getElementById('cc_body_label');
 
-      if (channel === 'email') {
-        if (bodyHelp) bodyHelp.textContent = 'Éditeur HTML TinyMCE : ce contenu sera affiché dans un navigateur, avec mise en forme.';
-        ensureComposerTinyMCE();
+      if (subjectWrap) subjectWrap.classList.toggle('hidden', channel !== 'email');
+      if (smsWrap) smsWrap.classList.toggle('hidden', channel !== 'sms');
+
+      if (channel === 'sms') {
+        if (bodyLabel) bodyLabel.textContent = 'Page d’information liée au SMS';
+        if (bodyHelp) bodyHelp.textContent = 'Éditeur HTML TinyMCE : ce contenu sera affiché après clic sur le lien du SMS. Le SMS lui-même reste court.';
       } else {
-        if (bodyHelp) bodyHelp.textContent = 'SMS : texte brut uniquement. La mise en forme HTML est désactivée.';
-        destroyComposerTinyMCE();
+        if (bodyLabel) bodyLabel.textContent = 'Corps du message email';
+        if (bodyHelp) bodyHelp.textContent = 'Éditeur HTML TinyMCE : ce contenu sera affiché dans un navigateur, avec mise en forme.';
       }
+
+      ensureComposerTinyMCE();
+      renderComposerVariables();
+      updateComposerSmsCounter();
     }
 
     function updateComposerGeneratedFields(options = {}) {
@@ -2530,6 +2560,7 @@ async function deleteScenarioStep(id) {
       const channel = currentComposerChannel();
       const subject = document.getElementById('cc_subject');
       if (subject) subject.value = defaultComposerSubject(ctx, role, channel);
+      setComposerSmsValue(defaultComposerSmsAlert(ctx, role));
       setComposerBodyValue(defaultComposerBody(ctx, role, channel));
       renderComposerPreview();
       renderComposerPolicyPreview();
@@ -2548,19 +2579,26 @@ async function deleteScenarioStep(id) {
       return `${ctx.label} : message de prévention`;
     }
 
+    function defaultComposerSmsAlert(ctx, role) {
+      if (ctx.topic_code === 'road_closure') return 'MobiSûr : route fermée sur {road_number} ({zone_cible}). Infos et consignes : {info_url}';
+      if (ctx.topic_code === 'road_detour') return 'MobiSûr : déviation signalée sur {road_number}. Infos et consignes : {info_url}';
+      if (ctx.topic_code === 'lane_closure') return 'MobiSûr : voie fermée sur {road_number}. Infos et consignes : {info_url}';
+      if (ctx.topic_code === 'alternating_traffic') return 'MobiSûr : circulation alternée sur {road_number}. Infos : {info_url}';
+      if (ctx.topic_code === 'storm') return 'MobiSûr : risque météo sur {zone_cible}. Conseils de conduite : {info_url}';
+      if (ctx.topic_code === 'new_radar') return 'MobiSûr : nouveau radar signalé sur {lieu}. Infos : {info_url}';
+      return 'MobiSûr : alerte prévention dans votre zone. Infos et consignes : {info_url}';
+    }
+
     function defaultComposerBody(ctx, role, channel) {
       const cta = role.type === 'operational_cta'
         ? 'Action recommandée : relayez cette information aux collaborateurs concernés avant leurs trajets.'
         : 'Consigne MobiSûr : invitez les conducteurs à anticiper, réduire leur vitesse à l’approche de la zone et suivre la signalisation temporaire.';
 
-      if (channel === 'sms') {
-        if (ctx.topic_code === 'road_closure') return 'MobiSûr : route fermée sur {road_number} ({zone_cible}). Anticipez l’itinéraire, réduisez la vitesse et suivez la déviation si indiquée.';
-        if (ctx.topic_code === 'road_detour') return 'MobiSûr : déviation signalée sur {road_number}. Vérifiez l’itinéraire, gardez une marge de temps et suivez la signalisation.';
-        if (ctx.topic_code === 'storm') return 'MobiSûr : risque météo sur {zone_cible}. Augmentez les distances, réduisez la vitesse et évitez les manœuvres brusques.';
-        return 'MobiSûr : événement routier sur {road_number} ({zone_cible}). Anticipez votre trajet et adaptez votre conduite.';
-      }
+      const intro = channel === 'sms'
+        ? '<p>Cette page détaille l’alerte envoyée par SMS.</p>'
+        : '<p>Un événement routier est signalé sur <strong>{road_number}</strong>, dans la zone <strong>{zone_cible}</strong>.</p>';
 
-      return `<p>Un événement routier est signalé sur <strong>{road_number}</strong>, dans la zone <strong>{zone_cible}</strong>.</p>
+      return `${intro}
 
 <p>{description}</p>
 
@@ -2575,13 +2613,30 @@ async function deleteScenarioStep(id) {
       const ctx = currentComposerContext();
       const role = currentComposerRole();
       const timing = currentComposerTiming();
-      return {
+      const channel = currentComposerChannel();
+      const base = {
         ...timing.policy,
         mobisur_context: ctx.topic_code,
         trigger_type_code: ctx.trigger_type_code,
         role: role.type,
         exclude_realtime_traffic: true,
         available_variables: (ctx.variables || []).map(v => v[0])
+      };
+
+      if (channel === 'sms') {
+        return {
+          ...base,
+          delivery_model: 'sms_with_landing_page',
+          sms_alert_template: getComposerSmsValue(),
+          sms_link_variable: 'info_url',
+          landing_page_template_location: 'content_versions.corps_template',
+          sms_raw_details_forbidden: true
+        };
+      }
+
+      return {
+        ...base,
+        delivery_model: 'email_html'
       };
     }
 
@@ -2594,7 +2649,11 @@ async function deleteScenarioStep(id) {
       const ctx = currentComposerContext();
       const box = document.getElementById('cc_variables');
       if (!box) return;
-      box.innerHTML = (ctx.variables || []).map(([key, label]) => `
+      let vars = [...(ctx.variables || [])];
+      if (currentComposerChannel() === 'sms') {
+        vars = [...vars, ['info_url', 'Lien vers la page d’information'], ['short_url', 'Lien court SMS']];
+      }
+      box.innerHTML = vars.map(([key, label]) => `
         <div class="var-pill">
           <div><strong>${escapeHtml(label)}</strong><br><code>{${escapeHtml(key)}}</code></div>
           <button type="button" class="secondary" onclick="insertComposerVariable('${escapeHtml(key)}')">Insérer</button>
@@ -2606,7 +2665,7 @@ async function deleteScenarioStep(id) {
       const token = `{${key}}`;
       const active = document.activeElement;
 
-      if (active && ['cc_subject', 'cc_title'].includes(active.id)) {
+      if (active && ['cc_subject', 'cc_title', 'cc_sms_text'].includes(active.id)) {
         const start = active.selectionStart || 0;
         const end = active.selectionEnd || 0;
         active.value = active.value.slice(0, start) + token + active.value.slice(end);
@@ -2623,20 +2682,23 @@ async function deleteScenarioStep(id) {
       const ctx = currentComposerContext();
       const channel = currentComposerChannel();
       const subject = val('cc_subject');
+      const smsText = getComposerSmsValue();
       const body = getComposerBodyValue();
-      const sample = ctx.sample || {};
+      const sample = { info_url: 'https://data.mobisur.net/i/exemple', short_url: 'https://mobi.sr/a1b2', ...(ctx.sample || {}) };
       const renderedSubject = renderComposerTemplate(subject, sample);
+      const renderedSms = renderComposerTemplate(smsText, sample);
       const renderedBody = renderComposerTemplate(body, sample);
       const box = document.getElementById('cc_preview');
       if (box) {
-        if (!renderedBody && !renderedSubject) {
+        if (!renderedBody && !renderedSubject && !renderedSms) {
           box.textContent = 'L’aperçu apparaîtra ici.';
-        } else if (channel === 'email') {
-          box.innerHTML = `<div class="composer-preview-subject"><strong>Objet :</strong> ${escapeHtml(renderedSubject)}</div><div class="composer-preview-html">${renderedBody}</div>`;
+        } else if (channel === 'sms') {
+          box.innerHTML = `<div class="composer-preview-subject"><strong>SMS envoyé :</strong><br>${escapeHtml(renderedSms)}</div><div class="composer-preview-subject" style="margin-top:10px;"><strong>Page affichée après clic :</strong></div><div class="composer-preview-html">${renderedBody}</div>`;
         } else {
-          box.textContent = renderedBody;
+          box.innerHTML = `<div class="composer-preview-subject"><strong>Objet :</strong> ${escapeHtml(renderedSubject)}</div><div class="composer-preview-html">${renderedBody}</div>`;
         }
       }
+      updateComposerSmsCounter();
       renderComposerPolicyPreview();
     }
 
@@ -2648,7 +2710,7 @@ async function deleteScenarioStep(id) {
     }
 
     function clearComposerForm() {
-      ['cc_title', 'cc_code', 'cc_subject'].forEach(id => {
+      ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
@@ -2672,6 +2734,7 @@ async function deleteScenarioStep(id) {
         const code = toComposerCode(val('cc_code'));
         const title = val('cc_title') || `${ctx.label} — ${role.label}`;
         const subject = channel === 'email' ? val('cc_subject') : null;
+        const smsAlert = channel === 'sms' ? getComposerSmsValue() : '';
         const body = getComposerBodyValue();
         const status = val('cc_status') || 'draft';
 
@@ -2679,8 +2742,12 @@ async function deleteScenarioStep(id) {
         if ((state.contentItems || []).some(i => String(i.code || '').toUpperCase() === code)) {
           throw new Error('Ce code existe déjà. Modifiez le code ou videz le formulaire pour en générer un nouveau.');
         }
-        if (!body) throw new Error('Le corps du message est obligatoire.');
+        if (!body) throw new Error(channel === 'sms' ? 'La page d’information liée au SMS est obligatoire.' : 'Le corps du message est obligatoire.');
         if (channel === 'email' && !subject) throw new Error('L’objet email est obligatoire pour un contenu email.');
+        if (channel === 'sms' && !smsAlert) throw new Error('Le texte court du SMS est obligatoire.');
+        if (channel === 'sms' && !/\{(info_url|short_url)\}/.test(smsAlert)) {
+          throw new Error('Le SMS doit contenir {info_url} ou {short_url}, car les détails ne seront pas envoyés directement par SMS.');
+        }
 
         setComposerNotice('Création du message en cours…', 'info');
 
@@ -2765,7 +2832,7 @@ async function deleteScenarioStep(id) {
       if (e.target && (e.target.closest && e.target.closest('#scenarioPlannerRows') || e.target.id === 'pl_demo_date')) {
         updatePlannerPreview();
       }
-      if (e.target && ['cc_title', 'cc_code', 'cc_subject', 'cc_body'].includes(e.target.id)) {
+      if (e.target && ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_body'].includes(e.target.id)) {
         renderComposerPreview();
       }
     });

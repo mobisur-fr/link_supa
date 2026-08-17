@@ -269,7 +269,6 @@
       <button class="nav-btn" onclick="showPage('trigger-types', this)">Types de déclencheur</button>
       <button class="nav-btn" onclick="showPage('scenarios', this)">Scénarios</button>
       <button class="nav-btn" onclick="showPage('scenario-steps', this)">Étapes des scénarios</button>
-      <button class="nav-btn" onclick="showPage('events', this)">Événements</button>
       <button class="nav-btn" onclick="showPage('preview', this)">Aperçu d’un rendu</button>
       <button class="nav-btn" onclick="refreshAll()">Rafraîchir les données</button>
     </aside>
@@ -396,8 +395,7 @@
         </div>
         <div class="grid-3" style="margin-top:16px;">
           <div class="card"><div class="muted">Types de déclencheur</div><div class="kpi" id="kpiTriggers">0</div></div>
-          <div class="card"><div class="muted">Événements</div><div class="kpi" id="kpiEvents">0</div></div>
-          <div class="card"><div class="muted">Nombre de pages</div><div class="kpi">8</div></div>
+          <div class="card"><div class="muted">Nombre de pages</div><div class="kpi">7</div></div>
         </div>
         <div class="card" style="margin-top:16px;">
           <h3>Chaîne métier</h3>
@@ -605,47 +603,6 @@
         </div>
       </section>
 
-
-      <section id="events" class="page">
-        <div class="grid-2">
-          <div class="card">
-            <h2>Créer un événement</h2>
-            <div class="help">Un événement est un cas concret : un orage annoncé, un radar installé, un changement de limitation…</div>
-            <label>Type de déclencheur</label>
-            <select id="ev_trigger_type_id"></select>
-            <label>ID du connecteur (facultatif)</label>
-            <input id="ev_connecteur_id" type="number" placeholder="Ex. 1">
-            <label>Identifiant externe</label>
-            <input id="ev_source_external_id" placeholder="Ex. storm-56-2026-001">
-            <label>Clé anti-doublon</label>
-            <input id="ev_dedupe_key" placeholder="Ex. STORM_ALERT|56|Vannes|2026-03-27T18:00:00+01:00">
-            <label>Zone cible</label>
-            <input id="ev_zone_cible" placeholder="Ex. 56">
-            <label>Date/heure de survenance</label>
-            <input id="ev_occurs_at" placeholder="2026-03-25T08:00:00+01:00">
-            <label>Date/heure de début prévue</label>
-            <input id="ev_predicted_start_at" placeholder="2026-03-27T18:00:00+01:00">
-            <label>Date/heure de fin prévue</label>
-            <input id="ev_predicted_end_at" placeholder="2026-03-27T23:00:00+01:00">
-            <label>Date d’événement</label>
-            <input id="ev_date_evenement" placeholder="2026-03-27">
-            <label>Niveau de gravité</label>
-            <select id="ev_severity"><option value="">Non renseigné</option><option>Information</option><option>Faible</option><option>Moyen</option><option>Élevé</option><option>Critique</option></select>
-            <label>Données de contexte optionnelles (JSON)</label>
-            <div class="help">Vous pouvez laisser ce champ vide. Dans ce cas, l’événement sera créé avec un contexte vide et la date actuelle sera utilisée pour les dates non renseignées.</div>
-            <textarea id="ev_payload" placeholder='Ex. { "city": "Vannes", "department": "56" }'></textarea>
-            <div class="row">
-              <button onclick="createEvent()">Créer l’événement</button>
-              <button class="secondary" onclick="clearEventForm()">Vider</button>
-            </div>
-          </div>
-          <div class="card">
-            <h2>Événements existants</h2>
-            <div id="eventsList" class="list"></div>
-          </div>
-        </div>
-      </section>
-
       <section id="preview" class="page">
         <div class="grid-2">
           <div class="card">
@@ -747,8 +704,7 @@
       contentVersions: [],
       triggerTypes: [],
       scenarios: [],
-      scenarioSteps: [],
-      events: []
+      scenarioSteps: []
     };
 
 
@@ -1536,8 +1492,7 @@ async function deleteScenarioStep(id) {
         db().from('content_versions').select('*').order('id', { ascending: false }),
         db().from('trigger_types').select('*').order('id', { ascending: false }),
         db().from('scenarios').select('*').order('id', { ascending: false }),
-        db().from('scenario_steps').select('*').order('scenario_id').order('step_order'),
-        db().from('events').select('*').order('id', { ascending: false }).limit(50)
+        db().from('scenario_steps').select('*').order('scenario_id').order('step_order')
       ]);
 
       const firstError = requests.find(r => r.error);
@@ -1552,7 +1507,6 @@ async function deleteScenarioStep(id) {
       state.triggerTypes = requests[2].data || [];
       state.scenarios = requests[3].data || [];
       state.scenarioSteps = requests[4].data || [];
-      state.events = requests[5].data || [];
 
       renderDashboard();
       renderContentItems();
@@ -1560,7 +1514,6 @@ async function deleteScenarioStep(id) {
       renderTriggerTypes();
       renderScenarios();
       renderScenarioSteps();
-      renderEvents();
       populateSelects();
       updateContentVersionEditorMode();
       if (options.keepPlannerScenarioId) {
@@ -1576,7 +1529,6 @@ async function deleteScenarioStep(id) {
       document.getElementById('kpiVersions').textContent = state.contentVersions.length;
       document.getElementById('kpiScenarios').textContent = `${state.scenarios.length} / ${state.scenarioSteps.length}`;
       document.getElementById('kpiTriggers').textContent = state.triggerTypes.length;
-      document.getElementById('kpiEvents').textContent = state.events.length;
     }
 
     function setOptions(selectId, items, valueKey, labelBuilder) {
@@ -1599,7 +1551,6 @@ async function deleteScenarioStep(id) {
       setOptions('cv_content_item_id', state.contentItems, 'id', i => i.code);
       setOptions('sc_trigger_type_id', state.triggerTypes, 'id', i => i.code);
       setOptions('ss_scenario_id', state.scenarios, 'id', i => i.code);
-      setOptions('ev_trigger_type_id', state.triggerTypes, 'id', i => i.code);
       setOptions('pv_content_item_id', state.contentItems, 'id', i => i.code);
       syncPreviewVersions();
       syncStepRuleDropdowns();
@@ -1703,27 +1654,6 @@ async function deleteScenarioStep(id) {
       // Ancienne liste technique retirée dans cette version.
       // La page utilise maintenant la vue globale scenarioPlannerRows.
       renderScenarioPlanner();
-    }
-
-    function renderEvents() {
-      const box = document.getElementById('eventsList');
-      box.innerHTML = '';
-      state.events.forEach(ev => {
-        const tt = state.triggerTypes.find(t => t.id === ev.trigger_type_id);
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.innerHTML = `
-          <strong>${escapeHtml(tt?.code || '')}</strong>
-          <div class="chips">
-            <span class="chip">zone ${escapeHtml(ev.zone_cible)}</span>
-            <span class="chip">${escapeHtml(ev.severity || 'non renseigné')}</span>
-            <span class="chip">${escapeHtml(ev.statut)}</span>
-          </div>
-          <div class="muted" style="margin-top:8px;">clé anti-doublon : ${escapeHtml(ev.dedupe_key)}</div>
-          <div class="mono" style="margin-top:10px;">${escapeHtml(JSON.stringify(ev.payload || {}, null, 2))}</div>
-        `;
-        box.appendChild(div);
-      });
     }
 
     async function createContentItem() {
@@ -1877,39 +1807,6 @@ async function deleteScenarioStep(id) {
         await refreshAll();
       } catch (e) {
         setGlobalNotice(e.message || 'Erreur lors de la création de l’étape.', 'err');
-      }
-    }
-
-    async function createEvent() {
-      try {
-        const now = new Date();
-        const nowIso = now.toISOString();
-        const today = nowIso.slice(0, 10);
-        const contextText = val('ev_payload');
-        const contextPayload = contextText ? parseJson(contextText, 'Données de contexte') : {};
-
-        const payload = {
-          trigger_type_id: Number(val('ev_trigger_type_id')),
-          connecteur_id: val('ev_connecteur_id') ? Number(val('ev_connecteur_id')) : null,
-          source_external_id: val('ev_source_external_id') || null,
-          dedupe_key: val('ev_dedupe_key') || ('MANUAL|' + nowIso),
-          zone_cible: val('ev_zone_cible') || 'MANUAL',
-          occurs_at: val('ev_occurs_at') || nowIso,
-          predicted_start_at: val('ev_predicted_start_at') || val('ev_occurs_at') || nowIso,
-          predicted_end_at: val('ev_predicted_end_at') || null,
-          date_evenement: val('ev_date_evenement') || today,
-          severity: dictionnaires.gravite[val('ev_severity')] || null,
-          payload: contextPayload,
-          statut: 'open',
-          validated_by: 'admin-ui'
-        };
-        const { error } = await db().from('events').insert(payload);
-        if (error) throw error;
-        setGlobalNotice('L’événement a été créé.', 'ok');
-        clearEventForm();
-        await refreshAll();
-      } catch (e) {
-        setGlobalNotice(e.message || 'Erreur lors de la création de l’événement.', 'err');
       }
     }
 
@@ -2070,12 +1967,6 @@ async function deleteScenarioStep(id) {
       updateScenarioAggregationHelp();
       updateScenarioButtons();
     }
-
-    function clearEventForm() {
-      ['ev_connecteur_id','ev_source_external_id','ev_dedupe_key','ev_zone_cible','ev_occurs_at','ev_predicted_start_at','ev_predicted_end_at','ev_date_evenement'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('ev_payload').value = '';
-    }
-
 
     function setDefaultPlannerDate() {
       const el = document.getElementById('pl_demo_date');

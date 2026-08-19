@@ -239,7 +239,23 @@
     .composer-mini-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
     .composer-hint { font-size:13px; color:var(--muted); margin-top:-4px; margin-bottom:12px; }
     .danger-zone-soft { border-left:5px solid var(--brand-blue); }
-    @media (max-width:1050px) { .composer-layout, .composer-mini-grid { grid-template-columns:1fr; } }
+    .scenario-visual-toggle {
+      display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+      border:1px solid var(--line); border-radius:16px; padding:14px; background:var(--brand-blue-soft);
+      margin-bottom:12px;
+    }
+    .scenario-visual-toggle label { margin:0; font-size:14px; text-transform:none; letter-spacing:0; }
+    .scenario-visual-toggle input { width:auto; margin:3px 0 0; transform:scale(1.2); }
+    .scenario-visual-panel { border:1px solid #d9d8ff; background:#fff; border-radius:16px; padding:14px; margin-top:12px; }
+    .scenario-rule-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .scenario-rule-grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .scenario-rule-checks { display:grid; gap:8px; margin-top:8px; }
+    .scenario-rule-checks label { display:flex; gap:8px; align-items:flex-start; font-weight:500; font-size:13px; text-transform:none; letter-spacing:0; margin:0; }
+    .scenario-rule-checks input { width:auto; margin:2px 0 0; }
+    .scenario-pill-line { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .scenario-preview-box { max-height:340px; overflow:auto; }
+    .scenario-save-note { border-left:5px solid var(--brand-yellow); }
+    @media (max-width:1050px) { .composer-layout, .composer-mini-grid, .scenario-rule-grid, .scenario-rule-grid-2 { grid-template-columns:1fr; } }
 
   </style>
 </head>
@@ -351,7 +367,122 @@
             </div>
 
             <div class="composer-step">
-              <h3><span class="number">5</span>Publication</h3>
+              <h3><span class="number">5</span>Scénario associé</h3>
+              <div class="scenario-visual-toggle">
+                <div>
+                  <label for="cc_make_scenario"><strong>Faire de ce message le point de départ d’un scénario</strong></label>
+                  <div class="composer-hint" style="margin:6px 0 0;">Mode visuel pour l’instant : cette zone prépare les futures lignes <code>scenarios</code> et <code>scenario_steps</code>, mais ne les enregistre pas encore.</div>
+                </div>
+                <input id="cc_make_scenario" type="checkbox">
+              </div>
+
+              <div id="cc_scenario_panel" class="scenario-visual-panel hidden">
+                <div class="notice warn scenario-save-note">
+                  <strong>Simulation uniquement</strong><br>
+                  À ce stade, le bouton “Créer le message” crée seulement <code>content_items</code> et <code>content_versions</code>. Le scénario ci-dessous sert à valider la logique avant de brancher l’écriture dans <code>scenarios</code> et <code>scenario_steps</code>.
+                </div>
+
+                <div class="scenario-rule-grid-2">
+                  <div>
+                    <label>Nom du scénario</label>
+                    <input id="cc_scenario_label" placeholder="Ex. Alerte route fermée — conducteurs concernés">
+                  </div>
+                  <div>
+                    <label>Code scénario</label>
+                    <input id="cc_scenario_code" placeholder="SC_ROAD_CLOSURE_RISK_EMAIL">
+                  </div>
+                </div>
+
+                <div class="scenario-rule-grid">
+                  <div>
+                    <label>Type de déclencheur</label>
+                    <input id="cc_scenario_trigger" disabled>
+                    <div class="help">Correspondra à <code>scenarios.trigger_type_id</code> via le code de déclencheur.</div>
+                  </div>
+                  <div>
+                    <label>Mode de scénario</label>
+                    <select id="cc_scenario_mode">
+                      <option value="single">Alerte unique</option>
+                      <option value="sequence">Séquence en plusieurs temps</option>
+                      <option value="digest">Récapitulatif</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Priorité</label>
+                    <input id="cc_scenario_priority" type="number" min="0" max="100" value="80">
+                  </div>
+                </div>
+
+                <h4>Première règle de déclenchement</h4>
+                <div class="scenario-rule-grid">
+                  <div>
+                    <label>Gravité minimale</label>
+                    <select id="cc_rule_min_severity">
+                      <option value="low">Faible</option>
+                      <option value="medium" selected>Moyenne</option>
+                      <option value="high">Élevée</option>
+                      <option value="critical">Critique</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Référence temporelle</label>
+                    <select id="cc_rule_window_ref">
+                      <option value="occurs_at">Détection / occurrence</option>
+                      <option value="predicted_start_at" selected>Début prévu</option>
+                      <option value="predicted_end_at">Fin prévue</option>
+                      <option value="date_evenement">Date de l’événement</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>Fenêtre d’envoi</label>
+                    <div class="row" style="gap:8px; flex-wrap:nowrap;">
+                      <input id="cc_rule_min_hours" type="number" value="-24" title="Heures minimum">
+                      <input id="cc_rule_max_hours" type="number" value="2" title="Heures maximum">
+                    </div>
+                    <div class="help">Ex. -24 / 2 = de 24 h avant à 2 h après la référence.</div>
+                  </div>
+                </div>
+
+                <div class="scenario-rule-grid-2">
+                  <div>
+                    <label>Canaux autorisés</label>
+                    <div class="scenario-rule-checks">
+                      <label><input id="cc_rule_allow_email" type="checkbox" checked> Email autorisé</label>
+                      <label><input id="cc_rule_allow_sms" type="checkbox"> SMS autorisé seulement comme alerte courte + lien</label>
+                    </div>
+                  </div>
+                  <div>
+                    <label>Garde-fous anti-saturation</label>
+                    <div class="scenario-rule-checks">
+                      <label><input id="cc_rule_once_per_event" type="checkbox" checked> Une seule fois par événement</label>
+                      <label><input id="cc_rule_group_similar" type="checkbox" checked> Regrouper les événements similaires</label>
+                      <label><input id="cc_rule_no_raw_sms" type="checkbox" checked disabled> Jamais d’information brute par SMS</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="scenario-rule-grid">
+                  <div>
+                    <label>Cooldown thème</label>
+                    <input id="cc_rule_cooldown_hours" type="number" min="0" value="24">
+                    <div class="help">Nombre d’heures avant de répéter une info similaire.</div>
+                  </div>
+                  <div>
+                    <label>Max alertes immédiates / client / jour</label>
+                    <input id="cc_rule_max_daily_alerts" type="number" min="1" value="2">
+                  </div>
+                  <div>
+                    <label>Max SMS / client / jour</label>
+                    <input id="cc_rule_max_daily_sms" type="number" min="0" value="1">
+                  </div>
+                </div>
+
+                <div class="scenario-pill-line" id="cc_scenario_readable"></div>
+              </div>
+            </div>
+
+            <div class="composer-step">
+              <h3><span class="number">6</span>Publication</h3>
               <label>Statut de la version</label>
               <select id="cc_status">
                 <option value="draft">Brouillon</option>
@@ -374,6 +505,9 @@
 
             <h3 style="margin-top:18px;">Règles générées</h3>
             <div id="cc_policy_preview" class="mono composer-policy">{}</div>
+
+            <h3 style="margin-top:18px;">Scénario associé</h3>
+            <div id="cc_scenario_preview" class="mono composer-policy scenario-preview-box">Aucun scénario demandé.</div>
           </aside>
         </div>
       </section>
@@ -2351,6 +2485,7 @@ async function deleteScenarioStep(id) {
       updateComposerChannelVisibility();
       updateComposerGeneratedFields({ preserveText: true });
       renderComposerVariables();
+      updateComposerScenarioVisibility({ preserveScenarioText: true, preserveScenarioCode: true, preserveScenarioRules: true });
       if (!getComposerBodyValue()) fillComposerDefaultText();
       renderComposerPreview();
     }
@@ -2423,6 +2558,11 @@ async function deleteScenarioStep(id) {
       const generatedCode = nextAvailableContentCode(`${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
       if (codeInput && (!codeInput.value || !options.preserveCode)) codeInput.value = generatedCode;
       if (titleInput && !titleInput.value) titleInput.value = `${ctx.label} — ${role.label}`;
+      updateComposerScenarioDefaults({
+        preserveScenarioText: options.preserveCode || options.preserveText,
+        preserveScenarioCode: options.preserveCode,
+        preserveScenarioRules: options.preserveText
+      });
       if (!options.preserveText) fillComposerDefaultText();
       renderComposerPolicyPreview();
     }
@@ -2531,9 +2671,191 @@ async function deleteScenarioStep(id) {
       };
     }
 
+    function isComposerScenarioEnabled() {
+      const el = document.getElementById('cc_make_scenario');
+      return Boolean(el && el.checked);
+    }
+
+    function currentComposerScenarioMode() {
+      return val('cc_scenario_mode') || 'single';
+    }
+
+    function defaultComposerScenarioCode(ctx, role, channel) {
+      return toComposerCode(`SC_${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
+    }
+
+    function updateComposerScenarioVisibility(options = {}) {
+      const panel = document.getElementById('cc_scenario_panel');
+      if (panel) panel.classList.toggle('hidden', !isComposerScenarioEnabled());
+      updateComposerScenarioDefaults(options);
+      renderComposerScenarioPreview();
+    }
+
+    function updateComposerScenarioDefaults(options = {}) {
+      const ctx = currentComposerContext();
+      const role = currentComposerRole();
+      const channel = currentComposerChannel();
+      const timing = currentComposerTiming();
+
+      const labelEl = document.getElementById('cc_scenario_label');
+      const codeEl = document.getElementById('cc_scenario_code');
+      const triggerEl = document.getElementById('cc_scenario_trigger');
+      const modeEl = document.getElementById('cc_scenario_mode');
+      const priorityEl = document.getElementById('cc_scenario_priority');
+      const windowRefEl = document.getElementById('cc_rule_window_ref');
+      const minHoursEl = document.getElementById('cc_rule_min_hours');
+      const maxHoursEl = document.getElementById('cc_rule_max_hours');
+      const smsEl = document.getElementById('cc_rule_allow_sms');
+      const emailEl = document.getElementById('cc_rule_allow_email');
+
+      const defaultLabel = `${ctx.label} — ${role.label}`;
+      const defaultCode = defaultComposerScenarioCode(ctx, role, channel);
+      if (labelEl && (!labelEl.value || !options.preserveScenarioText)) labelEl.value = defaultLabel;
+      if (codeEl && (!codeEl.value || !options.preserveScenarioCode)) codeEl.value = defaultCode;
+      if (triggerEl) triggerEl.value = `${ctx.trigger_type_code} — ${ctx.label}`;
+
+      if (modeEl && !options.preserveScenarioRules) {
+        modeEl.value = timing.policy?.timing === 'digest' ? 'digest' : 'single';
+      }
+
+      if (priorityEl && !options.preserveScenarioRules) {
+        const highPriorityTypes = new Set(['road_closure', 'road_detour', 'storm']);
+        priorityEl.value = highPriorityTypes.has(ctx.topic_code) ? '90' : '70';
+      }
+
+      if (windowRefEl && minHoursEl && maxHoursEl && !options.preserveScenarioRules) {
+        if (timing.policy?.timing === 'before_start') {
+          windowRefEl.value = 'predicted_start_at';
+          minHoursEl.value = '-48';
+          maxHoursEl.value = '-1';
+        } else if (timing.policy?.timing === 'during_event') {
+          windowRefEl.value = 'predicted_start_at';
+          minHoursEl.value = '0';
+          maxHoursEl.value = '24';
+        } else if (timing.policy?.timing === 'digest') {
+          windowRefEl.value = 'date_evenement';
+          minHoursEl.value = '0';
+          maxHoursEl.value = '24';
+        } else {
+          windowRefEl.value = 'occurs_at';
+          minHoursEl.value = '0';
+          maxHoursEl.value = '2';
+        }
+      }
+
+      if (emailEl && !options.preserveScenarioRules) emailEl.checked = channel === 'email';
+      if (smsEl && !options.preserveScenarioRules) smsEl.checked = channel === 'sms' || ctx.topic_code === 'road_closure' || ctx.topic_code === 'road_detour';
+    }
+
+    function buildComposerScenarioPlan() {
+      if (!isComposerScenarioEnabled()) return null;
+
+      const ctx = currentComposerContext();
+      const role = currentComposerRole();
+      const channel = currentComposerChannel();
+      const contentCode = toComposerCode(val('cc_code'));
+      const scenarioCode = toComposerCode(val('cc_scenario_code') || defaultComposerScenarioCode(ctx, role, channel));
+      const scenarioLabel = val('cc_scenario_label') || `${ctx.label} — ${role.label}`;
+      const minHours = Number(val('cc_rule_min_hours'));
+      const maxHours = Number(val('cc_rule_max_hours'));
+      const cooldownHours = Number(val('cc_rule_cooldown_hours'));
+      const maxDailyAlerts = Number(val('cc_rule_max_daily_alerts'));
+      const maxDailySms = Number(val('cc_rule_max_daily_sms'));
+
+      const allowEmail = Boolean(document.getElementById('cc_rule_allow_email')?.checked);
+      const allowSms = Boolean(document.getElementById('cc_rule_allow_sms')?.checked);
+      const oncePerEvent = Boolean(document.getElementById('cc_rule_once_per_event')?.checked);
+      const groupSimilar = Boolean(document.getElementById('cc_rule_group_similar')?.checked);
+
+      return {
+        visual_only: true,
+        database_writes_later: {
+          scenarios: {
+            code: scenarioCode,
+            label: scenarioLabel,
+            trigger_type_code: ctx.trigger_type_code,
+            aggregation_mode: currentComposerScenarioMode(),
+            priority: clampVisualNumber(val('cc_scenario_priority'), 0, 100, 70),
+            active: true
+          },
+          scenario_steps: [
+            {
+              code: `${scenarioCode}_STEP_1`,
+              step_order: 1,
+              window_ref: val('cc_rule_window_ref') || 'predicted_start_at',
+              window_min_hours: Number.isFinite(minHours) ? minHours : -24,
+              window_max_hours: Number.isFinite(maxHours) ? maxHours : 2,
+              active: true,
+              logic_json: {
+                content_code: contentCode,
+                min_severity: val('cc_rule_min_severity') || 'medium',
+                channels_allowed: {
+                  email: allowEmail,
+                  sms: allowSms,
+                  sms_delivery_model: 'sms_with_landing_page',
+                  raw_sms_details_forbidden: true
+                },
+                anti_saturation: {
+                  once_per_event: oncePerEvent,
+                  group_similar_events: groupSimilar,
+                  risk_group_key_template: '{trigger_type_code}:{road_number}:{zone_cible}:{date_evenement}',
+                  cooldown_hours: Number.isFinite(cooldownHours) ? cooldownHours : 24,
+                  max_immediate_alerts_per_client_per_day: Number.isFinite(maxDailyAlerts) ? maxDailyAlerts : 2,
+                  max_sms_per_client_per_day: Number.isFinite(maxDailySms) ? maxDailySms : 1
+                },
+                send_if: [
+                  'client_active',
+                  'client_zone_matches_event',
+                  'event_status_open_or_updated',
+                  'window_matches',
+                  'cooldown_ok',
+                  'not_already_sent_for_event'
+                ]
+              }
+            }
+          ]
+        }
+      };
+    }
+
+    function clampVisualNumber(value, min, max, fallback) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return fallback;
+      return Math.min(max, Math.max(min, Math.floor(n)));
+    }
+
+    function renderComposerScenarioPreview() {
+      const preview = document.getElementById('cc_scenario_preview');
+      const readable = document.getElementById('cc_scenario_readable');
+      const plan = buildComposerScenarioPlan();
+
+      if (!plan) {
+        if (preview) preview.textContent = 'Aucun scénario demandé.';
+        if (readable) readable.innerHTML = '';
+        return;
+      }
+
+      const sc = plan.database_writes_later.scenarios;
+      const step = plan.database_writes_later.scenario_steps[0];
+      const logic = step.logic_json;
+
+      if (preview) preview.textContent = JSON.stringify(plan, null, 2);
+      if (readable) {
+        readable.innerHTML = [
+          `Déclencheur : ${sc.trigger_type_code}`,
+          `Fenêtre : ${step.window_min_hours} h / ${step.window_max_hours} h sur ${step.window_ref}`,
+          `Gravité ≥ ${logic.min_severity}`,
+          logic.channels_allowed.sms ? 'SMS court + lien autorisé' : 'SMS non autorisé',
+          `Cooldown ${logic.anti_saturation.cooldown_hours} h`,
+          logic.anti_saturation.group_similar_events ? 'Regroupement similaire actif' : 'Pas de regroupement'
+        ].map(v => `<span class="chip">${escapeHtml(v)}</span>`).join('');
+      }
+    }
+
     function renderComposerPolicyPreview() {
       const box = document.getElementById('cc_policy_preview');
       if (box) box.textContent = JSON.stringify(buildComposerPolicy(), null, 2);
+      renderComposerScenarioPreview();
     }
 
     function renderComposerVariables() {
@@ -2606,6 +2928,9 @@ async function deleteScenarioStep(id) {
         if (el) el.value = '';
       });
       setComposerBodyValue('');
+      const scenarioToggle = document.getElementById('cc_make_scenario');
+      if (scenarioToggle) scenarioToggle.checked = false;
+      updateComposerScenarioVisibility({ preserveScenarioText: false, preserveScenarioCode: false, preserveScenarioRules: false });
       updateComposerGeneratedFields({ preserveText: false, preserveCode: false });
       setComposerNotice('', 'info');
     }
@@ -2675,7 +3000,10 @@ async function deleteScenarioStep(id) {
         const { error: versionError } = await db().from('content_versions').insert(versionPayload);
         if (versionError) throw versionError;
 
-        setComposerNotice(`Message créé : ${code}. Il est maintenant disponible dans les briques et versions.`, 'ok');
+        const scenarioSuffix = isComposerScenarioEnabled()
+          ? ' Le scénario associé est seulement préparé visuellement pour le moment : aucune ligne n’a été créée dans scenarios / scenario_steps.'
+          : '';
+        setComposerNotice(`Message créé : ${code}. Il est maintenant disponible dans les briques et versions.${scenarioSuffix}`, 'ok');
         setGlobalNotice(`Message créé : ${code}`, 'ok');
         await refreshAll();
         const codeInput = document.getElementById('cc_code');
@@ -2709,7 +3037,14 @@ async function deleteScenarioStep(id) {
         updateComposerTimingHelp();
         updateComposerChannelVisibility();
         updateComposerGeneratedFields({ preserveText: false, preserveCode: false });
+        updateComposerScenarioVisibility({ preserveScenarioText: false, preserveScenarioCode: false, preserveScenarioRules: false });
         renderComposerPreview();
+      }
+      if (e.target && e.target.id === 'cc_make_scenario') {
+        updateComposerScenarioVisibility({ preserveScenarioText: false, preserveScenarioCode: false, preserveScenarioRules: false });
+      }
+      if (e.target && ['cc_scenario_mode', 'cc_rule_min_severity', 'cc_rule_window_ref', 'cc_rule_allow_email', 'cc_rule_allow_sms', 'cc_rule_once_per_event', 'cc_rule_group_similar'].includes(e.target.id)) {
+        renderComposerScenarioPreview();
       }
       if (e.target && e.target.closest && e.target.closest('#scenarioPlannerRows')) {
         updatePlannerPreview();
@@ -2725,6 +3060,9 @@ async function deleteScenarioStep(id) {
       }
       if (e.target && ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_body'].includes(e.target.id)) {
         renderComposerPreview();
+      }
+      if (e.target && ['cc_scenario_label', 'cc_scenario_code', 'cc_scenario_priority', 'cc_rule_min_hours', 'cc_rule_max_hours', 'cc_rule_cooldown_hours', 'cc_rule_max_daily_alerts', 'cc_rule_max_daily_sms'].includes(e.target.id)) {
+        renderComposerScenarioPreview();
       }
     });
 

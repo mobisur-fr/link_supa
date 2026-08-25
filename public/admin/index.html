@@ -248,7 +248,13 @@
     .composer-scenario-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
     .composer-scenario-grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
     .composer-scenario-muted { font-size:12px; color:var(--muted); line-height:1.45; margin-top:-6px; margin-bottom:10px; }
-    @media (max-width:1050px) { .composer-scenario-grid, .composer-scenario-grid-2 { grid-template-columns:1fr; } }
+    .composer-trigger-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:8px 0 12px; }
+    .composer-trigger-option { display:flex; gap:9px; align-items:flex-start; border:1px solid var(--line); border-radius:12px; padding:10px; background:#fff; }
+    .composer-trigger-option input { width:auto; margin:2px 0 0; }
+    .composer-trigger-option strong { display:block; font-size:13px; }
+    .composer-trigger-option span { display:block; font-size:12px; color:var(--muted); line-height:1.35; }
+    .composer-advanced-trigger { border-left:5px solid var(--brand-blue); }
+    @media (max-width:1050px) { .composer-scenario-grid, .composer-scenario-grid-2, .composer-trigger-list { grid-template-columns:1fr; } }
     @media (max-width:1050px) { .composer-layout, .composer-mini-grid { grid-template-columns:1fr; } }
 
   </style>
@@ -379,14 +385,42 @@
 
                 <div class="composer-scenario-grid-2">
                   <div>
-                    <label>Nom du scénario</label>
-                    <input id="cc_scenario_label" placeholder="Ex. Déviation majeure — zones 95 et 75">
+                    <label>Nom générique du scénario</label>
+                    <input id="cc_scenario_label" placeholder="Ex. Alertes routières critiques — zones 95 et 75">
+                    <div class="composer-scenario-muted">Si plusieurs déclencheurs sont cochés, l’admin créera un scénario par déclencheur, avec ce libellé comme base.</div>
                   </div>
                   <div>
-                    <label>Code scénario</label>
-                    <input id="cc_scenario_code" placeholder="SC_ROAD_DETOUR_EMAIL">
+                    <label>Code générique</label>
+                    <input id="cc_scenario_code" placeholder="SC_ROAD_RISK_EMAIL">
+                    <div class="composer-scenario-muted">Un suffixe sera ajouté automatiquement si plusieurs scénarios sont créés.</div>
                   </div>
                 </div>
+
+                <label>Déclencheurs routiers à couvrir</label>
+                <div class="composer-scenario-muted">
+                  Coche un ou plusieurs événements. Avec le schéma actuel, un scénario ne peut avoir qu’un seul <code>trigger_type_id</code> : le formulaire créera donc plusieurs scénarios si plusieurs déclencheurs sont cochés, tous reliés au même message.
+                </div>
+                <div class="composer-trigger-list" id="cc_scenario_trigger_catalog">
+                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_closure"><div><strong>Route fermée</strong><span>road_closure — fermeture complète ou route indisponible.</span></div></label>
+                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_detour"><div><strong>Déviation</strong><span>road_detour — itinéraire de substitution.</span></div></label>
+                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="lane_closure"><div><strong>Voie fermée</strong><span>lane_closure — une ou plusieurs voies neutralisées.</span></div></label>
+                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="alternating_traffic"><div><strong>Circulation alternée</strong><span>alternating_traffic — alternat, chantier ponctuel, passage contraint.</span></div></label>
+                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="traffic_restriction"><div><strong>Restriction de circulation</strong><span>traffic_restriction — poids, gabarit, voies rétrécies, sortie à éviter.</span></div></label>
+                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_work"><div><strong>Travaux avec impact conduite</strong><span>road_work — travaux conservés par le Worker car ils modifient la conduite.</span></div></label>
+                  <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_management"><div><strong>Gestion DATEX brute</strong><span>datex_management — utile pour viser des management_types précis.</span></div></label>
+                  <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_work"><div><strong>Travaux DATEX bruts</strong><span>datex_work — ConstructionWorks / MaintenanceWorks et sous-types.</span></div></label>
+                  <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_any_road_risk"><div><strong>Autre risque routier importé</strong><span>datex_any_road_risk — filet large pour événements futurs importés par le Worker.</span></div></label>
+                </div>
+                <div class="row">
+                  <button type="button" class="secondary" onclick="selectComposerRoadTriggers('current')">Couvrir la situation choisie</button>
+                  <button type="button" class="secondary" onclick="selectComposerRoadTriggers('core')">Couvrir les 6 familles MobiSûr</button>
+                  <button type="button" class="secondary" onclick="selectComposerRoadTriggers('all')">Couvrir large</button>
+                  <button type="button" class="secondary" onclick="selectComposerRoadTriggers('none')">Tout décocher</button>
+                </div>
+
+                <label>Codes déclencheurs complémentaires</label>
+                <input id="cc_scenario_extra_trigger_codes" placeholder="Ex. accident, obstruction, weather_road_condition">
+                <div class="composer-scenario-muted">Option avancée. Ces codes ne se déclencheront que si le Worker data importe effectivement des événements avec ces <code>trigger_types.code</code>.</div>
 
                 <div class="composer-scenario-grid">
                   <div>
@@ -415,11 +449,33 @@
 
                 <label>Départements / zones concernés</label>
                 <input id="cc_scenario_zones" placeholder="Ex. 95,75 — laisser vide pour toutes les zones client compatibles">
-                <div class="composer-scenario-muted">Plusieurs valeurs possibles, séparées par virgule ou point-virgule. Exemple : <code>95, 75, 92</code>.</div>
+                <div class="composer-scenario-muted">Plusieurs valeurs possibles, séparées par virgule ou point-virgule. Vide = toutes les zones compatibles avec le client.</div>
 
                 <label>Routes concernées</label>
                 <input id="cc_scenario_routes" placeholder="Ex. N118,N20 — laisser vide pour toutes les routes">
-                <div class="composer-scenario-muted">Filtre optionnel. À utiliser seulement si le scénario doit être limité à certaines routes.</div>
+                <div class="composer-scenario-muted">Filtre optionnel. Vide = toutes les routes.</div>
+
+                <div class="composer-scenario-grid-2">
+                  <div>
+                    <label>Types DATEX bruts à accepter</label>
+                    <input id="cc_scenario_record_types" placeholder="Ex. ConstructionWorks,MaintenanceWorks,ReroutingManagement">
+                  </div>
+                  <div>
+                    <label>Mesures DATEX à accepter</label>
+                    <input id="cc_scenario_management_types" placeholder="Ex. roadClosed,laneClosures,contraflow">
+                  </div>
+                </div>
+                <div class="composer-scenario-grid-2">
+                  <div>
+                    <label>Types de travaux / maintenance</label>
+                    <input id="cc_scenario_work_types" placeholder="Ex. roadMarkingWork,repairWork,grassCuttingWork">
+                  </div>
+                  <div>
+                    <label>Recherche texte dans l’événement</label>
+                    <input id="cc_scenario_text_query" placeholder="Ex. peinture, fauchage, basculement, déviation">
+                  </div>
+                </div>
+                <div class="composer-scenario-muted">Ces filtres avancés seront lus dans <code>event.payload</code> : <code>record_types</code>, <code>management_types</code>, <code>construction_work_type</code>, <code>road_maintenance_type</code>, description, communes et notes importées.</div>
 
                 <div class="composer-scenario-grid">
                   <div>
@@ -907,6 +963,19 @@
         sample: { territory:'Morbihan', old_speed_limit_kmh:'80', new_speed_limit_kmh:'90', affected_km:'344', source_url:'https://exemple.fr' }
       }
     };
+
+    const composerRoadTriggerCatalog = {
+      road_closure: { code: 'road_closure', label: 'Route fermée', event_type: 'road_closure', source: 'datex_national_non_concede', code_suffix: 'ROAD_CLOSURE', help: 'Fermeture complète ou route indisponible.' },
+      road_detour: { code: 'road_detour', label: 'Déviation', event_type: 'road_detour', source: 'datex_national_non_concede', code_suffix: 'ROAD_DETOUR', help: 'Itinéraire de substitution ou déviation.' },
+      lane_closure: { code: 'lane_closure', label: 'Voie fermée', event_type: 'lane_closure', source: 'datex_national_non_concede', code_suffix: 'LANE_CLOSURE', help: 'Une ou plusieurs voies neutralisées.' },
+      alternating_traffic: { code: 'alternating_traffic', label: 'Circulation alternée', event_type: 'alternating_traffic', source: 'datex_national_non_concede', code_suffix: 'ALTERNATING_TRAFFIC', help: 'Alternat ou passage contraint.' },
+      traffic_restriction: { code: 'traffic_restriction', label: 'Restriction de circulation', event_type: 'traffic_restriction', source: 'datex_national_non_concede', code_suffix: 'TRAFFIC_RESTRICTION', help: 'Restriction poids, gabarit, voies rétrécies, sortie déconseillée.' },
+      road_work: { code: 'road_work', label: 'Travaux avec impact conduite', event_type: 'road_work', source: 'datex_national_non_concede', code_suffix: 'ROAD_WORK', help: 'Travaux conservés par le Worker car ils modifient la conduite.' },
+      datex_management: { code: 'datex_management', label: 'Gestion DATEX brute', event_type: null, source: 'datex_national_non_concede', code_suffix: 'DATEX_MANAGEMENT', help: 'Filet pour RoadOrCarriagewayOrLaneManagement et management_types.' },
+      datex_work: { code: 'datex_work', label: 'Travaux DATEX bruts', event_type: null, source: 'datex_national_non_concede', code_suffix: 'DATEX_WORK', help: 'Filet pour ConstructionWorks / MaintenanceWorks et sous-types travaux.' },
+      datex_any_road_risk: { code: 'datex_any_road_risk', label: 'Autre risque routier importé', event_type: null, source: 'datex_national_non_concede', code_suffix: 'DATEX_ANY_ROAD_RISK', help: 'Filet large pour événements futurs importés par le Worker data.' }
+    };
+
 
     const composerRoles = {
       risk_alert: { label: 'Prévenir d’un risque', help: 'Alerter clairement le conducteur ou le responsable sur une situation à anticiper.', categorie: 'alert', type: 'risk_alert', code_suffix: 'RISK' },
@@ -2469,6 +2538,7 @@ async function deleteScenarioStep(id) {
       updateComposerChannelVisibility();
       updateComposerGeneratedFields({ preserveText: true });
       updateComposerScenarioDefaults({ preserveUserValues: true });
+      syncComposerTriggerSelectionWithContext(true);
       updateComposerScenarioVisibility();
       renderComposerVariables();
       if (!getComposerBodyValue()) fillComposerDefaultText();
@@ -2507,6 +2577,60 @@ async function deleteScenarioStep(id) {
 
     function normalizeComposerRoadList(value) {
       return parseComposerList(value).map(v => v.replace(/\s+/g, ''));
+    }
+
+    function selectComposerRoadTriggers(mode) {
+      const inputs = Array.from(document.querySelectorAll('.cc_scenario_trigger'));
+      const ctx = currentComposerContext();
+      const current = String(ctx.trigger_type_code || ctx.topic_code || '').toLowerCase();
+      const core = ['road_closure', 'road_detour', 'lane_closure', 'alternating_traffic', 'traffic_restriction', 'road_work'];
+      inputs.forEach(input => {
+        const value = String(input.value || '').toLowerCase();
+        if (mode === 'none') input.checked = false;
+        else if (mode === 'all') input.checked = true;
+        else if (mode === 'core') input.checked = core.includes(value);
+        else input.checked = value === current;
+      });
+      updateComposerScenarioSummary();
+      renderComposerPolicyPreview();
+    }
+
+    function selectedComposerRoadTriggers() {
+      const selected = Array.from(document.querySelectorAll('.cc_scenario_trigger:checked'))
+        .map(input => composerRoadTriggerCatalog[input.value])
+        .filter(Boolean);
+
+      const extraCodes = parseComposerList(val('cc_scenario_extra_trigger_codes'));
+      extraCodes.forEach(code => {
+        const clean = toComposerCode(code).toLowerCase();
+        if (!clean) return;
+        if (selected.some(t => String(t.code).toLowerCase() === clean)) return;
+        selected.push({
+          code: clean,
+          label: code,
+          event_type: null,
+          source: 'datex_national_non_concede',
+          code_suffix: toComposerCode(code),
+          help: 'Code déclencheur complémentaire saisi manuellement.'
+        });
+      });
+
+      if (selected.length) return selected;
+      const ctx = currentComposerContext();
+      return [{
+        code: ctx.trigger_type_code,
+        label: ctx.label,
+        event_type: ctx.topic_code,
+        source: ctx.source,
+        code_suffix: ctx.code_base,
+        help: ctx.description
+      }];
+    }
+
+    function syncComposerTriggerSelectionWithContext(force = false) {
+      const anyChecked = Boolean(document.querySelector('.cc_scenario_trigger:checked'));
+      if (!force && anyChecked) return;
+      selectComposerRoadTriggers('current');
     }
 
     function currentComposerScenarioMode() {
@@ -2575,89 +2699,129 @@ async function deleteScenarioStep(id) {
       const channel = currentComposerChannel();
       const zones = parseComposerList(val('cc_scenario_zones'));
       const routes = normalizeComposerRoadList(val('cc_scenario_routes'));
-      const scenarioCode = toComposerCode(val('cc_scenario_code'));
-      const stepCode = `${scenarioCode}_STEP_1`;
+      const recordTypes = parseComposerList(val('cc_scenario_record_types'));
+      const managementTypes = parseComposerList(val('cc_scenario_management_types'));
+      const workTypes = parseComposerList(val('cc_scenario_work_types'));
+      const textQuery = val('cc_scenario_text_query');
+      const baseScenarioCode = toComposerCode(val('cc_scenario_code')) || toComposerCode(`SC_${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
+      const baseScenarioLabel = val('cc_scenario_label') || `${ctx.label} — ${role.label}`;
       const minSeverity = val('cc_scenario_min_severity') || 'low';
       const cooldownHours = Number(val('cc_scenario_cooldown_hours') || 24);
       const maxAlerts = Number(val('cc_scenario_max_alerts_day') || 2);
       const maxSms = Number(val('cc_scenario_max_sms_day') || 1);
       const oncePerEvent = Boolean(document.getElementById('cc_scenario_once_per_event')?.checked);
       const groupSimilar = Boolean(document.getElementById('cc_scenario_group_similar')?.checked);
+      const triggers = selectedComposerRoadTriggers();
+      const multiple = triggers.length > 1;
 
-      return {
-        scenario: {
-          code: scenarioCode,
-          label: val('cc_scenario_label') || `${ctx.label} — ${role.label}`,
-          trigger_type_code: ctx.trigger_type_code,
-          aggregation_mode: currentComposerScenarioMode(),
-          priority: Number(val('cc_scenario_priority') || 80),
-          active: true
-        },
-        first_step: {
-          code: stepCode,
-          step_order: 1,
-          window_ref: val('cc_scenario_window_ref') || 'occurs_at',
-          window_min_hours: Number(val('cc_scenario_window_min_hours') || 0),
-          window_max_hours: Number(val('cc_scenario_window_max_hours') || 2),
-          logic_json: {
-            trigger_conditions: {
-              description: 'Conditions d’entrée du scénario. Le moteur devra déclencher ce scénario uniquement si l’événement entrant respecte ces critères puis concerne un client éligible.',
-              trigger_type_code: ctx.trigger_type_code,
-              event_type: ctx.topic_code,
-              source: ctx.source,
-              zones,
-              routes,
-              min_severity: minSeverity,
-              client_zone_match_required: true
-            },
-            contents: [
-              {
-                content_code: contentCode || toComposerCode(val('cc_code')),
-                when: oncePerEvent ? 'first_detection_for_event && cooldown_ok' : 'cooldown_ok',
-                channel
-              }
-            ],
-            dispatch_rules: {
-              once_per_event: oncePerEvent,
-              group_similar_events: groupSimilar,
-              cooldown_hours: cooldownHours,
-              max_immediate_alerts_per_client_per_day: maxAlerts,
-              max_sms_per_client_per_day: maxSms,
-              channels_allowed: {
-                email: channel === 'email',
-                sms: channel === 'sms'
+      const scenarios = triggers.map(trigger => {
+        const suffix = toComposerCode(trigger.code_suffix || trigger.code || 'TRIGGER');
+        const scenarioCode = multiple ? toComposerCode(`${baseScenarioCode}_${suffix}`) : baseScenarioCode;
+        const stepCode = `${scenarioCode}_STEP_1`;
+        return {
+          scenario: {
+            code: scenarioCode,
+            label: multiple ? `${baseScenarioLabel} — ${trigger.label}` : baseScenarioLabel,
+            trigger_type_code: trigger.code,
+            trigger_label: trigger.label,
+            aggregation_mode: currentComposerScenarioMode(),
+            priority: Number(val('cc_scenario_priority') || 80),
+            active: true
+          },
+          first_step: {
+            code: stepCode,
+            step_order: 1,
+            window_ref: val('cc_scenario_window_ref') || 'occurs_at',
+            window_min_hours: Number(val('cc_scenario_window_min_hours') || 0),
+            window_max_hours: Number(val('cc_scenario_window_max_hours') || 2),
+            logic_json: {
+              trigger_conditions: {
+                description: 'Conditions d’entrée du scénario. Le moteur devra déclencher ce scénario uniquement si l’événement entrant respecte ces critères puis concerne un client éligible.',
+                trigger_type_code: trigger.code,
+                trigger_label: trigger.label,
+                event_type: trigger.event_type,
+                source: trigger.source || ctx.source,
+                zones,
+                routes,
+                min_severity: minSeverity,
+                client_zone_match_required: true,
+                advanced_payload_filters: {
+                  record_types: recordTypes,
+                  management_types: managementTypes,
+                  work_types: workTypes,
+                  text_query: textQuery || null,
+                  fields_checked: [
+                    'payload.event_type',
+                    'payload.record_types',
+                    'payload.management_types',
+                    'payload.construction_work_type',
+                    'payload.road_maintenance_type',
+                    'payload.description',
+                    'payload.internal_note',
+                    'payload.location_descriptor',
+                    'payload.from_town',
+                    'payload.to_town',
+                    'payload.point_town'
+                  ]
+                }
               },
-              sms_delivery_model: channel === 'sms' ? 'sms_with_landing_page' : null,
-              raw_sms_details_forbidden: channel === 'sms'
+              contents: [
+                {
+                  content_code: contentCode || toComposerCode(val('cc_code')),
+                  when: oncePerEvent ? 'first_detection_for_event && cooldown_ok' : 'cooldown_ok',
+                  channel
+                }
+              ],
+              dispatch_rules: {
+                once_per_event: oncePerEvent,
+                group_similar_events: groupSimilar,
+                cooldown_hours: cooldownHours,
+                max_immediate_alerts_per_client_per_day: maxAlerts,
+                max_sms_per_client_per_day: maxSms,
+                channels_allowed: {
+                  email: channel === 'email',
+                  sms: channel === 'sms'
+                },
+                sms_delivery_model: channel === 'sms' ? 'sms_with_landing_page' : null,
+                raw_sms_details_forbidden: channel === 'sms'
+              }
             }
           }
-        }
-      };
+        };
+      });
+
+      return { scenarios };
     }
 
     function updateComposerScenarioSummary() {
       const box = document.getElementById('cc_scenario_trigger_summary');
       if (!box) return;
       const draft = buildComposerScenarioDraft(toComposerCode(val('cc_code')));
-      if (!draft) {
+      if (!draft || !draft.scenarios || !draft.scenarios.length) {
         box.innerHTML = '<span class="muted">Aucun scénario ne sera créé avec ce message.</span>';
         return;
       }
-      const t = draft.scenario;
-      const c = draft.first_step.logic_json.trigger_conditions;
+      const first = draft.scenarios[0];
+      const c = first.first_step.logic_json.trigger_conditions;
       const zones = c.zones.length ? c.zones.join(', ') : 'zones client compatibles';
       const routes = c.routes.length ? c.routes.join(', ') : 'toutes routes';
+      const triggerLabels = draft.scenarios.map(d => d.scenario.trigger_label).join(', ');
+      const advanced = [];
+      if (c.advanced_payload_filters.record_types.length) advanced.push('types DATEX : ' + c.advanced_payload_filters.record_types.join(', '));
+      if (c.advanced_payload_filters.management_types.length) advanced.push('mesures : ' + c.advanced_payload_filters.management_types.join(', '));
+      if (c.advanced_payload_filters.work_types.length) advanced.push('travaux : ' + c.advanced_payload_filters.work_types.join(', '));
+      if (c.advanced_payload_filters.text_query) advanced.push('texte : “' + c.advanced_payload_filters.text_query + '”');
       box.innerHTML = `
         <strong>Déclenchement prévu :</strong><br>
-        Si un événement <strong>${escapeHtml(currentComposerContext().label)}</strong>
-        est détecté sur <strong>${escapeHtml(zones)}</strong>, route <strong>${escapeHtml(routes)}</strong>,
-        avec une gravité minimale <strong>${escapeHtml(c.min_severity)}</strong>,
-        alors le scénario <strong>${escapeHtml(t.code)}</strong> pourra être déclenché pour les clients concernés.
+        ${draft.scenarios.length} scénario(s) seront créés pour couvrir : <strong>${escapeHtml(triggerLabels)}</strong>.<br>
+        Zone : <strong>${escapeHtml(zones)}</strong> — route : <strong>${escapeHtml(routes)}</strong> — gravité minimale : <strong>${escapeHtml(c.min_severity)}</strong>.
+        ${advanced.length ? '<br>Filtres avancés : <strong>' + escapeHtml(advanced.join(' · ')) + '</strong>.' : ''}
+        <br><span class="muted">Rappel : un scénario est créé par déclencheur car <code>scenarios.trigger_type_id</code> ne peut référencer qu’un seul type.</span>
       `;
     }
 
-    async function ensureComposerTriggerType(ctx, priority) {
-      const wanted = String(ctx.trigger_type_code || '').trim();
+    async function ensureComposerTriggerType(trigger, priority) {
+      const wanted = String(trigger.code || '').trim();
       if (!wanted) throw new Error('Type de déclencheur manquant pour cette situation.');
 
       let existing = (state.triggerTypes || []).find(t => String(t.code || '') === wanted)
@@ -2666,8 +2830,8 @@ async function deleteScenarioStep(id) {
 
       const payload = {
         code: wanted,
-        label: ctx.label || wanted,
-        source_kind: ctx.source || 'admin-composer',
+        label: trigger.label || wanted,
+        source_kind: trigger.source || 'admin-composer',
         default_priority: Number(priority || 80),
         is_active: true
       };
@@ -2686,46 +2850,59 @@ async function deleteScenarioStep(id) {
 
     async function createComposerScenarioForContent(contentCode) {
       const draft = buildComposerScenarioDraft(contentCode);
-      if (!draft) return null;
-      if (!draft.scenario.code) throw new Error('Le code scénario est obligatoire.');
-      if ((state.scenarios || []).some(s => String(s.code || '').toUpperCase() === draft.scenario.code)) {
-        throw new Error('Ce code scénario existe déjà. Modifiez le code du scénario.');
+      if (!draft || !draft.scenarios || !draft.scenarios.length) return null;
+
+      const created = [];
+      const existingCodes = new Set((state.scenarios || []).map(s => String(s.code || '').toUpperCase()));
+
+      for (const item of draft.scenarios) {
+        if (!item.scenario.code) throw new Error('Le code scénario est obligatoire.');
+        if (existingCodes.has(item.scenario.code)) {
+          throw new Error('Le code scénario existe déjà : ' + item.scenario.code + '. Modifiez le code générique ou décochez des déclencheurs.');
+        }
+        existingCodes.add(item.scenario.code);
+
+        const triggerTypeId = await ensureComposerTriggerType({
+          code: item.scenario.trigger_type_code,
+          label: item.scenario.trigger_label,
+          source: item.first_step.logic_json.trigger_conditions.source
+        }, item.scenario.priority);
+
+        const scenarioPayload = {
+          code: item.scenario.code,
+          label: item.scenario.label,
+          trigger_type_id: triggerTypeId,
+          aggregation_mode: item.scenario.aggregation_mode,
+          priority: item.scenario.priority,
+          active: true
+        };
+
+        const { data: scenario, error: scenarioError } = await db()
+          .from('scenarios')
+          .insert(scenarioPayload)
+          .select('id,code')
+          .maybeSingle();
+        if (scenarioError) throw scenarioError;
+        if (!scenario || !scenario.id) throw new Error('Le scénario a été créé sans identifiant retourné.');
+
+        const stepPayload = {
+          scenario_id: scenario.id,
+          code: item.first_step.code,
+          step_order: 1,
+          window_ref: item.first_step.window_ref,
+          window_min_hours: item.first_step.window_min_hours,
+          window_max_hours: item.first_step.window_max_hours,
+          logic_json: item.first_step.logic_json,
+          active: true
+        };
+
+        const { error: stepError } = await db().from('scenario_steps').insert(stepPayload);
+        if (stepError) throw stepError;
+
+        created.push({ scenario, step: stepPayload, draft: item });
       }
 
-      const triggerTypeId = await ensureComposerTriggerType(currentComposerContext(), draft.scenario.priority);
-
-      const scenarioPayload = {
-        code: draft.scenario.code,
-        label: draft.scenario.label,
-        trigger_type_id: triggerTypeId,
-        aggregation_mode: draft.scenario.aggregation_mode,
-        priority: draft.scenario.priority,
-        active: true
-      };
-
-      const { data: scenario, error: scenarioError } = await db()
-        .from('scenarios')
-        .insert(scenarioPayload)
-        .select('id,code')
-        .maybeSingle();
-      if (scenarioError) throw scenarioError;
-      if (!scenario || !scenario.id) throw new Error('Le scénario a été créé sans identifiant retourné.');
-
-      const stepPayload = {
-        scenario_id: scenario.id,
-        code: draft.first_step.code,
-        step_order: 1,
-        window_ref: draft.first_step.window_ref,
-        window_min_hours: draft.first_step.window_min_hours,
-        window_max_hours: draft.first_step.window_max_hours,
-        logic_json: draft.first_step.logic_json,
-        active: true
-      };
-
-      const { error: stepError } = await db().from('scenario_steps').insert(stepPayload);
-      if (stepError) throw stepError;
-
-      return { scenario, step: stepPayload, draft };
+      return { created, count: created.length, scenario: created[0]?.scenario, draft };
     }
 
     function updateComposerContextHelp() {
@@ -2963,7 +3140,7 @@ async function deleteScenarioStep(id) {
     }
 
     function clearComposerForm() {
-      ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_scenario_label', 'cc_scenario_code', 'cc_scenario_zones', 'cc_scenario_routes'].forEach(id => {
+      ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_scenario_label', 'cc_scenario_code', 'cc_scenario_extra_trigger_codes', 'cc_scenario_zones', 'cc_scenario_routes', 'cc_scenario_record_types', 'cc_scenario_management_types', 'cc_scenario_work_types', 'cc_scenario_text_query'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
@@ -2973,6 +3150,7 @@ async function deleteScenarioStep(id) {
       if (once) once.checked = true;
       const group = document.getElementById('cc_scenario_group_similar');
       if (group) group.checked = true;
+      selectComposerRoadTriggers('current');
       setComposerBodyValue('');
       updateComposerGeneratedFields({ preserveText: false, preserveCode: false });
       updateComposerScenarioVisibility();
@@ -3050,7 +3228,7 @@ async function deleteScenarioStep(id) {
           scenarioResult = await createComposerScenarioForContent(code);
         }
 
-        const scenarioText = scenarioResult ? ` Scénario créé : ${scenarioResult.scenario.code}.` : '';
+        const scenarioText = scenarioResult ? ` ${scenarioResult.count} scénario(s) créé(s) : ${scenarioResult.created.map(x => x.scenario.code).join(', ')}.` : '';
         setComposerNotice(`Message créé : ${code}.${scenarioText}`, 'ok');
         setGlobalNotice(`Message créé : ${code}.${scenarioText}`, 'ok');
         await refreshAll();
@@ -3087,10 +3265,11 @@ async function deleteScenarioStep(id) {
         updateComposerTimingHelp();
         updateComposerChannelVisibility();
         updateComposerGeneratedFields({ preserveText: false, preserveCode: false });
+        syncComposerTriggerSelectionWithContext(true);
         updateComposerScenarioVisibility();
         renderComposerPreview();
       }
-      if (e.target && ['cc_make_scenario', 'cc_scenario_mode', 'cc_scenario_min_severity', 'cc_scenario_window_ref', 'cc_scenario_once_per_event', 'cc_scenario_group_similar'].includes(e.target.id)) {
+      if (e.target && (['cc_make_scenario', 'cc_scenario_mode', 'cc_scenario_min_severity', 'cc_scenario_window_ref', 'cc_scenario_once_per_event', 'cc_scenario_group_similar'].includes(e.target.id) || e.target.classList?.contains('cc_scenario_trigger'))) {
         updateComposerScenarioVisibility();
         renderComposerPreview();
       }
@@ -3106,7 +3285,7 @@ async function deleteScenarioStep(id) {
       if (e.target && (e.target.closest && e.target.closest('#scenarioPlannerRows') || e.target.id === 'pl_demo_date')) {
         updatePlannerPreview();
       }
-      if (e.target && ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_body', 'cc_scenario_label', 'cc_scenario_code', 'cc_scenario_zones', 'cc_scenario_routes', 'cc_scenario_priority', 'cc_scenario_window_min_hours', 'cc_scenario_window_max_hours', 'cc_scenario_cooldown_hours', 'cc_scenario_max_alerts_day', 'cc_scenario_max_sms_day'].includes(e.target.id)) {
+      if (e.target && ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_body', 'cc_scenario_label', 'cc_scenario_code', 'cc_scenario_extra_trigger_codes', 'cc_scenario_zones', 'cc_scenario_routes', 'cc_scenario_record_types', 'cc_scenario_management_types', 'cc_scenario_work_types', 'cc_scenario_text_query', 'cc_scenario_priority', 'cc_scenario_window_min_hours', 'cc_scenario_window_max_hours', 'cc_scenario_cooldown_hours', 'cc_scenario_max_alerts_day', 'cc_scenario_max_sms_day'].includes(e.target.id)) {
         updateComposerScenarioSummary();
         renderComposerPreview();
       }

@@ -257,6 +257,28 @@
     @media (max-width:1050px) { .composer-scenario-grid, .composer-scenario-grid-2, .composer-trigger-list { grid-template-columns:1fr; } }
     @media (max-width:1050px) { .composer-layout, .composer-mini-grid { grid-template-columns:1fr; } }
 
+
+
+    /* Version rédacteur : règles plus lisibles */
+    .writer-choice-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:10px 0 14px; }
+    .writer-choice {
+      border:1px solid var(--line); border-radius:16px; background:#fff; padding:12px;
+      cursor:pointer; display:flex; align-items:flex-start; gap:10px; min-height:82px;
+    }
+    .writer-choice input { width:auto; margin-top:3px; }
+    .writer-choice strong { display:block; margin-bottom:3px; color:var(--brand-brown); }
+    .writer-choice span { display:block; font-size:12px; color:var(--muted); line-height:1.35; }
+    .writer-soft-zone { border:1px solid var(--line); border-radius:18px; background:#fffdfa; padding:14px; margin:12px 0; }
+    .writer-soft-zone h4 { margin:0 0 10px; }
+    .writer-advanced details { border:1px solid var(--line); border-radius:16px; background:#fff; padding:12px; margin-top:12px; }
+    .writer-advanced summary { cursor:pointer; font-weight:800; color:var(--brand-blue); }
+    .writer-rule-summary { background:#fff; border:1px solid var(--line); border-left:5px solid var(--brand-blue); border-radius:14px; padding:12px; margin:10px 0; }
+    .scenario-rule-card { border:1px solid var(--line); border-radius:16px; background:#fffdfa; padding:14px; margin-top:12px; }
+    .scenario-rule-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .scenario-rule-grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .rule-pill { display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:999px; padding:4px 9px; font-size:12px; background:#fff; margin:3px 4px 3px 0; }
+    @media (max-width:1050px) { .writer-choice-row, .scenario-rule-grid, .scenario-rule-grid-2 { grid-template-columns:1fr; } }
+
   </style>
 </head>
 <body>
@@ -280,7 +302,6 @@
     <aside>
       <button class="nav-btn active" onclick="showPage('content-composer', this); initContentComposer();">Créer un message</button>
       <button class="nav-btn" onclick="showPage('dashboard', this)">Tableau de bord</button>
-      <button class="nav-btn" onclick="showPage('content-items', this)">Briques de contenu</button>
       <button class="nav-btn" onclick="showPage('content-versions', this)">Versions des contenus</button>
       <button class="nav-btn" onclick="showPage('trigger-types', this)">Types de déclencheur</button>
       <button class="nav-btn" onclick="showPage('scenarios', this)">Scénarios</button>
@@ -295,7 +316,7 @@
         <div id="composerNotice"></div>
         <div class="notice info danger-zone-soft">
           <strong>Assistant de création de contenu</strong><br>
-          Cette page crée automatiquement une <strong>brique</strong> dans <code>content_items</code> et sa première <strong>version</strong> dans <code>content_versions</code>. Pour les SMS, on ne rédige pas une information brute : on crée une <strong>alerte courte</strong> qui renvoie vers une <strong>page d’information HTML</strong>.
+          Cette page crée automatiquement le <strong>message</strong> dans <code>content_items</code> et sa première <strong>version</strong> dans <code>content_versions</code>. Pour les SMS, on ne rédige pas une information brute : on crée une <strong>alerte courte</strong> qui renvoie vers une <strong>page d’information HTML</strong>.
         </div>
 
         <div class="composer-layout">
@@ -368,159 +389,144 @@
 
             <div class="composer-step">
               <h3><span class="number">5</span>Déclenchement du scénario</h3>
-              <label class="inline-check">
-                <input type="checkbox" id="cc_make_scenario">
-                <span>Faire de ce message le point de départ d’un scénario déclenchable</span>
-              </label>
               <div class="composer-hint">
-                Ici, on règle les conditions d’entrée : par exemple <strong>une déviation</strong> sur les départements <strong>95, 75</strong> déclenche ce scénario. Les étapes temporelles détaillées restent modifiables ensuite dans “Étapes des scénarios”.
+                Un message peut rester un simple contenu, ou devenir un scénario déclenché automatiquement lorsqu’un événement routier correspond aux critères choisis.
               </div>
 
+              <div class="writer-choice-row">
+                <label class="writer-choice">
+                  <input type="radio" name="cc_scenario_choice" value="none" checked onchange="setComposerScenarioChoice('none')">
+                  <div><strong>Message seul</strong><span>Créer seulement le message. Aucun scénario n’est créé.</span></div>
+                </label>
+                <label class="writer-choice">
+                  <input type="radio" name="cc_scenario_choice" value="simple" onchange="setComposerScenarioChoice('simple')">
+                  <div><strong>Scénario simple</strong><span>Déclenchement sur la situation choisie, avec zone et route optionnelles.</span></div>
+                </label>
+                <label class="writer-choice">
+                  <input type="radio" name="cc_scenario_choice" value="advanced" onchange="setComposerScenarioChoice('advanced')">
+                  <div><strong>Couverture large</strong><span>Plusieurs déclencheurs et filtres DATEX avancés, à utiliser avec prudence.</span></div>
+                </label>
+              </div>
+              <input type="checkbox" id="cc_make_scenario" class="hidden">
+
               <div id="cc_scenario_wrap" class="composer-scenario-box hidden">
-                <div class="notice info small">
-                  Cette version crée réellement un <code>scenario</code> et une première ligne <code>scenario_steps</code>. Les conditions de déclenchement fines sont stockées pour l’instant dans <code>scenario_steps.logic_json.trigger_conditions</code>, car le schéma actuel n’a pas encore de colonne <code>scenarios.logic_json</code>.
-                </div>
+                <div class="writer-rule-summary" id="cc_scenario_trigger_summary"></div>
 
-                <div class="composer-scenario-summary" id="cc_scenario_trigger_summary"></div>
-
-                <div class="composer-scenario-grid-2">
-                  <div>
-                    <label>Nom générique du scénario</label>
-                    <input id="cc_scenario_label" placeholder="Ex. Alertes routières critiques — zones 95 et 75">
-                    <div class="composer-scenario-muted">Si plusieurs déclencheurs sont cochés, l’admin créera un scénario par déclencheur, avec ce libellé comme base.</div>
+                <div class="writer-soft-zone">
+                  <h4>Quand ce scénario se déclenche-t-il ?</h4>
+                  <div class="composer-scenario-grid-2">
+                    <div>
+                      <label>Nom du scénario</label>
+                      <input id="cc_scenario_label" placeholder="Ex. Déviation à anticiper — IDF">
+                    </div>
+                    <div>
+                      <label>Code scénario</label>
+                      <input id="cc_scenario_code" placeholder="SC_ROAD_RISK_EMAIL">
+                    </div>
                   </div>
-                  <div>
-                    <label>Code générique</label>
-                    <input id="cc_scenario_code" placeholder="SC_ROAD_RISK_EMAIL">
-                    <div class="composer-scenario-muted">Un suffixe sera ajouté automatiquement si plusieurs scénarios sont créés.</div>
-                  </div>
-                </div>
 
-                <label>Déclencheurs routiers à couvrir</label>
-                <div class="composer-scenario-muted">
-                  Coche un ou plusieurs événements. Avec le schéma actuel, un scénario ne peut avoir qu’un seul <code>trigger_type_id</code> : le formulaire créera donc plusieurs scénarios si plusieurs déclencheurs sont cochés, tous reliés au même message.
-                </div>
-                <div class="composer-trigger-list" id="cc_scenario_trigger_catalog">
-                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_closure"><div><strong>Route fermée</strong><span>road_closure — fermeture complète ou route indisponible.</span></div></label>
-                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_detour"><div><strong>Déviation</strong><span>road_detour — itinéraire de substitution.</span></div></label>
-                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="lane_closure"><div><strong>Voie fermée</strong><span>lane_closure — une ou plusieurs voies neutralisées.</span></div></label>
-                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="alternating_traffic"><div><strong>Circulation alternée</strong><span>alternating_traffic — alternat, chantier ponctuel, passage contraint.</span></div></label>
-                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="traffic_restriction"><div><strong>Restriction de circulation</strong><span>traffic_restriction — poids, gabarit, voies rétrécies, sortie à éviter.</span></div></label>
-                  <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_work"><div><strong>Travaux avec impact conduite</strong><span>road_work — travaux conservés par le Worker car ils modifient la conduite.</span></div></label>
-                  <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_management"><div><strong>Gestion DATEX brute</strong><span>datex_management — utile pour viser des management_types précis.</span></div></label>
-                  <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_work"><div><strong>Travaux DATEX bruts</strong><span>datex_work — ConstructionWorks / MaintenanceWorks et sous-types.</span></div></label>
-                  <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_any_road_risk"><div><strong>Autre risque routier importé</strong><span>datex_any_road_risk — filet large pour événements futurs importés par le Worker.</span></div></label>
-                </div>
-                <div class="row">
-                  <button type="button" class="secondary" onclick="selectComposerRoadTriggers('current')">Couvrir la situation choisie</button>
-                  <button type="button" class="secondary" onclick="selectComposerRoadTriggers('core')">Couvrir les 6 familles MobiSûr</button>
-                  <button type="button" class="secondary" onclick="selectComposerRoadTriggers('all')">Couvrir large</button>
-                  <button type="button" class="secondary" onclick="selectComposerRoadTriggers('none')">Tout décocher</button>
-                </div>
+                  <label>Départements / zones concernés</label>
+                  <input id="cc_scenario_zones" placeholder="Ex. 95,75 — laisser vide pour toutes les zones client compatibles">
+                  <div class="composer-scenario-muted">Plusieurs valeurs possibles, séparées par virgule ou point-virgule. Vide = toutes les zones compatibles avec le client.</div>
 
-                <label>Codes déclencheurs complémentaires</label>
-                <input id="cc_scenario_extra_trigger_codes" placeholder="Ex. accident, obstruction, weather_road_condition">
-                <div class="composer-scenario-muted">Option avancée. Ces codes ne se déclencheront que si le Worker data importe effectivement des événements avec ces <code>trigger_types.code</code>.</div>
+                  <label>Routes concernées</label>
+                  <input id="cc_scenario_routes" placeholder="Ex. N118,N20 — laisser vide pour toutes les routes">
 
-                <div class="composer-scenario-grid">
-                  <div>
-                    <label>Type de scénario</label>
-                    <select id="cc_scenario_mode">
-                      <option value="single">Message simple</option>
-                      <option value="sequence">Séquence temporelle</option>
-                      <option value="digest">Regroupement quotidien</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label>Priorité</label>
-                    <input id="cc_scenario_priority" type="number" min="0" max="100" value="80">
-                  </div>
-                  <div>
-                    <label>Gravité minimale</label>
-                    <select id="cc_scenario_min_severity">
-                      <option value="info">Information</option>
-                      <option value="low">Faible</option>
-                      <option value="medium" selected>Moyenne</option>
-                      <option value="high">Élevée</option>
-                      <option value="critical">Critique</option>
-                    </select>
+                  <div class="composer-scenario-grid">
+                    <div>
+                      <label>Gravité minimale</label>
+                      <select id="cc_scenario_min_severity">
+                        <option value="info">Information</option>
+                        <option value="low">Faible</option>
+                        <option value="medium" selected>Moyenne</option>
+                        <option value="high">Élevée</option>
+                        <option value="critical">Critique</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>Type de scénario</label>
+                      <select id="cc_scenario_mode">
+                        <option value="single">Message simple</option>
+                        <option value="sequence">Séquence temporelle</option>
+                        <option value="digest">Regroupement quotidien</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>Priorité</label>
+                      <input id="cc_scenario_priority" type="number" min="0" max="100" value="80">
+                    </div>
                   </div>
                 </div>
 
-                <label>Départements / zones concernés</label>
-                <input id="cc_scenario_zones" placeholder="Ex. 95,75 — laisser vide pour toutes les zones client compatibles">
-                <div class="composer-scenario-muted">Plusieurs valeurs possibles, séparées par virgule ou point-virgule. Vide = toutes les zones compatibles avec le client.</div>
-
-                <label>Routes concernées</label>
-                <input id="cc_scenario_routes" placeholder="Ex. N118,N20 — laisser vide pour toutes les routes">
-                <div class="composer-scenario-muted">Filtre optionnel. Vide = toutes les routes.</div>
-
-                <div class="composer-scenario-grid-2">
-                  <div>
-                    <label>Types DATEX bruts à accepter</label>
-                    <input id="cc_scenario_record_types" placeholder="Ex. ConstructionWorks,MaintenanceWorks,ReroutingManagement">
-                  </div>
-                  <div>
-                    <label>Mesures DATEX à accepter</label>
-                    <input id="cc_scenario_management_types" placeholder="Ex. roadClosed,laneClosures,contraflow">
-                  </div>
-                </div>
-                <div class="composer-scenario-grid-2">
-                  <div>
-                    <label>Types de travaux / maintenance</label>
-                    <input id="cc_scenario_work_types" placeholder="Ex. roadMarkingWork,repairWork,grassCuttingWork">
-                  </div>
-                  <div>
-                    <label>Recherche texte dans l’événement</label>
-                    <input id="cc_scenario_text_query" placeholder="Ex. peinture, fauchage, basculement, déviation">
-                  </div>
-                </div>
-                <div class="composer-scenario-muted">Ces filtres avancés seront lus dans <code>event.payload</code> : <code>record_types</code>, <code>management_types</code>, <code>construction_work_type</code>, <code>road_maintenance_type</code>, description, communes et notes importées.</div>
-
-                <div class="composer-scenario-grid">
-                  <div>
-                    <label>Référence temporelle</label>
-                    <select id="cc_scenario_window_ref">
-                      <option value="occurs_at">Détection / mise à jour</option>
-                      <option value="predicted_start_at">Début prévu</option>
-                      <option value="predicted_end_at">Fin prévue</option>
-                      <option value="date_evenement">Date d’événement</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label>Fenêtre min. heures</label>
-                    <input id="cc_scenario_window_min_hours" type="number" value="0">
-                  </div>
-                  <div>
-                    <label>Fenêtre max. heures</label>
-                    <input id="cc_scenario_window_max_hours" type="number" value="2">
-                  </div>
-                </div>
-                <div class="composer-scenario-muted">Exemple : <code>predicted_start_at</code>, min <code>-24</code>, max <code>0</code> = envoyer dans les 24 h avant le début prévu.</div>
-
-                <div class="composer-scenario-grid">
-                  <div>
-                    <label>Cooldown heures</label>
-                    <input id="cc_scenario_cooldown_hours" type="number" min="0" value="24">
-                  </div>
-                  <div>
-                    <label>Alertes max / client / jour</label>
-                    <input id="cc_scenario_max_alerts_day" type="number" min="1" value="2">
-                  </div>
-                  <div>
-                    <label>SMS max / client / jour</label>
-                    <input id="cc_scenario_max_sms_day" type="number" min="0" value="1">
+                <div class="writer-soft-zone" id="cc_trigger_simple_zone">
+                  <h4>Déclencheur principal</h4>
+                  <div class="composer-hint">Par défaut, le scénario couvre la situation choisie en haut du formulaire. Tu peux élargir à plusieurs familles en mode “Couverture large”.</div>
+                  <div class="row">
+                    <button type="button" class="secondary" onclick="selectComposerRoadTriggers('current')">Couvrir seulement la situation choisie</button>
+                    <button type="button" class="secondary" onclick="selectComposerRoadTriggers('core')">Couvrir les 6 familles MobiSûr</button>
                   </div>
                 </div>
 
-                <label class="inline-check">
-                  <input type="checkbox" id="cc_scenario_once_per_event" checked>
-                  <span>Ne pas envoyer deux fois ce scénario pour le même événement</span>
-                </label>
-                <label class="inline-check">
-                  <input type="checkbox" id="cc_scenario_group_similar" checked>
-                  <span>Regrouper / limiter les événements similaires sur la même zone</span>
-                </label>
+                <div class="writer-advanced" id="cc_trigger_advanced_zone">
+                  <details>
+                    <summary>Réglages avancés DATEX / couverture large</summary>
+                    <div class="composer-scenario-muted" style="margin-top:10px;">
+                      À utiliser si le scénario doit couvrir plusieurs familles ou des valeurs DATEX précises. Avec le schéma actuel, un scénario sera créé par type de déclencheur sélectionné.
+                    </div>
+                    <div class="composer-trigger-list" id="cc_scenario_trigger_catalog">
+                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_closure"><div><strong>Route fermée</strong><span>Fermeture complète ou route indisponible.</span></div></label>
+                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_detour"><div><strong>Déviation</strong><span>Itinéraire de substitution.</span></div></label>
+                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="lane_closure"><div><strong>Voie fermée</strong><span>Une ou plusieurs voies neutralisées.</span></div></label>
+                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="alternating_traffic"><div><strong>Circulation alternée</strong><span>Alternat, chantier ponctuel, passage contraint.</span></div></label>
+                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="traffic_restriction"><div><strong>Restriction de circulation</strong><span>Poids, gabarit, voies rétrécies, sortie à éviter.</span></div></label>
+                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_work"><div><strong>Travaux avec impact conduite</strong><span>Travaux conservés par le Worker.</span></div></label>
+                      <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_management"><div><strong>Gestion DATEX brute</strong><span>Management types précis.</span></div></label>
+                      <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_work"><div><strong>Travaux DATEX bruts</strong><span>ConstructionWorks / MaintenanceWorks.</span></div></label>
+                      <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_any_road_risk"><div><strong>Autre risque routier importé</strong><span>Filet large pour futurs imports.</span></div></label>
+                    </div>
+                    <div class="row">
+                      <button type="button" class="secondary" onclick="selectComposerRoadTriggers('all')">Tout couvrir</button>
+                      <button type="button" class="secondary" onclick="selectComposerRoadTriggers('none')">Tout décocher</button>
+                    </div>
+                    <label>Codes déclencheurs complémentaires</label>
+                    <input id="cc_scenario_extra_trigger_codes" placeholder="Ex. accident, obstruction, weather_road_condition">
+
+                    <div class="composer-scenario-grid-2">
+                      <div><label>Types DATEX bruts</label><input id="cc_scenario_record_types" placeholder="Ex. ConstructionWorks,MaintenanceWorks"></div>
+                      <div><label>Mesures DATEX</label><input id="cc_scenario_management_types" placeholder="Ex. roadClosed,laneClosures,contraflow"></div>
+                    </div>
+                    <div class="composer-scenario-grid-2">
+                      <div><label>Types de travaux / maintenance</label><input id="cc_scenario_work_types" placeholder="Ex. roadMarkingWork,repairWork"></div>
+                      <div><label>Recherche texte dans l’événement</label><input id="cc_scenario_text_query" placeholder="Ex. peinture, fauchage, basculement"></div>
+                    </div>
+                  </details>
+                </div>
+
+                <div class="writer-advanced">
+                  <details>
+                    <summary>Timing et garde-fous anti-saturation</summary>
+                    <div class="composer-scenario-grid" style="margin-top:10px;">
+                      <div>
+                        <label>Référence temporelle</label>
+                        <select id="cc_scenario_window_ref">
+                          <option value="occurs_at">Détection / mise à jour</option>
+                          <option value="predicted_start_at">Début prévu</option>
+                          <option value="predicted_end_at">Fin prévue</option>
+                          <option value="date_evenement">Date d’événement</option>
+                        </select>
+                      </div>
+                      <div><label>Fenêtre min. heures</label><input id="cc_scenario_window_min_hours" type="number" value="0"></div>
+                      <div><label>Fenêtre max. heures</label><input id="cc_scenario_window_max_hours" type="number" value="2"></div>
+                    </div>
+                    <div class="composer-scenario-grid">
+                      <div><label>Cooldown heures</label><input id="cc_scenario_cooldown_hours" type="number" min="0" value="24"></div>
+                      <div><label>Alertes max / client / jour</label><input id="cc_scenario_max_alerts_day" type="number" min="1" value="2"></div>
+                      <div><label>SMS max / client / jour</label><input id="cc_scenario_max_sms_day" type="number" min="0" value="1"></div>
+                    </div>
+                    <label class="inline-check"><input type="checkbox" id="cc_scenario_once_per_event" checked><span>Ne pas envoyer deux fois ce scénario pour le même événement</span></label>
+                    <label class="inline-check"><input type="checkbox" id="cc_scenario_group_similar" checked><span>Regrouper / limiter les événements similaires sur la même zone</span></label>
+                  </details>
+                </div>
               </div>
             </div>
 
@@ -556,66 +562,27 @@
         <div id="globalNotice"></div>
         <div class="notice info">
           <strong>Comment utiliser l’interface</strong><br>
-          1. Créez d’abord une <strong>brique de contenu</strong>.<br>
-          2. Ajoutez ensuite une <strong>version</strong> de cette brique.<br>
+          1. Créez un <strong>message</strong> depuis “Créer un message”.<br>
+          2. Ajoutez ensuite une <strong>version</strong> si le texte doit évoluer.<br>
           3. Créez ou générez un <strong>type de déclencheur</strong>, puis un <strong>scénario</strong>.<br>
           4. Ajoutez une ou plusieurs <strong>étapes</strong> au scénario.<br>
           5. Les événements bruts sont collectés par le Worker Data ; l’admin sert surtout à préparer les messages et règles de diffusion.
         </div>
         <div class="grid-3">
-          <div class="card"><div class="muted">Briques de contenu</div><div class="kpi" id="kpiContents">0</div><div class="small muted">Table content_items</div></div>
+          <div class="card"><div class="muted">Messages</div><div class="kpi" id="kpiContents">0</div><div class="small muted">Messages créés depuis “Créer un message”</div></div>
           <div class="card"><div class="muted">Versions</div><div class="kpi" id="kpiVersions">0</div><div class="small muted">Table content_versions</div></div>
           <div class="card"><div class="muted">Scénarios / étapes</div><div class="kpi" id="kpiScenarios">0 / 0</div><div class="small muted">Tables scenarios / scenario_steps</div></div>
         </div>
         <div class="grid-3" style="margin-top:16px;">
           <div class="card"><div class="muted">Types de déclencheur</div><div class="kpi" id="kpiTriggers">0</div></div>
-          <div class="card"><div class="muted">Nombre de pages</div><div class="kpi">7</div></div>
+          <div class="card"><div class="muted">Nombre de pages</div><div class="kpi">6</div></div>
         </div>
         <div class="card" style="margin-top:16px;">
           <h3>Chaîne métier</h3>
           <div class="grid-3">
             <div class="mono">Sources de données → points de données</div>
             <div class="mono">Types de déclencheur → événements → clients concernés</div>
-            <div class="mono">Briques → versions → scénarios → étapes → messages → emails finaux</div>
-          </div>
-        </div>
-      </section>
-
-      <section id="content-items" class="page">
-        <div class="grid-2">
-          <div class="card">
-            <h2>Créer une brique de contenu</h2>
-            <div class="help">Une brique est un morceau de message réutilisable : alerte, conseil, rappel, conclusion…</div>
-            <label>Code technique</label>
-            <input id="ci_code" placeholder="Ex. AQUAPLANING_WARNING">
-            <div class="help">Nom unique utilisé par le système.</div>
-            <label>Catégorie</label>
-            <select id="ci_categorie"><option>Alerte</option><option>Conseil</option><option>Juridique</option><option>Appel à l’action</option></select>
-            <label>Titre lisible</label>
-            <input id="ci_sujet" placeholder="Ex. Conseil aquaplaning">
-            <label>Type de bloc</label>
-            <input id="ci_type" placeholder="Ex. advice_block">
-            <label>Origine</label>
-            <input id="ci_source" value="interne">
-            <label>Thème</label>
-            <input id="ci_topic_code" placeholder="Ex. aquaplaning">
-            <label>Canal de diffusion</label>
-            <select id="ci_channel"><option>Email</option><option>SMS</option><option>WhatsApp</option><option>Notification push</option></select>
-            <label>Règles JSON</label>
-            <textarea id="ci_policy">{
-  "once_per_event": true,
-  "cooldown_days": 7,
-  "cooldown_scope": "client"
-}</textarea>
-            <div class="help">Exemple : ne montrer ce contenu qu’une fois par événement, avec un délai de répétition de 7 jours.</div>
-            <div class="row">
-              <button onclick="createContentItem()">Créer la brique</button>
-              <button class="secondary" onclick="clearContentItemForm()">Vider</button>
-            </div>
-          </div>
-          <div class="card">
-            <h2>Briques existantes</h2>
-            <div id="contentItemsList" class="list"></div>
+            <div class="mono">Messages → versions → scénarios → règles → étapes → envois finaux</div>
           </div>
         </div>
       </section>
@@ -624,8 +591,8 @@
         <div class="grid-2">
           <div class="card">
             <h2>Créer une version de contenu</h2>
-            <div class="help">Une même brique peut avoir plusieurs versions : brouillon, publiée, archivée…</div>
-            <label>Brique concernée</label>
+            <div class="help">Un même message peut avoir plusieurs versions : brouillon, publiée, archivée…</div>
+            <label>Message concerné</label>
             <select id="cv_content_item_id"></select>
             <label>Numéro de version</label>
             <input id="cv_version_no" type="number" value="1">
@@ -692,17 +659,17 @@
           <div class="card">
             <h2>Créer ou modifier un scénario</h2>
             <div class="notice info">
-              Un scénario correspond à une situation métier : orage, radar, changement de limitation, alerte transport, message manuel…
-              Les messages précis se règlent ensuite dans la page <strong>Étapes des scénarios</strong>.
+              Un scénario répond à deux questions : <strong>qu’est-ce qui le déclenche ?</strong> puis <strong>quels messages sont envoyés ?</strong><br>
+              Les règles ci-dessous décrivent le déclenchement. La séquence de messages se règle ensuite dans “Étapes des scénarios”.
             </div>
 
             <label>Nom interne court</label>
-            <input id="sc_code" placeholder="Ex. SCN_STORM_SEQUENCE">
+            <input id="sc_code" placeholder="Ex. SCN_DEVIATION_IDF">
 
             <label>Nom visible dans l’interface</label>
-            <input id="sc_label" placeholder="Ex. Séquence d’alerte orage">
+            <input id="sc_label" placeholder="Ex. Déviation à anticiper — Île-de-France">
 
-            <label>Ce qui déclenche ce scénario</label>
+            <label>Famille d’événement déclencheur</label>
             <select id="sc_trigger_type_id"></select>
 
             <label>Type de scénario</label>
@@ -715,9 +682,50 @@
 
             <label>Priorité</label>
             <input id="sc_priority" type="number" value="80">
-            <div class="help">Plus la priorité est élevée, plus ce scénario sera traité comme important en cas de concurrence avec d’autres messages.</div>
 
-            <div class="row">
+            <div class="scenario-rule-card">
+              <h3>Règles de déclenchement</h3>
+              <div class="help">Exemple : une déviation dans les départements 95 ou 75 déclenche ce scénario. Laisser vide = toutes les valeurs compatibles.</div>
+              <div class="scenario-rule-grid">
+                <div><label>Départements / zones</label><input id="sc_rule_zones" placeholder="Ex. 95,75"></div>
+                <div><label>Routes</label><input id="sc_rule_routes" placeholder="Ex. N118,N20"></div>
+                <div>
+                  <label>Gravité minimale</label>
+                  <select id="sc_rule_min_severity">
+                    <option value="info">Information</option>
+                    <option value="low">Faible</option>
+                    <option value="medium" selected>Moyenne</option>
+                    <option value="high">Élevée</option>
+                    <option value="critical">Critique</option>
+                  </select>
+                </div>
+              </div>
+
+              <details class="writer-advanced">
+                <summary>Filtres avancés DATEX</summary>
+                <div class="scenario-rule-grid-2" style="margin-top:12px;">
+                  <div><label>Types DATEX bruts</label><input id="sc_rule_record_types" placeholder="Ex. ConstructionWorks,MaintenanceWorks"></div>
+                  <div><label>Mesures DATEX</label><input id="sc_rule_management_types" placeholder="Ex. roadClosed,laneClosures,contraflow"></div>
+                </div>
+                <div class="scenario-rule-grid-2">
+                  <div><label>Types de travaux / maintenance</label><input id="sc_rule_work_types" placeholder="Ex. roadMarkingWork,repairWork"></div>
+                  <div><label>Recherche texte</label><input id="sc_rule_text_query" placeholder="Ex. peinture, fauchage, basculement"></div>
+                </div>
+              </details>
+
+              <details class="writer-advanced">
+                <summary>Garde-fous d’envoi</summary>
+                <div class="scenario-rule-grid" style="margin-top:12px;">
+                  <div><label>Cooldown heures</label><input id="sc_rule_cooldown_hours" type="number" min="0" value="24"></div>
+                  <div><label>Alertes max / client / jour</label><input id="sc_rule_max_alerts_day" type="number" min="1" value="2"></div>
+                  <div><label>SMS max / client / jour</label><input id="sc_rule_max_sms_day" type="number" min="0" value="1"></div>
+                </div>
+                <label class="inline-check"><input type="checkbox" id="sc_rule_once_per_event" checked><span>Ne pas envoyer deux fois pour le même événement</span></label>
+                <label class="inline-check"><input type="checkbox" id="sc_rule_group_similar" checked><span>Regrouper / limiter les événements similaires</span></label>
+              </details>
+            </div>
+
+            <div class="row" style="margin-top:14px;">
               <button id="sc_submit_btn" onclick="submitScenario()">Créer le scénario</button>
               <button class="secondary" onclick="clearScenarioForm()">Vider</button>
               <button id="sc_cancel_edit_btn" class="secondary hidden" onclick="cancelEditScenario()">Annuler l’édition</button>
@@ -726,7 +734,7 @@
 
           <div class="card">
             <h2>Scénarios existants</h2>
-            <div class="help">Cliquez sur “Gérer les étapes” pour voir et modifier toute la séquence d’un scénario au même endroit.</div>
+            <div class="help">Les règles affichées ici sont stockées dans une ligne technique <code>scenario_steps.logic_json.kind = "trigger_rules"</code>. Elles ne sont pas affichées dans la séquence d’envoi.</div>
             <div id="scenariosList" class="list"></div>
           </div>
         </div>
@@ -782,7 +790,7 @@
           <div class="card">
             <h2>Aperçu d’un message</h2>
             <div class="help">Choisissez une version de contenu et testez son rendu avec des données de contexte.</div>
-            <label>Brique de contenu</label>
+            <label>Message</label>
             <select id="pv_content_item_id"></select>
             <label>Version</label>
             <select id="pv_content_version_id"></select>
@@ -1000,6 +1008,161 @@
     let editingScenarioId = null;
     let editingScenarioStepId = null;
 
+
+
+    function parseAdminList(value) {
+      return String(value || '')
+        .split(/[;,\n]/)
+        .map(v => v.trim().toUpperCase())
+        .filter(Boolean);
+    }
+
+    function normalizeAdminRoadList(value) {
+      return parseAdminList(value).map(v => v.replace(/\s+/g, ''));
+    }
+
+    function getScenarioRuleStep(scenarioId) {
+      return (state.scenarioSteps || []).find(st =>
+        Number(st.scenario_id) === Number(scenarioId) &&
+        st.logic_json &&
+        (st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)
+      ) || null;
+    }
+
+    function buildScenarioRuleLogicFromForm(triggerTypeId) {
+      const trigger = state.triggerTypes.find(t => Number(t.id) === Number(triggerTypeId));
+      return {
+        kind: 'trigger_rules',
+        trigger_conditions: {
+          description: 'Conditions d’entrée du scénario. Le moteur devra déclencher ce scénario uniquement si l’événement entrant respecte ces critères puis concerne un client éligible.',
+          trigger_type_code: trigger?.code || '',
+          trigger_label: trigger?.label || '',
+          source: trigger?.source_kind || 'admin-scenario',
+          zones: parseAdminList(val('sc_rule_zones')),
+          routes: normalizeAdminRoadList(val('sc_rule_routes')),
+          min_severity: val('sc_rule_min_severity') || 'medium',
+          client_zone_match_required: true,
+          advanced_payload_filters: {
+            record_types: parseAdminList(val('sc_rule_record_types')),
+            management_types: parseAdminList(val('sc_rule_management_types')),
+            work_types: parseAdminList(val('sc_rule_work_types')),
+            text_query: val('sc_rule_text_query') || null,
+            fields_checked: [
+              'payload.event_type',
+              'payload.record_types',
+              'payload.management_types',
+              'payload.construction_work_type',
+              'payload.road_maintenance_type',
+              'payload.description',
+              'payload.internal_note',
+              'payload.location_descriptor',
+              'payload.from_town',
+              'payload.to_town',
+              'payload.point_town'
+            ]
+          }
+        },
+        dispatch_rules: {
+          once_per_event: Boolean(document.getElementById('sc_rule_once_per_event')?.checked),
+          group_similar_events: Boolean(document.getElementById('sc_rule_group_similar')?.checked),
+          cooldown_hours: Number(val('sc_rule_cooldown_hours') || 24),
+          max_immediate_alerts_per_client_per_day: Number(val('sc_rule_max_alerts_day') || 2),
+          max_sms_per_client_per_day: Number(val('sc_rule_max_sms_day') || 1)
+        }
+      };
+    }
+
+    async function saveScenarioTriggerRules(scenarioId, scenarioCode, triggerTypeId) {
+      const logic = buildScenarioRuleLogicFromForm(triggerTypeId);
+      const existing = getScenarioRuleStep(scenarioId);
+      const payload = {
+        scenario_id: Number(scenarioId),
+        code: `${toComposerCode(scenarioCode || 'SCENARIO')}_TRIGGER_RULES`,
+        step_order: 0,
+        window_ref: 'occurs_at',
+        window_min_hours: 0,
+        window_max_hours: 0,
+        logic_json: logic,
+        active: true
+      };
+
+      if (existing && existing.id) {
+        const { error } = await db().from('scenario_steps').update(payload).eq('id', existing.id);
+        if (error) throw error;
+        return existing.id;
+      }
+
+      const { data, error } = await db().from('scenario_steps').insert(payload).select('id').maybeSingle();
+      if (error) throw error;
+      return data?.id || null;
+    }
+
+    function fillScenarioRuleForm(scenarioId) {
+      const step = getScenarioRuleStep(scenarioId);
+      const logic = step?.logic_json || {};
+      const cond = logic.trigger_conditions || {};
+      const adv = cond.advanced_payload_filters || {};
+      const dispatch = logic.dispatch_rules || {};
+
+      const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value == null ? '' : String(value); };
+      const setCheck = (id, value, fallback = true) => { const el = document.getElementById(id); if (el) el.checked = value == null ? fallback : Boolean(value); };
+
+      set('sc_rule_zones', Array.isArray(cond.zones) ? cond.zones.join(',') : '');
+      set('sc_rule_routes', Array.isArray(cond.routes) ? cond.routes.join(',') : '');
+      set('sc_rule_min_severity', cond.min_severity || 'medium');
+      set('sc_rule_record_types', Array.isArray(adv.record_types) ? adv.record_types.join(',') : '');
+      set('sc_rule_management_types', Array.isArray(adv.management_types) ? adv.management_types.join(',') : '');
+      set('sc_rule_work_types', Array.isArray(adv.work_types) ? adv.work_types.join(',') : '');
+      set('sc_rule_text_query', adv.text_query || '');
+      set('sc_rule_cooldown_hours', dispatch.cooldown_hours ?? 24);
+      set('sc_rule_max_alerts_day', dispatch.max_immediate_alerts_per_client_per_day ?? 2);
+      set('sc_rule_max_sms_day', dispatch.max_sms_per_client_per_day ?? 1);
+      setCheck('sc_rule_once_per_event', dispatch.once_per_event, true);
+      setCheck('sc_rule_group_similar', dispatch.group_similar_events, true);
+    }
+
+    function clearScenarioRuleForm() {
+      ['sc_rule_zones','sc_rule_routes','sc_rule_record_types','sc_rule_management_types','sc_rule_work_types','sc_rule_text_query'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+      });
+      const min = document.getElementById('sc_rule_min_severity'); if (min) min.value = 'medium';
+      const cooldown = document.getElementById('sc_rule_cooldown_hours'); if (cooldown) cooldown.value = '24';
+      const maxAlerts = document.getElementById('sc_rule_max_alerts_day'); if (maxAlerts) maxAlerts.value = '2';
+      const maxSms = document.getElementById('sc_rule_max_sms_day'); if (maxSms) maxSms.value = '1';
+      const once = document.getElementById('sc_rule_once_per_event'); if (once) once.checked = true;
+      const group = document.getElementById('sc_rule_group_similar'); if (group) group.checked = true;
+    }
+
+    function renderScenarioRuleSummary(scenarioId) {
+      const step = getScenarioRuleStep(scenarioId);
+      if (!step || !step.logic_json) return '<div class="small muted" style="margin-top:8px;">Aucune règle de déclenchement détaillée enregistrée.</div>';
+      const cond = step.logic_json.trigger_conditions || {};
+      const dispatch = step.logic_json.dispatch_rules || {};
+      const adv = cond.advanced_payload_filters || {};
+      const bits = [];
+      bits.push('zones : ' + (Array.isArray(cond.zones) && cond.zones.length ? cond.zones.join(', ') : 'toutes'));
+      bits.push('routes : ' + (Array.isArray(cond.routes) && cond.routes.length ? cond.routes.join(', ') : 'toutes'));
+      bits.push('gravité ≥ ' + (cond.min_severity || 'medium'));
+      if (Array.isArray(adv.record_types) && adv.record_types.length) bits.push('DATEX : ' + adv.record_types.join(', '));
+      if (Array.isArray(adv.management_types) && adv.management_types.length) bits.push('mesures : ' + adv.management_types.join(', '));
+      if (Array.isArray(adv.work_types) && adv.work_types.length) bits.push('travaux : ' + adv.work_types.join(', '));
+      if (adv.text_query) bits.push('texte : “' + adv.text_query + '”');
+      bits.push('cooldown ' + (dispatch.cooldown_hours ?? 24) + 'h');
+      return '<div style="margin-top:8px;">' + bits.map(b => '<span class="rule-pill">' + escapeHtml(b) + '</span>').join('') + '</div>';
+    }
+
+    function setComposerScenarioChoice(choice) {
+      const make = document.getElementById('cc_make_scenario');
+      if (make) make.checked = choice !== 'none';
+      if (choice === 'simple') selectComposerRoadTriggers('current');
+      if (choice === 'advanced') selectComposerRoadTriggers('core');
+      const advanced = document.getElementById('cc_trigger_advanced_zone');
+      if (advanced) advanced.classList.toggle('hidden', choice !== 'advanced');
+      updateComposerScenarioVisibility();
+      renderComposerPreview();
+    }
+
+
     function startEditScenario(id) {
   const scenario = state.scenarios.find(s => Number(s.id) === Number(id));
   if (!scenario) return;
@@ -1019,6 +1182,7 @@
   }
 
   updateScenarioAggregationHelp();
+  fillScenarioRuleForm(scenario.id);
   updateScenarioButtons();
 }
 
@@ -1067,7 +1231,9 @@ async function updateScenario() {
 
     if (error) throw error;
 
-    setGlobalNotice('Le scénario a été mis à jour.', 'ok');
+    await saveScenarioTriggerRules(editingScenarioId, payload.code, payload.trigger_type_id);
+
+    setGlobalNotice('Le scénario et ses règles ont été mis à jour.', 'ok');
     editingScenarioId = null;
     clearScenarioForm();
     updateScenarioButtons();
@@ -1078,7 +1244,7 @@ async function updateScenario() {
 }
 
 async function deleteScenario(id) {
-  const stepsCount = state.scenarioSteps.filter(st => Number(st.scenario_id) === Number(id)).length;
+  const stepsCount = state.scenarioSteps.filter(st => Number(st.scenario_id) === Number(id) && !(st.logic_json && (st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions))).length;
 
   const confirmed = window.confirm(
     stepsCount > 0
@@ -1586,7 +1752,7 @@ async function deleteScenarioStep(id) {
 
       if (options.fromPlanner) {
         const item = getContentItemById(version.content_item_id);
-        setGlobalNotice(`Nouvelle version de ${item?.code || 'la brique sélectionnée'} préparée à partir de la dernière version. Le numéro ${nextVersionNo} est prérempli.`, 'info');
+        setGlobalNotice(`Nouvelle version de ${item?.code || 'le message sélectionné'} préparée à partir de la dernière version. Le numéro ${nextVersionNo} est prérempli.`, 'info');
       }
 
       const target = document.getElementById('cv_content_item_id');
@@ -1614,7 +1780,7 @@ async function deleteScenarioStep(id) {
 
       if (options.fromPlanner) {
         const item = getContentItemById(version.content_item_id);
-        setGlobalNotice(`Modification de ${item?.code || 'la brique sélectionnée'} — version ${version.version_no}.`, 'info');
+        setGlobalNotice(`Modification de ${item?.code || 'le message sélectionné'} — version ${version.version_no}.`, 'info');
       }
 
       const target = document.getElementById('cv_content_item_id');
@@ -1627,13 +1793,13 @@ async function deleteScenarioStep(id) {
       const contentCode = select ? select.value : '';
 
       if (!contentCode) {
-        setGlobalNotice('Choisissez d’abord une brique de contenu à modifier.', 'warn');
+        setGlobalNotice('Choisissez d’abord un message à modifier.', 'warn');
         return;
       }
 
       const item = state.contentItems.find(i => i.code === contentCode);
       if (!item) {
-        setGlobalNotice('Brique de contenu introuvable.', 'err');
+        setGlobalNotice('Message introuvable.', 'err');
         return;
       }
 
@@ -1752,6 +1918,7 @@ async function deleteScenarioStep(id) {
 
     function renderContentItems() {
       const box = document.getElementById('contentItemsList');
+      if (!box) return;
       box.innerHTML = '';
       state.contentItems.forEach(item => {
         const div = document.createElement('div');
@@ -1783,7 +1950,7 @@ async function deleteScenarioStep(id) {
         const div = document.createElement('div');
         div.className = 'item';
         div.innerHTML = `
-          <strong>${escapeHtml(item?.code || 'Brique inconnue')} — version ${escapeHtml(v.version_no)}</strong>
+          <strong>${escapeHtml(item?.code || 'Message inconnu')} — version ${escapeHtml(v.version_no)}</strong>
           <div class="chips"><span class="chip">${escapeHtml(v.status)}</span></div>
           <div class="muted" style="margin-top:8px;">${escapeHtml(v.sujet_template || '')}</div>
           <div class="mono" style="margin-top:10px;">${escapeHtml(v.corps_template || '')}</div>
@@ -1815,7 +1982,10 @@ async function deleteScenarioStep(id) {
       box.innerHTML = '';
       state.scenarios.forEach(s => {
         const trig = state.triggerTypes.find(t => t.id === s.trigger_type_id);
-        const steps = state.scenarioSteps.filter(st => st.scenario_id === s.id).length;
+        const messageSteps = state.scenarioSteps.filter(st =>
+          st.scenario_id === s.id && !(st.logic_json && (st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions))
+        ).length;
+        const hasRules = Boolean(getScenarioRuleStep(s.id));
         const div = document.createElement('div');
         div.className = 'item';
         div.innerHTML = `
@@ -1825,10 +1995,12 @@ async function deleteScenarioStep(id) {
               <span class="chip">${escapeHtml(trig?.code || '')}</span>
               <span class="chip">${escapeHtml(s.aggregation_mode)}</span>
               <span class="chip">priorité ${escapeHtml(s.priority)}</span>
-              <span class="chip">${steps} étape(s)</span>
+              <span class="chip">${messageSteps} étape(s) d’envoi</span>
+              <span class="chip">${hasRules ? 'règles OK' : 'règles simples'}</span>
             </div>
+            ${renderScenarioRuleSummary(s.id)}
             <div class="row" style="margin-top:10px;">
-              <button class="secondary" onclick="startEditScenario(${s.id})">Modifier</button>
+              <button class="secondary" onclick="startEditScenario(${s.id})">Modifier règles</button>
               <button class="success" onclick="openScenarioPlanner(${s.id})">Gérer les étapes</button>
               <button class="danger" onclick="deleteScenario(${s.id})">Supprimer</button>
             </div>
@@ -1858,11 +2030,11 @@ async function deleteScenarioStep(id) {
         };
         const { error } = await db().from('content_items').insert(payload);
         if (error) throw error;
-        setGlobalNotice('La brique de contenu a été créée.', 'ok');
+        setGlobalNotice('Le message a été créé.', 'ok');
         clearContentItemForm();
         await refreshAll();
       } catch (e) {
-        setGlobalNotice(e.message || 'Erreur lors de la création de la brique.', 'err');
+        setGlobalNotice(e.message || 'Erreur lors de la création du message.', 'err');
       }
     }
 
@@ -1953,9 +2125,11 @@ async function deleteScenarioStep(id) {
           priority: Number(val('sc_priority')),
           active: true
         };
-        const { error } = await db().from('scenarios').insert(payload);
+        const { data, error } = await db().from('scenarios').insert(payload).select('id,code,trigger_type_id').maybeSingle();
         if (error) throw error;
-        setGlobalNotice('Le scénario a été créé.', 'ok');
+        if (!data || !data.id) throw new Error('Le scénario a été créé sans identifiant retourné.');
+        await saveScenarioTriggerRules(data.id, payload.code, payload.trigger_type_id);
+        setGlobalNotice('Le scénario et ses règles de déclenchement ont été créés.', 'ok');
         clearScenarioForm();
         await refreshAll();
       } catch (e) {
@@ -2009,7 +2183,7 @@ async function deleteScenarioStep(id) {
       // option vide
       const empty = document.createElement('option');
       empty.value = '';
-      empty.textContent = '-- Choisir une brique --';
+      empty.textContent = '-- Choisir un message --';
       contentSelect.appendChild(empty);
     
       // 🔁 alimenté depuis Supabase
@@ -2041,7 +2215,7 @@ async function deleteScenarioStep(id) {
       remove.onclick = () => row.remove();
     
       // 🧱 STRUCTURE
-      row.appendChild(labelEl('Brique'));
+      row.appendChild(labelEl('Message'));
       row.appendChild(contentSelect);
     
       row.appendChild(labelEl('Condition'));
@@ -2081,7 +2255,7 @@ async function deleteScenarioStep(id) {
       if (!scenarioSelect || !input) return;
       const scenarioId = Number(scenarioSelect.value);
       if (!scenarioId) return;
-      const existing = state.scenarioSteps.filter(st => st.scenario_id === scenarioId);
+      const existing = state.scenarioSteps.filter(st => st.scenario_id === scenarioId && !(st.logic_json && (st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)));
       const maxOrder = existing.length ? Math.max(...existing.map(st => Number(st.step_order) || 0)) : 0;
       input.value = String(maxOrder + 1);
     }
@@ -2151,6 +2325,7 @@ async function deleteScenarioStep(id) {
       document.getElementById('sc_priority').value = '80';
       document.getElementById('sc_aggregation_mode').value = 'Message simple';
       editingScenarioId = null;
+      clearScenarioRuleForm();
       updateScenarioAggregationHelp();
       updateScenarioButtons();
     }
@@ -2219,7 +2394,7 @@ async function deleteScenarioStep(id) {
     }
 
     function plannerContentSelectHtml(selectedCode = '') {
-      const options = ['<option value="">-- Choisir une brique --</option>'];
+      const options = ['<option value="">-- Choisir un message --</option>'];
 
       state.contentItems.forEach(item => {
         const selected = item.code === selectedCode ? 'selected' : '';
@@ -2304,12 +2479,12 @@ async function deleteScenarioStep(id) {
             </div>
           </div>
 
-          <label>Briques de contenu à envoyer</label>
+          <label>Messages à envoyer</label>
           <div class="pl_content_wrap">
             ${plannerContentSelectsHtml(codes)}
           </div>
-          <button class="secondary" type="button" onclick="addPlannerContentSelect(this)">Ajouter une brique à cette étape</button>
-          <div class="help">Chaque brique sélectionnée sera incluse dans le même message de cette étape.</div>
+          <button class="secondary" type="button" onclick="addPlannerContentSelect(this)">Ajouter un message à cette étape</button>
+          <div class="help">Chaque message sélectionné sera inclus dans cette étape.</div>
 
           <details>
             <summary class="advanced-small">Condition avancée d’affichage</summary>
@@ -2436,7 +2611,7 @@ async function deleteScenarioStep(id) {
 
       box.innerHTML = rows.map(row => {
         const sendAt = new Date(referenceDate.getTime() - Number(row.window_max_hours || 0) * 3600 * 1000);
-        const codes = (row.logic_json.contents || []).map(c => c.content_code).join(', ') || 'Aucune brique renseignée';
+        const codes = (row.logic_json.contents || []).map(c => c.content_code).join(', ') || 'Aucun message renseigné';
         return `
           <div class="timeline-preview-item">
             <div class="timeline-preview-dot">${escapeHtml(row.code || row.step_order)}</div>
@@ -2473,7 +2648,7 @@ async function deleteScenarioStep(id) {
           if (!row.step_order || row.step_order < 1) throw new Error('Chaque étape doit avoir un ordre supérieur ou égal à 1.');
           if (seenOrders.has(row.step_order)) throw new Error('Deux étapes ont le même ordre. Corrigez l’ordre avant d’enregistrer.');
           if (seenCodes.has(row.code)) throw new Error('Deux étapes ont le même code. Corrigez les codes avant d’enregistrer.');
-          if (!row.logic_json.contents.length) throw new Error('Chaque étape doit contenir au moins une brique de contenu.');
+          if (!row.logic_json.contents.length) throw new Error('Chaque étape doit contenir au moins un message.');
           seenOrders.add(row.step_order);
           seenCodes.add(row.code);
         }
@@ -2540,6 +2715,7 @@ async function deleteScenarioStep(id) {
       updateComposerScenarioDefaults({ preserveUserValues: true });
       syncComposerTriggerSelectionWithContext(true);
       updateComposerScenarioVisibility();
+      const advZone = document.getElementById('cc_trigger_advanced_zone'); if (advZone) advZone.classList.add('hidden');
       renderComposerVariables();
       if (!getComposerBodyValue()) fillComposerDefaultText();
       renderComposerPreview();
@@ -2816,7 +2992,7 @@ async function deleteScenarioStep(id) {
         ${draft.scenarios.length} scénario(s) seront créés pour couvrir : <strong>${escapeHtml(triggerLabels)}</strong>.<br>
         Zone : <strong>${escapeHtml(zones)}</strong> — route : <strong>${escapeHtml(routes)}</strong> — gravité minimale : <strong>${escapeHtml(c.min_severity)}</strong>.
         ${advanced.length ? '<br>Filtres avancés : <strong>' + escapeHtml(advanced.join(' · ')) + '</strong>.' : ''}
-        <br><span class="muted">Rappel : un scénario est créé par déclencheur car <code>scenarios.trigger_type_id</code> ne peut référencer qu’un seul type.</span>
+        <br><span class="muted">Les réglages avancés restent repliés pour garder le formulaire lisible côté rédaction.</span>
       `;
     }
 
@@ -3207,7 +3383,7 @@ async function deleteScenarioStep(id) {
           .select('id,code')
           .maybeSingle();
         if (itemError) throw itemError;
-        if (!item || !item.id) throw new Error('La brique a été créée sans identifiant retourné. Vérifiez les droits Supabase.');
+        if (!item || !item.id) throw new Error('Le message a été créé sans identifiant retourné. Vérifiez les droits Supabase.');
 
         const versionPayload = {
           content_item_id: item.id,

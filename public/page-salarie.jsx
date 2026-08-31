@@ -173,7 +173,7 @@ function SalariePage({ setPage, t }) {
       {/* CTA */}
       <section className="cta-strip">
         <div className="container container-tight">
-          <h2>Ce qu'ils viennent de recevoir trouve toutson sens. Et c'est vous qui le dites !</h2>
+          <h2>Ce qu'ils viennent de recevoir trouve tout son sens. Et c'est vous qui le dites !</h2>
           <p>Activez le service pour vos équipes dès maintenant !</p>
           <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
             <a className="btn btn-dark btn-lg" href="#" onClick={(e) => { e.preventDefault(); setPage("home"); setTimeout(() => document.getElementById("pilote")?.scrollIntoView({ behavior: "smooth" }), 50); }}>

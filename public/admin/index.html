@@ -282,7 +282,16 @@
     .content-version-result-title { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:flex-start; }
     .content-version-excerpt { margin-top:8px; color:var(--muted); font-size:13px; line-height:1.45; max-height:54px; overflow:hidden; }
     .content-version-empty { padding:18px; border:1px dashed var(--line); border-radius:14px; color:var(--muted); background:#fffdfa; }
-    @media (max-width:1050px) { .writer-choice-row, .scenario-rule-grid, .scenario-rule-grid-2, .content-version-search { grid-template-columns:1fr; } }
+    .message-library-search { display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; align-items:end; margin-bottom:14px; }
+    .message-library-meta { display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+    .message-library-card { border:1px solid var(--line); border-radius:16px; padding:14px; background:#fff; box-shadow:0 6px 18px rgba(40,12,16,.04); }
+    .message-library-head { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; flex-wrap:wrap; }
+    .message-library-title { font-size:16px; font-weight:800; margin-bottom:3px; }
+    .message-library-code { font-family:Consolas, Monaco, monospace; font-size:12px; color:var(--muted); }
+    .message-library-excerpt { margin-top:10px; color:var(--muted); font-size:13px; line-height:1.45; max-height:64px; overflow:hidden; }
+    .message-library-stats { display:flex; gap:8px; flex-wrap:wrap; margin-top:9px; }
+    .danger-help { border-left:5px solid #b91c1c; }
+    @media (max-width:1050px) { .writer-choice-row, .scenario-rule-grid, .scenario-rule-grid-2, .content-version-search, .message-library-search { grid-template-columns:1fr; } }
 
   </style>
 </head>
@@ -307,6 +316,7 @@
     <aside>
       <button class="nav-btn active" onclick="showPage('content-composer', this); initContentComposer();">Créer un message</button>
       <button class="nav-btn" onclick="showPage('dashboard', this)">Tableau de bord</button>
+      <button class="nav-btn" onclick="showPage('message-library', this); renderMessageLibrary();">Bibliothèque des messages</button>
       <button class="nav-btn" onclick="showPage('content-versions', this)">Versions des contenus</button>
       <button class="nav-btn" onclick="showPage('trigger-types', this)">Types de déclencheur</button>
       <button class="nav-btn" onclick="showPage('scenarios', this)">Scénarios</button>
@@ -548,7 +558,7 @@
         </div>
         <div class="grid-3" style="margin-top:16px;">
           <div class="card"><div class="muted">Types de déclencheur</div><div class="kpi" id="kpiTriggers">0</div></div>
-          <div class="card"><div class="muted">Nombre de pages</div><div class="kpi">6</div></div>
+          <div class="card"><div class="muted">Nombre de pages</div><div class="kpi">8</div></div>
         </div>
         <div class="card" style="margin-top:16px;">
           <h3>Chaîne métier</h3>
@@ -560,11 +570,58 @@
         </div>
       </section>
 
+      <section id="message-library" class="page">
+        <div id="messageLibraryNotice"></div>
+        <div class="card">
+          <div class="composer-section-title">
+            <div>
+              <h2>Bibliothèque des messages</h2>
+              <div class="help">Recherche tous les messages par nom éditorial, code, risque, canal ou contenu d’une version. C’est ici que l’on retrouve, ouvre ou supprime un bloc de contenu complet.</div>
+            </div>
+            <span class="chip" id="messageLibraryCount">0 message</span>
+          </div>
+
+          <div class="message-library-search">
+            <div>
+              <label>Rechercher un message</label>
+              <input id="ml_search_query" placeholder="Ex. rabattement, RISK_LANE_MERGE, conducteur…">
+            </div>
+            <div>
+              <label>Canal</label>
+              <select id="ml_search_channel">
+                <option value="">Tous</option>
+                <option value="email">Email</option>
+                <option value="sms">SMS</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="push">Push</option>
+              </select>
+            </div>
+            <div>
+              <label>Statut de la dernière version</label>
+              <select id="ml_search_status">
+                <option value="">Tous</option>
+                <option value="published">Publié</option>
+                <option value="draft">Brouillon</option>
+                <option value="archived">Archivé</option>
+                <option value="none">Sans version</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="notice warn danger-help">
+            <strong>Suppression d’un message</strong><br>
+            Le bouton de suppression efface le bloc <code>content_items</code> et toutes ses versions. S’il est utilisé dans des étapes de scénario, l’admin retire aussi sa référence pour ne pas laisser de scénario cassé. Une étape devenue vide est supprimée, mais le scénario lui-même est conservé.
+          </div>
+
+          <div id="messageLibraryResults" class="list"></div>
+        </div>
+      </section>
+
       <section id="content-versions" class="page">
         <div class="grid-2">
           <div class="card">
-            <h2>Créer une version de contenu</h2>
-            <div class="help">Un même message peut avoir plusieurs versions : brouillon, publiée, archivée…</div>
+            <h2>Créer ou modifier une version</h2>
+            <div class="help">Choisissez un message. La colonne de droite affiche uniquement ses versions. Pour rechercher un message dans toute la bibliothèque, utilisez la section “Bibliothèque des messages”.</div>
             <label>Message concerné</label>
             <select id="cv_content_item_id"></select>
             <label>Numéro de version</label>
@@ -596,33 +653,8 @@
             </div>
           </div>
           <div class="card">
-            <h2>Rechercher une version</h2>
-            <div class="help">Cherche par nom interne du message, code technique, objet ou note. La liste n’affiche plus le corps complet pour rester lisible.</div>
-            <div class="content-version-search">
-              <div>
-                <label>Recherche</label>
-                <input id="cv_search_query" placeholder="Ex. déviation, conducteur, route fermée…">
-              </div>
-              <div>
-                <label>Statut</label>
-                <select id="cv_search_status">
-                  <option value="">Tous</option>
-                  <option value="published">Publié</option>
-                  <option value="draft">Brouillon</option>
-                  <option value="archived">Archivé</option>
-                </select>
-              </div>
-              <div>
-                <label>Canal</label>
-                <select id="cv_search_channel">
-                  <option value="">Tous</option>
-                  <option value="email">Email</option>
-                  <option value="sms">SMS</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="push">Push</option>
-                </select>
-              </div>
-            </div>
+            <h2>Versions de ce message</h2>
+            <div id="selectedContentSummary" class="notice info">Choisissez un message pour afficher son historique de versions.</div>
             <div id="contentVersionsList" class="list"></div>
           </div>
         </div>
@@ -1778,6 +1810,7 @@ async function deleteScenarioStep(id) {
       document.getElementById('cv_change_note').value = 'nouvelle version à partir de la version ' + nextVersionNo;
       setContentVersionBodyValue(version);
       updateContentVersionButtons();
+      renderContentVersions();
 
       if (options.fromPlanner) {
         const item = getContentItemById(version.content_item_id);
@@ -1806,6 +1839,7 @@ async function deleteScenarioStep(id) {
       document.getElementById('cv_change_note').value = version.change_note || '';
       setContentVersionBodyValue(version);
       updateContentVersionButtons();
+      renderContentVersions();
 
       if (options.fromPlanner) {
         const item = getContentItemById(version.content_item_id);
@@ -1893,6 +1927,7 @@ async function deleteScenarioStep(id) {
       renderDashboard();
       renderContentItems();
       renderContentVersions();
+      renderMessageLibrary();
       renderTriggerTypes();
       renderScenarios();
       renderScenarioSteps();
@@ -1981,80 +2016,216 @@ async function deleteScenarioStep(id) {
       });
     }
 
-    function renderContentVersions() {
-      const box = document.getElementById('contentVersionsList');
-      if (!box) return;
-      const q = normalizedSearchText(document.getElementById('cv_search_query')?.value || '');
-      const status = document.getElementById('cv_search_status')?.value || '';
-      const channel = document.getElementById('cv_search_channel')?.value || '';
+    function getContentVersionsForItem(itemId) {
+      return (state.contentVersions || [])
+        .filter(v => Number(v.content_item_id) === Number(itemId))
+        .sort((a, b) => Number(b.version_no || 0) - Number(a.version_no || 0));
+    }
 
-      const results = (state.contentVersions || [])
-        .map(v => ({ version: v, item: state.contentItems.find(i => Number(i.id) === Number(v.content_item_id)) }))
-        .filter(({ version: v, item }) => {
-          if (status && String(v.status || '') !== status) return false;
-          if (channel && String(item?.channel || '') !== channel) return false;
+    function getLatestContentVersion(itemId) {
+      return getContentVersionsForItem(itemId)[0] || null;
+    }
+
+    function contentReferenceSteps(contentCode) {
+      const wanted = String(contentCode || '');
+      return (state.scenarioSteps || []).filter(step => {
+        const contents = Array.isArray(step.logic_json?.contents) ? step.logic_json.contents : [];
+        return contents.some(c => String(c?.content_code || '') === wanted);
+      });
+    }
+
+    function setMessageLibraryNotice(text, type = 'info') {
+      const box = document.getElementById('messageLibraryNotice');
+      if (box) box.innerHTML = text ? `<div class="notice ${type}">${escapeHtml(text)}</div>` : '';
+    }
+
+    function openMessageVersions(itemId) {
+      showPage('content-versions');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.textContent.includes('Versions des contenus'));
+      if (btn) btn.classList.add('active');
+      const select = document.getElementById('cv_content_item_id');
+      if (select) select.value = String(itemId);
+      editingContentVersionId = null;
+      updateContentVersionEditorMode();
+      prefillContentVersionFromPrevious();
+      updateContentVersionButtons();
+      renderContentVersions();
+    }
+
+    function renderMessageLibrary() {
+      const box = document.getElementById('messageLibraryResults');
+      const count = document.getElementById('messageLibraryCount');
+      if (!box) return;
+
+      const q = normalizedSearchText(document.getElementById('ml_search_query')?.value || '');
+      const channel = document.getElementById('ml_search_channel')?.value || '';
+      const status = document.getElementById('ml_search_status')?.value || '';
+
+      const results = (state.contentItems || [])
+        .map(item => {
+          const versions = getContentVersionsForItem(item.id);
+          const latest = versions[0] || null;
+          const refs = contentReferenceSteps(item.code);
+          return { item, versions, latest, refs };
+        })
+        .filter(({ item, versions, latest }) => {
+          if (channel && String(item.channel || '') !== channel) return false;
+          if (status === 'none' && latest) return false;
+          if (status && status !== 'none' && String(latest?.status || '') !== status) return false;
           if (!q) return true;
           const haystack = normalizedSearchText([
-            item?.sujet,
-            item?.code,
-            item?.categorie,
-            item?.type,
-            item?.topic_code,
-            item?.channel,
-            v.sujet_template,
-            v.status,
-            v.source_ref,
-            v.change_note,
-            stripHtmlForExcerpt(v.corps_template, 600)
+            item.sujet, item.code, item.categorie, item.type, item.topic_code, item.channel, item.source,
+            latest?.sujet_template, latest?.status, latest?.change_note,
+            ...versions.map(v => [v.sujet_template, v.change_note, stripHtmlForExcerpt(v.corps_template || '', 500)].join(' '))
           ].join(' '));
           return haystack.includes(q);
         })
-        .sort((a, b) => {
-          const an = normalizedSearchText(a.item?.sujet || a.item?.code || '');
-          const bn = normalizedSearchText(b.item?.sujet || b.item?.code || '');
-          if (an !== bn) return an.localeCompare(bn, 'fr');
-          return Number(b.version.version_no || 0) - Number(a.version.version_no || 0);
-        });
+        .sort((a, b) => normalizedSearchText(a.item.sujet || a.item.code).localeCompare(normalizedSearchText(b.item.sujet || b.item.code), 'fr'));
 
+      if (count) count.textContent = `${results.length} message${results.length > 1 ? 's' : ''}`;
       box.innerHTML = '';
+
       if (!results.length) {
-        box.innerHTML = '<div class="content-version-empty">Aucune version trouvée. Essaie le nom interne du message, un mot de l’objet ou le code technique.</div>';
+        box.innerHTML = '<div class="content-version-empty">Aucun message trouvé. Essaie le nom éditorial, un code RISK_*, un mot du texte ou le canal.</div>';
         return;
       }
 
-      results.slice(0, 80).forEach(({ version: v, item }) => {
+      results.forEach(({ item, versions, latest, refs }) => {
+        const div = document.createElement('div');
+        div.className = 'message-library-card';
+        const excerpt = latest ? stripHtmlForExcerpt(latest.corps_template || '', 250) : '';
+        div.innerHTML = `
+          <div class="message-library-head">
+            <div>
+              <div class="message-library-title">${escapeHtml(item.sujet || 'Sans nom éditorial')}</div>
+              <div class="message-library-code">${escapeHtml(item.code || '')}</div>
+              <div class="message-library-stats">
+                <span class="chip">${escapeHtml(item.channel || '')}</span>
+                <span class="chip">${escapeHtml(item.topic_code || 'sans risque/thème')}</span>
+                <span class="chip">${versions.length} version(s)</span>
+                <span class="chip">${refs.length} étape(s) de scénario</span>
+                ${latest ? `<span class="chip">dernière : ${escapeHtml(latest.status || '')}</span>` : '<span class="chip">sans version</span>'}
+              </div>
+            </div>
+            <div class="row">
+              <button class="secondary" type="button" onclick="openMessageVersions(${Number(item.id)})">Voir les versions</button>
+              <button class="danger" type="button" onclick="deleteContentBlock(${Number(item.id)})">Supprimer le message</button>
+            </div>
+          </div>
+          ${latest?.sujet_template ? `<div class="muted" style="margin-top:10px;"><strong>Objet actuel :</strong> ${escapeHtml(latest.sujet_template)}</div>` : ''}
+          ${excerpt ? `<div class="message-library-excerpt">${escapeHtml(excerpt)}</div>` : ''}
+        `;
+        box.appendChild(div);
+      });
+    }
+
+    async function deleteContentBlock(itemId) {
+      const item = getContentItemById(itemId);
+      if (!item) {
+        setMessageLibraryNotice('Message introuvable.', 'err');
+        return;
+      }
+
+      const versions = getContentVersionsForItem(itemId);
+      const refs = contentReferenceSteps(item.code);
+      const scenarioIds = new Set(refs.map(r => Number(r.scenario_id)).filter(Boolean));
+      const warning = [
+        `Supprimer définitivement « ${item.sujet || item.code} » ?`,
+        '',
+        `${versions.length} version(s) seront supprimée(s).`,
+        refs.length ? `${refs.length} étape(s) de scénario seront nettoyée(s) dans ${scenarioIds.size} scénario(s).` : 'Aucune étape de scénario ne référence ce message.',
+        '',
+        'Cette action est irréversible.'
+      ].join('\n');
+
+      if (!window.confirm(warning)) return;
+
+      try {
+        setMessageLibraryNotice('Suppression du message en cours…', 'info');
+
+        for (const step of refs) {
+          const logic = JSON.parse(JSON.stringify(step.logic_json || {}));
+          const contents = Array.isArray(logic.contents) ? logic.contents : [];
+          logic.contents = contents.filter(c => String(c?.content_code || '') !== String(item.code || ''));
+
+          const isRuleStep = logic.kind === 'risk_rules' || logic.kind === 'trigger_rules' || Boolean(logic.risk_conditions) || Boolean(logic.trigger_conditions);
+          if (!isRuleStep && logic.contents.length === 0) {
+            const { error } = await db().from('scenario_steps').delete().eq('id', step.id);
+            if (error) throw error;
+          } else {
+            const { error } = await db().from('scenario_steps').update({ logic_json: logic }).eq('id', step.id);
+            if (error) throw error;
+          }
+        }
+
+        const { error: versionsError } = await db().from('content_versions').delete().eq('content_item_id', itemId);
+        if (versionsError) throw versionsError;
+
+        const { error: itemError } = await db().from('content_items').delete().eq('id', itemId);
+        if (itemError) throw itemError;
+
+        if (editingContentVersionId && versions.some(v => Number(v.id) === Number(editingContentVersionId))) {
+          editingContentVersionId = null;
+        }
+
+        await refreshAll();
+        renderMessageLibrary();
+        setMessageLibraryNotice(`Message « ${item.sujet || item.code} » supprimé avec ${versions.length} version(s).`, 'ok');
+      } catch (e) {
+        console.error('Erreur deleteContentBlock()', e);
+        setMessageLibraryNotice(e.message || 'Erreur lors de la suppression du message.', 'err');
+      }
+    }
+
+    function renderContentVersions() {
+      const box = document.getElementById('contentVersionsList');
+      const summary = document.getElementById('selectedContentSummary');
+      if (!box) return;
+
+      const itemId = Number(document.getElementById('cv_content_item_id')?.value || 0);
+      const item = getContentItemById(itemId);
+      const versions = (state.contentVersions || [])
+        .filter(v => Number(v.content_item_id) === itemId)
+        .sort((a, b) => Number(b.version_no || 0) - Number(a.version_no || 0));
+
+      if (summary) {
+        summary.innerHTML = item
+          ? `<strong>${escapeHtml(item.sujet || item.code || 'Message')}</strong><br><span class="small">${escapeHtml(item.code || '')} · ${escapeHtml(item.channel || '')} · ${versions.length} version(s)</span>`
+          : 'Choisissez un message pour afficher son historique de versions.';
+      }
+
+      box.innerHTML = '';
+      if (!item) {
+        box.innerHTML = '<div class="content-version-empty">Aucun message sélectionné.</div>';
+        return;
+      }
+      if (!versions.length) {
+        box.innerHTML = '<div class="content-version-empty">Ce message ne possède encore aucune version.</div>';
+        return;
+      }
+
+      versions.forEach(v => {
         const div = document.createElement('div');
         div.className = 'content-version-result';
-        const title = item?.sujet || item?.code || 'Message inconnu';
         const excerpt = stripHtmlForExcerpt(v.corps_template || '', 220);
         div.innerHTML = `
           <div class="content-version-result-title">
             <div>
-              <strong>${escapeHtml(title)}</strong><br>
-              <span class="muted small">${escapeHtml(item?.code || 'sans code')} — version ${escapeHtml(v.version_no)}</span>
+              <strong>Version ${escapeHtml(v.version_no)}</strong><br>
+              <span class="muted small">${escapeHtml(v.status || '')} · ${escapeHtml(v.created_at ? new Date(v.created_at).toLocaleString('fr-FR') : '')}</span>
             </div>
             <div class="row">
               <button class="secondary" onclick="startEditContentVersion(${Number(v.id)})">Modifier</button>
               <button class="secondary" onclick="startNewContentVersionFromExisting(${Number(v.id)})">Dupliquer</button>
             </div>
           </div>
-          <div class="chips">
-            <span class="chip">${escapeHtml(v.status || '')}</span>
-            <span class="chip">${escapeHtml(item?.channel || '')}</span>
-            <span class="chip">${escapeHtml(item?.topic_code || 'sans thème')}</span>
-          </div>
           <div class="muted" style="margin-top:8px;"><strong>Objet :</strong> ${escapeHtml(v.sujet_template || '—')}</div>
           ${excerpt ? `<div class="content-version-excerpt">${escapeHtml(excerpt)}</div>` : ''}
+          ${v.change_note ? `<div class="small muted" style="margin-top:8px;">Note : ${escapeHtml(v.change_note)}</div>` : ''}
         `;
         box.appendChild(div);
       });
-
-      if (results.length > 80) {
-        const more = document.createElement('div');
-        more.className = 'content-version-empty';
-        more.textContent = `${results.length - 80} autre(s) résultat(s) masqué(s). Affine la recherche pour réduire la liste.`;
-        box.appendChild(more);
-      }
     }
 
     function renderTriggerTypes() {
@@ -2408,6 +2579,7 @@ async function deleteScenarioStep(id) {
       document.getElementById('cv_source_ref').value = 'interne';
       document.getElementById('cv_change_note').value = 'création manuelle';
       updateContentVersionButtons();
+      renderContentVersions();
     }
 
     function clearTriggerTypeForm() {
@@ -3530,13 +3702,14 @@ async function deleteScenarioStep(id) {
       if (e.target && e.target.id === 'sc_aggregation_mode') updateScenarioAggregationHelp();
       if (e.target && e.target.id === 'ss_window_ref') updateStepWindowHelp();
       if (e.target && e.target.id === 'ss_scenario_id') updateNextStepOrder();
-      if (e.target && ['cv_search_status', 'cv_search_channel'].includes(e.target.id)) renderContentVersions();
+      if (e.target && ['ml_search_channel', 'ml_search_status'].includes(e.target.id)) renderMessageLibrary();
       if (e.target && e.target.id === 'cv_content_item_id') {
         if (editingContentVersionId) {
           updateContentVersionEditorMode();
         } else {
           prefillContentVersionFromPrevious();
         }
+        renderContentVersions();
       }
       if (e.target && e.target.id === 'pl_scenario_id') {
         renderScenarioPlanner();
@@ -3567,7 +3740,7 @@ async function deleteScenarioStep(id) {
       if (e.target && (e.target.closest && e.target.closest('#scenarioPlannerRows') || e.target.id === 'pl_demo_date')) {
         updatePlannerPreview();
       }
-      if (e.target && e.target.id === 'cv_search_query') renderContentVersions();
+      if (e.target && e.target.id === 'ml_search_query') renderMessageLibrary();
       if (e.target && ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_body', 'cc_scenario_label', 'cc_scenario_code', 'cc_scenario_zones', 'cc_scenario_routes', 'cc_scenario_priority', 'cc_scenario_window_min_hours', 'cc_scenario_window_max_hours', 'cc_scenario_cooldown_hours', 'cc_scenario_max_alerts_day', 'cc_scenario_max_sms_day'].includes(e.target.id)) {
         updateComposerScenarioSummary();
         renderComposerPreview();

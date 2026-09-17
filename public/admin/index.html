@@ -260,7 +260,7 @@
 
 
     /* Version rédacteur : règles plus lisibles */
-    .writer-choice-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:10px 0 14px; }
+    .writer-choice-row { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:10px 0 14px; }
     .writer-choice {
       border:1px solid var(--line); border-radius:16px; background:#fff; padding:12px;
       cursor:pointer; display:flex; align-items:flex-start; gap:10px; min-height:82px;
@@ -332,10 +332,10 @@
             </div>
 
             <div class="composer-step">
-              <h3><span class="number">1</span>Situation traitée</h3>
-              <label>Type de situation</label>
+              <h3><span class="number">1</span>Risque routier traité</h3>
+              <label>Risque routier normalisé</label>
               <select id="cc_context"></select>
-              <div class="composer-hint">Choisis ici la situation éditoriale à traiter. Pour un message décidé par MobiSûr hors données DATEX, choisis <strong>Décision éditoriale / envoi volontaire</strong>.</div>
+              <div class="composer-hint">Choisis le risque routier normalisé produit par la moulinette IA. Le scénario sera ensuite associé à <code>event_boost_ia_deux.risque_routier_code</code>, quelle que soit la source ayant permis d’identifier le risque. Pour un envoi décidé manuellement par MobiSûr, choisis <strong>Décision éditoriale / envoi volontaire</strong>.</div>
               <div id="cc_context_help" class="composer-hint"></div>
             </div>
 
@@ -396,7 +396,7 @@
             <div class="composer-step">
               <h3><span class="number">5</span>Déclenchement du scénario</h3>
               <div class="composer-hint">
-                Un message peut rester un simple contenu ou devenir un scénario. Le type de déclenchement dépend de la situation choisie plus haut : événement routier, météo, radar, changement de limitation ou décision éditoriale.
+                Un message peut rester un simple contenu ou devenir un scénario. Le déclenchement automatique se fait désormais sur le <strong>risque routier normalisé</strong> identifié par l’IA, et non sur la famille DATEX brute.
               </div>
 
               <div class="writer-choice-row">
@@ -406,11 +406,11 @@
                 </label>
                 <label class="writer-choice">
                   <input type="radio" name="cc_scenario_choice" value="simple" onchange="setComposerScenarioChoice('simple')">
-                  <div><strong>Scénario simple</strong><span>Déclenchement sur la situation choisie, avec zone et route optionnelles.</span></div>
+                  <div><strong>Scénario simple</strong><span>Déclenchement sur le risque routier choisi, avec zone et route optionnelles.</span></div>
                 </label>
                 <label class="writer-choice">
                   <input type="radio" name="cc_scenario_choice" value="advanced" onchange="setComposerScenarioChoice('advanced')">
-                  <div><strong>Couverture large</strong><span>Plusieurs déclencheurs et filtres DATEX avancés, à utiliser avec prudence.</span></div>
+                  <div><strong>Plusieurs risques</strong><span>Le même message peut être associé à plusieurs risques routiers normalisés.</span></div>
                 </label>
               </div>
               <input type="checkbox" id="cc_make_scenario" class="hidden">
@@ -423,11 +423,11 @@
                   <div class="composer-scenario-grid-2">
                     <div>
                       <label>Nom du scénario</label>
-                      <input id="cc_scenario_label" placeholder="Ex. Déviation à anticiper — IDF">
+                      <input id="cc_scenario_label" placeholder="Ex. Rabattement de voie — IDF">
                     </div>
                     <div>
                       <label>Code scénario</label>
-                      <input id="cc_scenario_code" placeholder="SC_ROAD_RISK_EMAIL">
+                      <input id="cc_scenario_code" placeholder="SC_RISK_LANE_MERGE_EMAIL">
                     </div>
                   </div>
 
@@ -465,47 +465,14 @@
                 </div>
 
                 <div class="writer-soft-zone" id="cc_trigger_simple_zone">
-                  <h4>Déclencheur principal</h4>
-                  <div class="composer-hint">En couverture large, tu peux élargir le scénario à plusieurs familles DATEX. En scénario simple, l’admin utilise directement la situation choisie en haut du formulaire.</div>
+                  <h4>Risque déclencheur</h4>
+                  <div class="composer-hint">En scénario simple, le risque choisi en haut du formulaire est utilisé. En mode « Plusieurs risques », sélectionne ici les autres risques qui doivent partager le même message.</div>
+                  <div class="composer-trigger-list" id="cc_scenario_trigger_catalog"></div>
                   <div class="row">
-                    <button type="button" class="secondary" onclick="selectComposerRoadTriggers('current')">Couvrir seulement la situation choisie</button>
-                    <button type="button" class="secondary" onclick="selectComposerRoadTriggers('core')">Couvrir les 6 familles MobiSûr</button>
+                    <button type="button" class="secondary" onclick="selectComposerRiskTriggers('current')">Seulement le risque choisi</button>
+                    <button type="button" class="secondary" onclick="selectComposerRiskTriggers('all')">Tous les risques exploitables</button>
+                    <button type="button" class="secondary" onclick="selectComposerRiskTriggers('none')">Tout décocher</button>
                   </div>
-                </div>
-
-                <div class="writer-advanced" id="cc_trigger_advanced_zone">
-                  <details>
-                    <summary>Réglages avancés DATEX / couverture large</summary>
-                    <div class="composer-scenario-muted" style="margin-top:10px;">
-                      À utiliser si le scénario doit couvrir plusieurs familles ou des valeurs DATEX précises. Avec le schéma actuel, un scénario sera créé par type de déclencheur sélectionné.
-                    </div>
-                    <div class="composer-trigger-list" id="cc_scenario_trigger_catalog">
-                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_closure"><div><strong>Route fermée</strong><span>Fermeture complète ou route indisponible.</span></div></label>
-                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_detour"><div><strong>Déviation</strong><span>Itinéraire de substitution.</span></div></label>
-                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="lane_closure"><div><strong>Voie fermée</strong><span>Une ou plusieurs voies neutralisées.</span></div></label>
-                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="alternating_traffic"><div><strong>Circulation alternée</strong><span>Alternat, chantier ponctuel, passage contraint.</span></div></label>
-                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="traffic_restriction"><div><strong>Restriction de circulation</strong><span>Poids, gabarit, voies rétrécies, sortie à éviter.</span></div></label>
-                      <label class="composer-trigger-option"><input type="checkbox" class="cc_scenario_trigger" value="road_work"><div><strong>Travaux avec impact conduite</strong><span>Travaux conservés par le Worker.</span></div></label>
-                      <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_management"><div><strong>Gestion DATEX brute</strong><span>Management types précis.</span></div></label>
-                      <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_work"><div><strong>Travaux DATEX bruts</strong><span>ConstructionWorks / MaintenanceWorks.</span></div></label>
-                      <label class="composer-trigger-option composer-advanced-trigger"><input type="checkbox" class="cc_scenario_trigger" value="datex_any_road_risk"><div><strong>Autre risque routier importé</strong><span>Filet large pour futurs imports.</span></div></label>
-                    </div>
-                    <div class="row">
-                      <button type="button" class="secondary" onclick="selectComposerRoadTriggers('all')">Tout couvrir</button>
-                      <button type="button" class="secondary" onclick="selectComposerRoadTriggers('none')">Tout décocher</button>
-                    </div>
-                    <label>Codes déclencheurs complémentaires</label>
-                    <input id="cc_scenario_extra_trigger_codes" placeholder="Ex. accident, obstruction, weather_road_condition">
-
-                    <div class="composer-scenario-grid-2">
-                      <div><label>Types DATEX bruts</label><input id="cc_scenario_record_types" placeholder="Ex. ConstructionWorks,MaintenanceWorks"></div>
-                      <div><label>Mesures DATEX</label><input id="cc_scenario_management_types" placeholder="Ex. roadClosed,laneClosures,contraflow"></div>
-                    </div>
-                    <div class="composer-scenario-grid-2">
-                      <div><label>Types de travaux / maintenance</label><input id="cc_scenario_work_types" placeholder="Ex. roadMarkingWork,repairWork"></div>
-                      <div><label>Recherche texte dans l’événement</label><input id="cc_scenario_text_query" placeholder="Ex. peinture, fauchage, basculement"></div>
-                    </div>
-                  </details>
                 </div>
 
                 <div class="writer-advanced">
@@ -570,9 +537,9 @@
           <strong>Comment utiliser l’interface</strong><br>
           1. Créez un <strong>message</strong> depuis “Créer un message”.<br>
           2. Ajoutez ensuite une <strong>version</strong> si le texte doit évoluer.<br>
-          3. Créez ou générez un <strong>type de déclencheur</strong>, puis un <strong>scénario</strong>.<br>
-          4. Ajoutez une ou plusieurs <strong>étapes</strong> au scénario.<br>
-          5. Les événements bruts viennent du Worker Data, mais un scénario peut aussi être lancé par décision éditoriale.
+          3. La moulinette IA normalise le risque dans <code>event_boost_ia_deux.risque_routier_code</code>.<br>
+          4. Un <strong>scénario</strong> est associé à un ou plusieurs codes <code>RISK_*</code>.<br>
+          5. Ajoutez ensuite une ou plusieurs <strong>étapes d’envoi</strong>. Une décision éditoriale reste possible hors risque automatique.
         </div>
         <div class="grid-3">
           <div class="card"><div class="muted">Messages</div><div class="kpi" id="kpiContents">0</div><div class="small muted">Messages créés depuis “Créer un message”</div></div>
@@ -586,9 +553,9 @@
         <div class="card" style="margin-top:16px;">
           <h3>Chaîne métier</h3>
           <div class="grid-3">
-            <div class="mono">Sources de données → points de données</div>
-            <div class="mono">Types de déclencheur → événements → clients concernés</div>
-            <div class="mono">Messages → versions → scénarios → règles → étapes → envois finaux</div>
+            <div class="mono">Sources (DATEX, météo…) → événements</div>
+            <div class="mono">IA → risque_routier_code normalisé → clients concernés</div>
+            <div class="mono">Risque → scénario → étapes → messages → envois finaux</div>
           </div>
         </div>
       </section>
@@ -665,7 +632,7 @@
         <div class="grid-2">
           <div class="card">
             <h2>Créer un type de déclencheur</h2>
-            <div class="help">Un type de déclencheur correspond à une famille d’événements : radar, orage, changement de vitesse…</div>
+            <div class="help">Les nouveaux scénarios automatiques utilisent les codes de risque normalisés <code>RISK_*</code>. Cette page reste disponible pour administrer les types techniques et les anciens déclencheurs.</div>
             <label>Code technique</label>
             <input id="tt_code" placeholder="Ex. STORM_ALERT">
             <label>Libellé</label>
@@ -691,17 +658,17 @@
           <div class="card">
             <h2>Créer ou modifier un scénario</h2>
             <div class="notice info">
-              Un scénario répond à deux questions : <strong>qu’est-ce qui le déclenche ?</strong> puis <strong>quels messages sont envoyés ?</strong><br>
-              Les règles ci-dessous décrivent le déclenchement. La séquence de messages se règle ensuite dans “Étapes des scénarios”.
+              Un scénario répond à deux questions : <strong>quel risque routier le déclenche ?</strong> puis <strong>quels messages sont envoyés ?</strong><br>
+              Le risque est lu dans <code>event_boost_ia_deux.risque_routier_code</code>. La source amont peut évoluer (DATEX, météo, autre) sans changer le scénario.
             </div>
 
             <label>Nom interne court</label>
-            <input id="sc_code" placeholder="Ex. SCN_DEVIATION_IDF">
+            <input id="sc_code" placeholder="Ex. SCN_RISK_LANE_MERGE_IDF">
 
             <label>Nom visible dans l’interface</label>
-            <input id="sc_label" placeholder="Ex. Déviation à anticiper — Île-de-France">
+            <input id="sc_label" placeholder="Ex. Rabattement / neutralisation de voie — Île-de-France">
 
-            <label>Famille d’événement déclencheur</label>
+            <label>Risque routier déclencheur</label>
             <select id="sc_trigger_type_id"></select>
 
             <label>Type de scénario</label>
@@ -717,7 +684,7 @@
 
             <div class="scenario-rule-card">
               <h3>Règles de déclenchement</h3>
-              <div class="help">Exemple : une déviation dans les départements 95 ou 75 déclenche ce scénario. Laisser vide = toutes les valeurs compatibles.</div>
+              <div class="help">Exemple : le risque « rabattement / neutralisation de voie » dans les départements 95 ou 75 déclenche ce scénario. Laisser vide = toutes les valeurs compatibles.</div>
               <div class="scenario-rule-grid">
                 <div><label>Départements / zones</label><input id="sc_rule_zones" placeholder="Ex. 95,75"></div>
                 <div><label>Routes</label><input id="sc_rule_routes" placeholder="Ex. N118,N20"></div>
@@ -732,18 +699,6 @@
                   </select>
                 </div>
               </div>
-
-              <details class="writer-advanced">
-                <summary>Filtres avancés DATEX</summary>
-                <div class="scenario-rule-grid-2" style="margin-top:12px;">
-                  <div><label>Types DATEX bruts</label><input id="sc_rule_record_types" placeholder="Ex. ConstructionWorks,MaintenanceWorks"></div>
-                  <div><label>Mesures DATEX</label><input id="sc_rule_management_types" placeholder="Ex. roadClosed,laneClosures,contraflow"></div>
-                </div>
-                <div class="scenario-rule-grid-2">
-                  <div><label>Types de travaux / maintenance</label><input id="sc_rule_work_types" placeholder="Ex. roadMarkingWork,repairWork"></div>
-                  <div><label>Recherche texte</label><input id="sc_rule_text_query" placeholder="Ex. peinture, fauchage, basculement"></div>
-                </div>
-              </details>
 
               <details class="writer-advanced">
                 <summary>Garde-fous d’envoi</summary>
@@ -766,7 +721,7 @@
 
           <div class="card">
             <h2>Scénarios existants</h2>
-            <div class="help">Les règles affichées ici sont stockées dans une ligne technique <code>scenario_steps.logic_json.kind = "trigger_rules"</code>. Elles ne sont pas affichées dans la séquence d’envoi.</div>
+            <div class="help">Les règles affichées ici sont stockées dans une ligne technique <code>scenario_steps.logic_json.kind = "risk_rules"</code>. Elles ne sont pas affichées dans la séquence d’envoi.</div>
             <div id="scenariosList" class="list"></div>
           </div>
         </div>
@@ -922,111 +877,133 @@
     };
 
 
-    const composerContextTypes = {
-      road_closure: {
-        label: 'Route fermée',
-        description: 'Événement DATEX conservé lorsqu’une route est fermée ou rendue indisponible.',
-        source: 'datex_national_non_concede',
-        topic_code: 'road_closure',
-        trigger_type_code: 'road_closure',
-        code_base: 'ROAD_CLOSURE',
-        variables: [
-          ['road_number', 'Route concernée'],
-          ['zone_cible', 'Zone / département'],
-          ['from_town', 'Commune de début'],
-          ['to_town', 'Commune de fin'],
-          ['description', 'Description de l’événement'],
-          ['start_at', 'Début prévu'],
-          ['end_at', 'Fin prévue'],
-          ['detour_description', 'Description de la déviation']
-        ],
+    const DATEX_RISK_MAP = {
+      RISK_NONE: 'donnees_insuffisantes',
+      RISK_HEAVY_WEIGHT: 'Poids / Tonnage / Intégrité ouvrage',
+      RISK_WORKZONE_STAFF: 'Présence du personnel / Ouvriers sur chaussée',
+      RISK_LANE_MERGE: 'Rabattement / Neutralisation de voie',
+      RISK_CONTRAFLOW: 'Circulation en contre-flux / Contraflow',
+      RISK_LANE_NARROWING: 'Rétrécissement de voies / Heurts latéraux',
+      RISK_FALLING_ROCKS: 'Chutes de pierres / Blocs',
+      RISK_ALTERNATE_TRAFFIC: 'Circulation alternée / Feux',
+      RISK_RAMP_MANEUVER: 'Manœuvres sur bretelle / Déviation'
+    };
+
+    const commonRiskVariables = [
+      ['risque_routier_code', 'Code du risque normalisé'],
+      ['risque_routier', 'Libellé / explication du risque par l’IA'],
+      ['cause_exacte', 'Cause exacte identifiée'],
+      ['impact_level', 'Niveau d’impact identifié'],
+      ['message_redige', 'Message rédigé par la moulinette IA'],
+      ['message_court', 'Résumé court produit par l’IA'],
+      ['detour_info', 'Information de déviation éventuelle'],
+      ['road_number', 'Route concernée'],
+      ['zone_cible', 'Zone / département'],
+      ['description', 'Description source / événement'],
+      ['start_at', 'Début prévu'],
+      ['end_at', 'Fin prévue']
+    ];
+
+    function riskContext(code, options = {}) {
+      return {
+        label: options.label || DATEX_RISK_MAP[code] || code,
+        description: options.description || `Risque normalisé ${code}, produit par la moulinette IA puis stocké dans event_boost_ia_deux.risque_routier_code.`,
+        source: 'ai_risk_normalized',
+        topic_code: code,
+        trigger_type_code: code,
+        code_base: code,
+        risk_code: code,
+        triggerable: options.triggerable !== false,
+        variables: commonRiskVariables,
         sample: {
-          road_number: 'N125', zone_cible: '31', from_town: 'Eup', to_town: 'Lez',
-          description: 'Route fermée avec déviation locale mise en place.',
-          start_at: '06/08 08:30', end_at: '06/08 16:30', detour_description: 'Suivre la déviation signalée S9 et S10.'
+          risque_routier_code: code,
+          risque_routier: DATEX_RISK_MAP[code] || code,
+          cause_exacte: options.sampleCause || 'Situation identifiée par la moulinette IA.',
+          impact_level: options.sampleImpact || 'voie_neutralisee',
+          message_redige: options.sampleMessage || 'Un risque routier nécessite une vigilance renforcée dans ce secteur.',
+          message_court: options.sampleShort || 'Vigilance renforcée dans le secteur.',
+          detour_info: options.sampleDetour || '',
+          road_number: options.road || 'N118',
+          zone_cible: options.zone || '92',
+          description: options.sampleDescription || 'Événement analysé et qualifié par la moulinette IA.',
+          start_at: '17/09 08:00',
+          end_at: '17/09 18:00'
         }
-      },
-      lane_closure: {
-        label: 'Voie fermée',
-        description: 'Événement DATEX conservé lorsqu’une ou plusieurs voies sont neutralisées.',
-        source: 'datex_national_non_concede', topic_code: 'lane_closure', trigger_type_code: 'lane_closure', code_base: 'LANE_CLOSURE',
-        variables: [['road_number','Route concernée'],['zone_cible','Zone / département'],['description','Description'],['start_at','Début prévu'],['end_at','Fin prévue'],['management_types','Mesures de circulation']],
-        sample: { road_number:'N118', zone_cible:'92', description:'Neutralisation d’une voie pour travaux.', start_at:'31/07 22:00', end_at:'01/08 05:00', management_types:'laneClosures' }
-      },
-      alternating_traffic: {
-        label: 'Circulation alternée',
-        description: 'Événement DATEX conservé lorsqu’un alternat modifie les conditions normales de conduite.',
-        source: 'datex_national_non_concede', topic_code: 'alternating_traffic', trigger_type_code: 'alternating_traffic', code_base: 'ALTERNATING_TRAFFIC',
-        variables: [['road_number','Route concernée'],['zone_cible','Zone / département'],['from_town','Commune de début'],['to_town','Commune de fin'],['description','Description'],['start_at','Début prévu'],['end_at','Fin prévue']],
-        sample: { road_number:'N85', zone_cible:'38', from_town:'Vizille', to_town:'Laffrey', description:'Circulation alternée pendant une phase de chantier.', start_at:'05/08 09:00', end_at:'05/08 17:00' }
-      },
-      road_detour: {
-        label: 'Déviation',
-        description: 'Événement DATEX conservé lorsqu’un itinéraire de substitution est nécessaire.',
-        source: 'datex_national_non_concede', topic_code: 'road_detour', trigger_type_code: 'road_detour', code_base: 'ROAD_DETOUR',
-        variables: [['road_number','Route concernée'],['zone_cible','Zone / département'],['description','Description'],['detour_description','Description de la déviation'],['start_at','Début prévu'],['end_at','Fin prévue']],
-        sample: { road_number:'N164', zone_cible:'22', description:'Déviation en place en raison de travaux.', detour_description:'Suivre l’itinéraire de déviation balisé.', start_at:'07/08 08:00', end_at:'14/08 18:00' }
-      },
-      traffic_restriction: {
-        label: 'Restriction de circulation',
-        description: 'Restrictions de poids, gabarit, voies étroites ou sortie fermée.',
-        source: 'datex_national_non_concede', topic_code: 'traffic_restriction', trigger_type_code: 'traffic_restriction', code_base: 'TRAFFIC_RESTRICTION',
-        variables: [['road_number','Route concernée'],['zone_cible','Zone / département'],['description','Description'],['management_types','Restriction détectée'],['start_at','Début prévu'],['end_at','Fin prévue']],
-        sample: { road_number:'N20', zone_cible:'09', description:'Restriction de circulation pour certains véhicules.', management_types:'weightRestrictionInOperation', start_at:'12/08 07:00', end_at:'12/08 19:00' }
-      },
-      road_work: {
-        label: 'Travaux avec impact conduite',
-        description: 'Travaux conservés uniquement s’ils modifient réellement les conditions de conduite.',
-        source: 'datex_national_non_concede', topic_code: 'road_work', trigger_type_code: 'road_work', code_base: 'ROAD_WORK',
-        variables: [['road_number','Route concernée'],['zone_cible','Zone / département'],['description','Description'],['location_descriptor','Localisation'],['start_at','Début prévu'],['end_at','Fin prévue']],
-        sample: { road_number:'N12', zone_cible:'78', description:'Travaux avec modification temporaire des voies.', location_descriptor:'Secteur de Jouars-Pontchartrain', start_at:'10/08 21:00', end_at:'11/08 06:00' }
-      },
-      storm: {
-        label: 'Orage / météo dangereuse',
-        description: 'Alerte météo utile pour prévenir les risques d’aquaplaning, visibilité réduite ou conduite sous pluie intense.',
-        source: 'weather_api', topic_code: 'storm', trigger_type_code: 'STORM_ALERT', code_base: 'STORM',
-        variables: [['zone_cible','Zone concernée'],['predicted_start_at','Début prévu'],['predicted_end_at','Fin prévue'],['description','Description'],['risk_level','Niveau de risque']],
-        sample: { zone_cible:'Vannes', predicted_start_at:'05/08 18:00', predicted_end_at:'05/08 23:00', description:'Orages localement forts attendus en soirée.', risk_level:'élevé' }
-      },
-      radar: {
-        label: 'Nouveau radar',
-        description: 'Installation ou signalement d’un nouveau radar sur une zone de circulation.',
-        source: 'manual_or_open_data', topic_code: 'new_radar', trigger_type_code: 'NEW_RADAR_INSTALLATION', code_base: 'NEW_RADAR',
-        variables: [['lieu','Lieu'],['road_number','Route concernée'],['speed_limit_kmh','Limitation'],['source_url','Source']],
-        sample: { lieu:'D980 entre Montbard et Semur-en-Auxois', road_number:'D980', speed_limit_kmh:'80', source_url:'https://exemple.fr' }
-      },
-      speed_limit_change: {
-        label: 'Changement de limitation',
-        description: 'Modification locale de limitation de vitesse utile pour anticiper les comportements à risque.',
-        source: 'manual_or_open_data', topic_code: 'speed_limit_change', trigger_type_code: 'LOCAL_SPEED_LIMIT_CHANGE', code_base: 'SPEED_LIMIT_CHANGE',
-        variables: [['territory','Territoire'],['old_speed_limit_kmh','Ancienne limitation'],['new_speed_limit_kmh','Nouvelle limitation'],['affected_km','Kilomètres concernés'],['source_url','Source']],
-        sample: { territory:'Morbihan', old_speed_limit_kmh:'80', new_speed_limit_kmh:'90', affected_km:'344', source_url:'https://exemple.fr' }
-      },
+      };
+    }
+
+    const composerContextTypes = {
+      RISK_HEAVY_WEIGHT: riskContext('RISK_HEAVY_WEIGHT', {
+        description: 'Risque lié au poids, au tonnage autorisé ou à l’intégrité d’un ouvrage. À utiliser lorsque l’IA estime que le gabarit/tonnage impose une vigilance ou un itinéraire adapté.',
+        sampleCause: 'Restriction de tonnage ou fragilité d’ouvrage signalée.',
+        sampleImpact: 'deviation_bretelle'
+      }),
+      RISK_WORKZONE_STAFF: riskContext('RISK_WORKZONE_STAFF', {
+        description: 'Présence d’ouvriers ou de personnel sur ou à proximité immédiate de la chaussée.',
+        sampleCause: 'Personnel de chantier présent sur la chaussée.',
+        sampleMessage: 'Des agents interviennent sur la chaussée : ralentissez nettement et augmentez les distances de sécurité.'
+      }),
+      RISK_LANE_MERGE: riskContext('RISK_LANE_MERGE', {
+        description: 'Rabattement, suppression ou neutralisation de voie entraînant des changements de file et des conflits de trajectoire.',
+        sampleCause: 'Une voie est neutralisée et impose un rabattement.',
+        sampleImpact: 'voie_neutralisee'
+      }),
+      RISK_CONTRAFLOW: riskContext('RISK_CONTRAFLOW', {
+        description: 'Circulation basculée en contre-flux : voies inhabituelles, séparation réduite et vigilance accrue.',
+        sampleCause: 'Basculement temporaire de circulation en contre-flux.'
+      }),
+      RISK_LANE_NARROWING: riskContext('RISK_LANE_NARROWING', {
+        description: 'Rétrécissement de voie avec risque de heurt latéral, notamment pour les véhicules larges.',
+        sampleCause: 'Largeur de voie temporairement réduite.'
+      }),
+      RISK_FALLING_ROCKS: riskContext('RISK_FALLING_ROCKS', {
+        description: 'Risque de chute de pierres ou de blocs sur la chaussée.',
+        sampleCause: 'Chutes de pierres signalées sur ou à proximité de la chaussée.',
+        sampleMessage: 'Des chutes de pierres sont possibles : réduisez l’allure et restez attentif aux obstacles sur la chaussée.'
+      }),
+      RISK_ALTERNATE_TRAFFIC: riskContext('RISK_ALTERNATE_TRAFFIC', {
+        description: 'Circulation alternée, souvent régulée par feux ou agents, avec risque de freinage et de file d’attente.',
+        sampleCause: 'Alternat de circulation mis en place.',
+        sampleImpact: 'circulation_alternee'
+      }),
+      RISK_RAMP_MANEUVER: riskContext('RISK_RAMP_MANEUVER', {
+        description: 'Manœuvres inhabituelles sur bretelle, échangeur ou déviation : changements de direction, insertion ou sortie à anticiper.',
+        sampleCause: 'Déviation imposant une manœuvre inhabituelle sur une bretelle.',
+        sampleImpact: 'deviation_bretelle',
+        sampleDetour: 'Suivre la déviation locale balisée.'
+      }),
+      RISK_NONE: riskContext('RISK_NONE', {
+        label: 'Données insuffisantes / aucun risque exploitable',
+        description: 'L’IA ne dispose pas d’assez d’éléments pour qualifier un risque exploitable. Ce code ne doit pas déclencher automatiquement un scénario.',
+        triggerable: false,
+        sampleCause: 'Données insuffisantes.'
+      }),
       editorial_decision: {
         label: 'Décision éditoriale / envoi volontaire',
-        description: 'Message ou scénario lancé volontairement par MobiSûr : campagne de prévention, conseil saisonnier, rappel sécurité, information client. Il ne dépend pas d’un événement DATEX.',
+        description: 'Message ou scénario lancé volontairement par MobiSûr. Il ne dépend pas d’un risque remonté par la moulinette IA.',
         source: 'editorial_decision',
-        topic_code: 'editorial_decision',
+        topic_code: 'EDITORIAL_DECISION',
         trigger_type_code: 'EDITORIAL_DECISION',
         code_base: 'EDITORIAL_DECISION',
+        risk_code: null,
+        triggerable: true,
         variables: [['zone_cible','Zone ou segment client'],['audience','Audience visée'],['theme','Thème éditorial'],['info_url','Lien d’information'],['short_url','Lien court']],
-        sample: { zone_cible:'Tous clients', audience:'Conducteurs itinérants', theme:'Rappel prévention vitesse et distances de sécurité', info_url:'https://data.mobisur.net/i/prevention', short_url:'https://mobi.sr/prevention' }
+        sample: { zone_cible:'Tous clients', audience:'Conducteurs itinérants', theme:'Rappel prévention', info_url:'https://data.mobisur.net/i/prevention', short_url:'https://mobi.sr/prevention' }
       }
     };
 
-    const composerRoadTriggerCatalog = {
-      road_closure: { code: 'road_closure', label: 'Route fermée', event_type: 'road_closure', source: 'datex_national_non_concede', code_suffix: 'ROAD_CLOSURE', help: 'Fermeture complète ou route indisponible.' },
-      road_detour: { code: 'road_detour', label: 'Déviation', event_type: 'road_detour', source: 'datex_national_non_concede', code_suffix: 'ROAD_DETOUR', help: 'Itinéraire de substitution ou déviation.' },
-      lane_closure: { code: 'lane_closure', label: 'Voie fermée', event_type: 'lane_closure', source: 'datex_national_non_concede', code_suffix: 'LANE_CLOSURE', help: 'Une ou plusieurs voies neutralisées.' },
-      alternating_traffic: { code: 'alternating_traffic', label: 'Circulation alternée', event_type: 'alternating_traffic', source: 'datex_national_non_concede', code_suffix: 'ALTERNATING_TRAFFIC', help: 'Alternat ou passage contraint.' },
-      traffic_restriction: { code: 'traffic_restriction', label: 'Restriction de circulation', event_type: 'traffic_restriction', source: 'datex_national_non_concede', code_suffix: 'TRAFFIC_RESTRICTION', help: 'Restriction poids, gabarit, voies rétrécies, sortie déconseillée.' },
-      road_work: { code: 'road_work', label: 'Travaux avec impact conduite', event_type: 'road_work', source: 'datex_national_non_concede', code_suffix: 'ROAD_WORK', help: 'Travaux conservés par le Worker car ils modifient la conduite.' },
-      datex_management: { code: 'datex_management', label: 'Gestion DATEX brute', event_type: null, source: 'datex_national_non_concede', code_suffix: 'DATEX_MANAGEMENT', help: 'Filet pour RoadOrCarriagewayOrLaneManagement et management_types.' },
-      datex_work: { code: 'datex_work', label: 'Travaux DATEX bruts', event_type: null, source: 'datex_national_non_concede', code_suffix: 'DATEX_WORK', help: 'Filet pour ConstructionWorks / MaintenanceWorks et sous-types travaux.' },
-      datex_any_road_risk: { code: 'datex_any_road_risk', label: 'Autre risque routier importé', event_type: null, source: 'datex_national_non_concede', code_suffix: 'DATEX_ANY_ROAD_RISK', help: 'Filet large pour événements futurs importés par le Worker data.' },
-      editorial_decision: { code: 'EDITORIAL_DECISION', label: 'Décision éditoriale', event_type: 'editorial_decision', source: 'editorial_decision', code_suffix: 'EDITORIAL_DECISION', help: 'Déclenchement volontaire décidé par l’équipe éditoriale ou commerciale MobiSûr.' }
-    };
-
+    const composerRiskTriggerCatalog = Object.fromEntries(
+      Object.entries(composerContextTypes)
+        .filter(([code, cfg]) => code.startsWith('RISK_') && cfg.triggerable !== false)
+        .map(([code, cfg]) => [code, {
+          code,
+          label: cfg.label,
+          risk_code: code,
+          source: 'ai_risk_normalized',
+          code_suffix: code,
+          help: cfg.description
+        }])
+    );
 
     const composerRoles = {
       risk_alert: { label: 'Prévenir d’un risque', help: 'Alerter clairement le conducteur ou le responsable sur une situation à anticiper.', categorie: 'alert', type: 'risk_alert', code_suffix: 'RISK' },
@@ -1068,42 +1045,26 @@
       return (state.scenarioSteps || []).find(st =>
         Number(st.scenario_id) === Number(scenarioId) &&
         st.logic_json &&
-        (st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)
+        (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)
       ) || null;
     }
 
     function buildScenarioRuleLogicFromForm(triggerTypeId) {
       const trigger = state.triggerTypes.find(t => Number(t.id) === Number(triggerTypeId));
+      const riskCode = String(trigger?.code || '').trim();
       return {
-        kind: 'trigger_rules',
-        trigger_conditions: {
-          description: 'Conditions d’entrée du scénario. Le moteur devra déclencher ce scénario uniquement si l’événement entrant respecte ces critères puis concerne un client éligible.',
-          trigger_type_code: trigger?.code || '',
-          trigger_label: trigger?.label || '',
-          source: trigger?.source_kind || 'admin-scenario',
+        kind: riskCode === 'EDITORIAL_DECISION' ? 'editorial_rules' : 'risk_rules',
+        risk_conditions: {
+          description: riskCode === 'EDITORIAL_DECISION'
+            ? 'Scénario lancé volontairement par décision éditoriale.'
+            : 'Le chef d’orchestre doit faire correspondre ce code avec event_boost_ia_deux.risque_routier_code, puis vérifier les critères client/zone.',
+          risk_code: riskCode,
+          risk_label: trigger?.label || DATEX_RISK_MAP[riskCode] || riskCode,
+          source_field: riskCode === 'EDITORIAL_DECISION' ? 'manual' : 'event_boost_ia_deux.risque_routier_code',
           zones: parseAdminList(val('sc_rule_zones')),
           routes: normalizeAdminRoadList(val('sc_rule_routes')),
           min_severity: val('sc_rule_min_severity') || 'medium',
-          client_zone_match_required: true,
-          advanced_payload_filters: {
-            record_types: parseAdminList(val('sc_rule_record_types')),
-            management_types: parseAdminList(val('sc_rule_management_types')),
-            work_types: parseAdminList(val('sc_rule_work_types')),
-            text_query: val('sc_rule_text_query') || null,
-            fields_checked: [
-              'payload.event_type',
-              'payload.record_types',
-              'payload.management_types',
-              'payload.construction_work_type',
-              'payload.road_maintenance_type',
-              'payload.description',
-              'payload.internal_note',
-              'payload.location_descriptor',
-              'payload.from_town',
-              'payload.to_town',
-              'payload.point_town'
-            ]
-          }
+          client_zone_match_required: riskCode !== 'EDITORIAL_DECISION'
         },
         dispatch_rules: {
           once_per_event: Boolean(document.getElementById('sc_rule_once_per_event')?.checked),
@@ -1120,7 +1081,7 @@
       const existing = getScenarioRuleStep(scenarioId);
       const payload = {
         scenario_id: Number(scenarioId),
-        code: `${toComposerCode(scenarioCode || 'SCENARIO')}_TRIGGER_RULES`,
+        code: `${toComposerCode(scenarioCode || 'SCENARIO')}_RISK_RULES`,
         step_order: 0,
         window_ref: 'occurs_at',
         window_min_hours: 0,
@@ -1143,8 +1104,7 @@
     function fillScenarioRuleForm(scenarioId) {
       const step = getScenarioRuleStep(scenarioId);
       const logic = step?.logic_json || {};
-      const cond = logic.trigger_conditions || {};
-      const adv = cond.advanced_payload_filters || {};
+      const cond = logic.risk_conditions || logic.trigger_conditions || {};
       const dispatch = logic.dispatch_rules || {};
 
       const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value == null ? '' : String(value); };
@@ -1153,10 +1113,6 @@
       set('sc_rule_zones', Array.isArray(cond.zones) ? cond.zones.join(',') : '');
       set('sc_rule_routes', Array.isArray(cond.routes) ? cond.routes.join(',') : '');
       set('sc_rule_min_severity', cond.min_severity || 'medium');
-      set('sc_rule_record_types', Array.isArray(adv.record_types) ? adv.record_types.join(',') : '');
-      set('sc_rule_management_types', Array.isArray(adv.management_types) ? adv.management_types.join(',') : '');
-      set('sc_rule_work_types', Array.isArray(adv.work_types) ? adv.work_types.join(',') : '');
-      set('sc_rule_text_query', adv.text_query || '');
       set('sc_rule_cooldown_hours', dispatch.cooldown_hours ?? 24);
       set('sc_rule_max_alerts_day', dispatch.max_immediate_alerts_per_client_per_day ?? 2);
       set('sc_rule_max_sms_day', dispatch.max_sms_per_client_per_day ?? 1);
@@ -1165,7 +1121,7 @@
     }
 
     function clearScenarioRuleForm() {
-      ['sc_rule_zones','sc_rule_routes','sc_rule_record_types','sc_rule_management_types','sc_rule_work_types','sc_rule_text_query'].forEach(id => {
+      ['sc_rule_zones','sc_rule_routes'].forEach(id => {
         const el = document.getElementById(id); if (el) el.value = '';
       });
       const min = document.getElementById('sc_rule_min_severity'); if (min) min.value = 'medium';
@@ -1178,37 +1134,32 @@
 
     function renderScenarioRuleSummary(scenarioId) {
       const step = getScenarioRuleStep(scenarioId);
-      if (!step || !step.logic_json) return '<div class="small muted" style="margin-top:8px;">Aucune règle de déclenchement détaillée enregistrée.</div>';
-      const cond = step.logic_json.trigger_conditions || {};
+      if (!step || !step.logic_json) return '<div class="small muted" style="margin-top:8px;">Aucune règle de risque détaillée enregistrée.</div>';
+      const cond = step.logic_json.risk_conditions || step.logic_json.trigger_conditions || {};
       const dispatch = step.logic_json.dispatch_rules || {};
-      const adv = cond.advanced_payload_filters || {};
       const bits = [];
+      const riskCode = cond.risk_code || cond.trigger_type_code || '';
+      if (riskCode) bits.push('risque : ' + riskCode);
       bits.push('zones : ' + (Array.isArray(cond.zones) && cond.zones.length ? cond.zones.join(', ') : 'toutes'));
       bits.push('routes : ' + (Array.isArray(cond.routes) && cond.routes.length ? cond.routes.join(', ') : 'toutes'));
       bits.push('gravité ≥ ' + (cond.min_severity || 'medium'));
-      if (Array.isArray(adv.record_types) && adv.record_types.length) bits.push('DATEX : ' + adv.record_types.join(', '));
-      if (Array.isArray(adv.management_types) && adv.management_types.length) bits.push('mesures : ' + adv.management_types.join(', '));
-      if (Array.isArray(adv.work_types) && adv.work_types.length) bits.push('travaux : ' + adv.work_types.join(', '));
-      if (adv.text_query) bits.push('texte : “' + adv.text_query + '”');
       bits.push('cooldown ' + (dispatch.cooldown_hours ?? 24) + 'h');
       return '<div style="margin-top:8px;">' + bits.map(b => '<span class="rule-pill">' + escapeHtml(b) + '</span>').join('') + '</div>';
     }
 
     function setComposerScenarioChoice(choice) {
       const ctx = currentComposerContext();
-      if (ctx.topic_code === 'editorial_decision' && choice === 'advanced') choice = 'simple';
+      if (ctx.triggerable === false && choice !== 'none') choice = 'none';
+
+      const radio = document.querySelector(`input[name="cc_scenario_choice"][value="${choice}"]`);
+      if (radio) radio.checked = true;
 
       const make = document.getElementById('cc_make_scenario');
       if (make) make.checked = choice !== 'none';
 
-      if (choice === 'simple') {
-        selectComposerRoadTriggers('current');
-      } else if (choice === 'advanced') {
-        selectComposerRoadTriggers('core');
-      }
+      if (choice === 'simple') selectComposerRiskTriggers('current');
+      else if (choice === 'advanced') selectComposerRiskTriggers('current');
 
-      const advanced = document.getElementById('cc_trigger_advanced_zone');
-      if (advanced) advanced.classList.toggle('hidden', choice !== 'advanced' || ctx.topic_code === 'editorial_decision');
       updateComposerScenarioVisibility();
       renderComposerPreview();
     }
@@ -1295,7 +1246,7 @@ async function updateScenario() {
 }
 
 async function deleteScenario(id) {
-  const stepsCount = state.scenarioSteps.filter(st => Number(st.scenario_id) === Number(id) && !(st.logic_json && (st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions))).length;
+  const stepsCount = state.scenarioSteps.filter(st => Number(st.scenario_id) === Number(id) && !(st.logic_json && (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions))).length;
 
   const confirmed = window.confirm(
     stepsCount > 0
@@ -1978,9 +1929,19 @@ async function deleteScenarioStep(id) {
       }
     }
 
+    function scenarioRiskTriggerTypes() {
+      const allowed = (state.triggerTypes || []).filter(t => (String(t.code || '').startsWith('RISK_') || String(t.code || '') === 'EDITORIAL_DECISION') && String(t.code || '') !== 'RISK_NONE' && t.is_active !== false);
+      if (editingScenarioId) {
+        const current = state.scenarios.find(s => Number(s.id) === Number(editingScenarioId));
+        const legacy = current ? state.triggerTypes.find(t => Number(t.id) === Number(current.trigger_type_id)) : null;
+        if (legacy && !allowed.some(t => Number(t.id) === Number(legacy.id))) allowed.push(legacy);
+      }
+      return allowed.sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')));
+    }
+
     function populateSelects() {
       setOptions('cv_content_item_id', state.contentItems, 'id', i => contentItemSearchLabel(i));
-      setOptions('sc_trigger_type_id', state.triggerTypes, 'id', i => i.code);
+      setOptions('sc_trigger_type_id', scenarioRiskTriggerTypes(), 'id', i => `${i.code} — ${i.label || DATEX_RISK_MAP[i.code] || ''}`);
       setOptions('ss_scenario_id', state.scenarios, 'id', i => i.code);
       setOptions('pv_content_item_id', state.contentItems, 'id', i => contentItemSearchLabel(i));
       syncPreviewVersions();
@@ -2120,7 +2081,7 @@ async function deleteScenarioStep(id) {
       state.scenarios.forEach(s => {
         const trig = state.triggerTypes.find(t => t.id === s.trigger_type_id);
         const messageSteps = state.scenarioSteps.filter(st =>
-          st.scenario_id === s.id && !(st.logic_json && (st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions))
+          st.scenario_id === s.id && !(st.logic_json && (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions))
         ).length;
         const hasRules = Boolean(getScenarioRuleStep(s.id));
         const div = document.createElement('div');
@@ -2133,7 +2094,7 @@ async function deleteScenarioStep(id) {
               <span class="chip">${escapeHtml(s.aggregation_mode)}</span>
               <span class="chip">priorité ${escapeHtml(s.priority)}</span>
               <span class="chip">${messageSteps} étape(s) d’envoi</span>
-              <span class="chip">${hasRules ? 'règles OK' : 'règles simples'}</span>
+              <span class="chip">${hasRules ? 'règle risque OK' : 'règle à définir'}</span>
             </div>
             ${renderScenarioRuleSummary(s.id)}
             <div class="row" style="margin-top:10px;">
@@ -2392,7 +2353,7 @@ async function deleteScenarioStep(id) {
       if (!scenarioSelect || !input) return;
       const scenarioId = Number(scenarioSelect.value);
       if (!scenarioId) return;
-      const existing = state.scenarioSteps.filter(st => st.scenario_id === scenarioId && !(st.logic_json && (st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)));
+      const existing = state.scenarioSteps.filter(st => st.scenario_id === scenarioId && !(st.logic_json && (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)));
       const maxOrder = existing.length ? Math.max(...existing.map(st => Number(st.step_order) || 0)) : 0;
       input.value = String(maxOrder + 1);
     }
@@ -2642,7 +2603,7 @@ async function deleteScenarioStep(id) {
       const rows = Array.from(document.querySelectorAll('#scenarioPlannerRows .step-editor'));
       if (!rows.length) {
         const scenarioId = Number(val('pl_scenario_id'));
-        const existing = state.scenarioSteps.filter(st => Number(st.scenario_id) === scenarioId);
+        const existing = state.scenarioSteps.filter(st => Number(st.scenario_id) === scenarioId && !(st.logic_json && (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)));
         return existing.length ? Math.max(...existing.map(st => Number(st.step_order) || 0)) + 1 : 1;
       }
       return Math.max(...rows.map(r => Number(r.querySelector('.pl_order')?.value || 0))) + 1;
@@ -2655,7 +2616,7 @@ async function deleteScenarioStep(id) {
 
       const scenarioId = Number(select.value);
       const steps = state.scenarioSteps
-        .filter(st => Number(st.scenario_id) === scenarioId)
+        .filter(st => Number(st.scenario_id) === scenarioId && !(st.logic_json && (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)))
         .sort((a, b) => Number(a.step_order || 0) - Number(b.step_order || 0));
 
       wrap.innerHTML = steps.map(st => plannerRowHtml(st)).join('');
@@ -2854,6 +2815,7 @@ async function deleteScenarioStep(id) {
       updateComposerScenarioVisibility();
       const advZone = document.getElementById('cc_trigger_advanced_zone'); if (advZone) advZone.classList.add('hidden');
       renderComposerVariables();
+      renderComposerRiskCatalog();
       if (!getComposerBodyValue()) fillComposerDefaultText();
       renderComposerPreview();
     }
@@ -2870,7 +2832,7 @@ async function deleteScenarioStep(id) {
       el.dataset.filled = '1';
     }
 
-    function currentComposerContext() { return composerContextTypes[val('cc_context')] || composerContextTypes.road_closure; }
+    function currentComposerContext() { return composerContextTypes[val('cc_context')] || composerContextTypes.RISK_LANE_MERGE; }
     function currentComposerRole() { return composerRoles[val('cc_role')] || composerRoles.risk_alert; }
     function currentComposerTiming() { return composerTimings[val('cc_timing')] || composerTimings.detection; }
     function currentComposerChannel() { return val('cc_channel') || 'email'; }
@@ -2888,15 +2850,20 @@ async function deleteScenarioStep(id) {
 
     function normalizeComposerScenarioChoiceForContext() {
       const ctx = currentComposerContext();
+      const simpleChoice = document.querySelector('input[name="cc_scenario_choice"][value="simple"]');
       const advancedChoice = document.querySelector('input[name="cc_scenario_choice"][value="advanced"]');
+      const simpleCard = simpleChoice ? simpleChoice.closest('label') : null;
       const advancedCard = advancedChoice ? advancedChoice.closest('label') : null;
-      if (advancedCard) advancedCard.classList.toggle('hidden', ctx.topic_code === 'editorial_decision');
-      if (ctx.topic_code === 'editorial_decision' && advancedChoice && advancedChoice.checked) {
-        const simpleChoice = document.querySelector('input[name="cc_scenario_choice"][value="simple"]');
-        if (simpleChoice) simpleChoice.checked = true;
+      const disabled = ctx.triggerable === false;
+      if (simpleChoice) simpleChoice.disabled = disabled;
+      if (advancedChoice) advancedChoice.disabled = disabled || ctx.topic_code === 'EDITORIAL_DECISION';
+      if (simpleCard) simpleCard.classList.toggle('hidden', disabled);
+      if (advancedCard) advancedCard.classList.toggle('hidden', disabled || ctx.topic_code === 'EDITORIAL_DECISION');
+      if (disabled && currentComposerScenarioChoice() !== 'none') {
+        const none = document.querySelector('input[name="cc_scenario_choice"][value="none"]');
+        if (none) none.checked = true;
         const make = document.getElementById('cc_make_scenario');
-        if (make) make.checked = true;
-        selectComposerRoadTriggers('current');
+        if (make) make.checked = false;
       }
     }
 
@@ -2911,69 +2878,50 @@ async function deleteScenarioStep(id) {
       return parseComposerList(value).map(v => v.replace(/\s+/g, ''));
     }
 
-    function selectComposerRoadTriggers(mode) {
+    function renderComposerRiskCatalog() {
+      const box = document.getElementById('cc_scenario_trigger_catalog');
+      if (!box) return;
+      box.innerHTML = Object.entries(composerRiskTriggerCatalog).map(([code, risk]) => `
+        <label class="composer-trigger-option">
+          <input type="checkbox" class="cc_scenario_trigger" value="${escapeHtml(code)}">
+          <div><strong>${escapeHtml(risk.label)}</strong><span>${escapeHtml(risk.help)}</span></div>
+        </label>
+      `).join('');
+    }
+
+    function selectComposerRiskTriggers(mode) {
       const inputs = Array.from(document.querySelectorAll('.cc_scenario_trigger'));
       const ctx = currentComposerContext();
-      const current = String(ctx.trigger_type_code || ctx.topic_code || '').toLowerCase();
-      const core = ['road_closure', 'road_detour', 'lane_closure', 'alternating_traffic', 'traffic_restriction', 'road_work'];
+      const current = String(ctx.trigger_type_code || '').toUpperCase();
       inputs.forEach(input => {
-        const value = String(input.value || '').toLowerCase();
+        const value = String(input.value || '').toUpperCase();
         if (mode === 'none') input.checked = false;
         else if (mode === 'all') input.checked = true;
-        else if (mode === 'core') input.checked = core.includes(value);
-        else if (mode === 'editorial') input.checked = value === 'editorial_decision' || value === 'editorial_decision'.toLowerCase();
         else input.checked = value === current;
       });
       updateComposerScenarioSummary();
       renderComposerPolicyPreview();
     }
 
-    function selectedComposerRoadTriggers() {
-      const selected = Array.from(document.querySelectorAll('.cc_scenario_trigger:checked'))
-        .map(input => composerRoadTriggerCatalog[input.value])
-        .filter(Boolean);
-
-      const extraCodes = parseComposerList(val('cc_scenario_extra_trigger_codes'));
-      extraCodes.forEach(code => {
-        const clean = toComposerCode(code).toLowerCase();
-        if (!clean) return;
-        if (selected.some(t => String(t.code).toLowerCase() === clean)) return;
-        selected.push({
-          code: clean,
-          label: code,
-          event_type: null,
-          source: 'datex_national_non_concede',
-          code_suffix: toComposerCode(code),
-          help: 'Code déclencheur complémentaire saisi manuellement.'
-        });
-      });
-
+    function selectedComposerRiskTriggers() {
       const ctx = currentComposerContext();
-      if (ctx.topic_code === 'editorial_decision' && !selected.length) {
-        selected.push({
-          code: ctx.trigger_type_code,
-          label: ctx.label,
-          event_type: ctx.topic_code,
-          source: ctx.source,
-          code_suffix: ctx.code_base,
-          help: ctx.description
-        });
+      if (ctx.topic_code === 'EDITORIAL_DECISION') {
+        return [{ code: 'EDITORIAL_DECISION', label: ctx.label, risk_code: null, source: 'editorial_decision', code_suffix: 'EDITORIAL_DECISION', help: ctx.description }];
       }
+      const selected = Array.from(document.querySelectorAll('.cc_scenario_trigger:checked'))
+        .map(input => composerRiskTriggerCatalog[input.value])
+        .filter(Boolean);
       if (selected.length) return selected;
-      return [{
-        code: ctx.trigger_type_code,
-        label: ctx.label,
-        event_type: ctx.topic_code,
-        source: ctx.source,
-        code_suffix: ctx.code_base,
-        help: ctx.description
-      }];
+      if (ctx.triggerable === false || currentComposerScenarioChoice() === 'advanced') return [];
+      const fallback = composerRiskTriggerCatalog[ctx.trigger_type_code];
+      return fallback ? [fallback] : [];
     }
 
     function syncComposerTriggerSelectionWithContext(force = false) {
+      renderComposerRiskCatalog();
       const anyChecked = Boolean(document.querySelector('.cc_scenario_trigger:checked'));
       if (!force && anyChecked) return;
-      selectComposerRoadTriggers('current');
+      selectComposerRiskTriggers('current');
     }
 
     function currentComposerScenarioMode() {
@@ -2995,13 +2943,8 @@ async function deleteScenarioStep(id) {
       const wrap = document.getElementById('cc_scenario_wrap');
       if (wrap) wrap.classList.toggle('hidden', !composerScenarioEnabled());
 
-      const simpleZone = document.getElementById('cc_trigger_simple_zone');
-      if (simpleZone) {
-        simpleZone.classList.toggle('hidden', ctx.topic_code === 'editorial_decision' || choice !== 'advanced');
-      }
-
-      const advanced = document.getElementById('cc_trigger_advanced_zone');
-      if (advanced) advanced.classList.toggle('hidden', choice !== 'advanced' || ctx.topic_code === 'editorial_decision');
+      const riskZone = document.getElementById('cc_trigger_simple_zone');
+      if (riskZone) riskZone.classList.toggle('hidden', choice !== 'advanced' || ctx.topic_code === 'EDITORIAL_DECISION');
 
       updateComposerScenarioDefaults({ preserveUserValues: true });
       updateComposerScenarioSummary();
@@ -3028,8 +2971,8 @@ async function deleteScenarioStep(id) {
       const preserve = Boolean(options.preserveUserValues);
       if (scenarioLabel && (!scenarioLabel.value || !preserve)) scenarioLabel.value = defaultLabel;
       if (scenarioCode && (!scenarioCode.value || !preserve)) scenarioCode.value = defaultCode;
-      if (priority && (!priority.value || !preserve)) priority.value = String(ctx.topic_code === 'road_closure' || ctx.topic_code === 'road_detour' ? 90 : 80);
-      if (minSeverity && (!minSeverity.value || !preserve)) minSeverity.value = ctx.topic_code === 'road_work' ? 'medium' : 'low';
+      if (priority && (!priority.value || !preserve)) priority.value = String(['RISK_WORKZONE_STAFF','RISK_FALLING_ROCKS','RISK_CONTRAFLOW'].includes(ctx.topic_code) ? 90 : 80);
+      if (minSeverity && (!minSeverity.value || !preserve)) minSeverity.value = 'low';
       if (mode && (!mode.value || !preserve)) mode.value = timingCode === 'digest' ? 'digest' : 'single';
       if (windowRef && (!windowRef.value || !preserve)) windowRef.value = w.ref;
       if (windowMin && (!windowMin.value || !preserve)) windowMin.value = String(w.min);
@@ -3054,10 +2997,6 @@ async function deleteScenarioStep(id) {
       const channel = currentComposerChannel();
       const zones = parseComposerList(val('cc_scenario_zones'));
       const routes = normalizeComposerRoadList(val('cc_scenario_routes'));
-      const recordTypes = parseComposerList(val('cc_scenario_record_types'));
-      const managementTypes = parseComposerList(val('cc_scenario_management_types'));
-      const workTypes = parseComposerList(val('cc_scenario_work_types'));
-      const textQuery = val('cc_scenario_text_query');
       const baseScenarioCode = toComposerCode(val('cc_scenario_code')) || toComposerCode(`SC_${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
       const baseScenarioLabel = val('cc_scenario_label') || `${ctx.label} — ${role.label}`;
       const minSeverity = val('cc_scenario_min_severity') || 'low';
@@ -3066,13 +3005,14 @@ async function deleteScenarioStep(id) {
       const maxSms = Number(val('cc_scenario_max_sms_day') || 1);
       const oncePerEvent = Boolean(document.getElementById('cc_scenario_once_per_event')?.checked);
       const groupSimilar = Boolean(document.getElementById('cc_scenario_group_similar')?.checked);
-      const triggers = selectedComposerRoadTriggers();
+      const triggers = selectedComposerRiskTriggers();
+      if (!triggers.length) return { scenarios: [] };
       const multiple = triggers.length > 1;
 
       const scenarios = triggers.map(trigger => {
-        const suffix = toComposerCode(trigger.code_suffix || trigger.code || 'TRIGGER');
+        const suffix = toComposerCode(trigger.code_suffix || trigger.code || 'RISK');
         const scenarioCode = multiple ? toComposerCode(`${baseScenarioCode}_${suffix}`) : baseScenarioCode;
-        const stepCode = `${scenarioCode}_STEP_1`;
+        const riskCode = trigger.risk_code || trigger.code;
         return {
           scenario: {
             code: scenarioCode,
@@ -3083,64 +3023,49 @@ async function deleteScenarioStep(id) {
             priority: Number(val('cc_scenario_priority') || 80),
             active: true
           },
-          first_step: {
-            code: stepCode,
-            step_order: 1,
-            window_ref: val('cc_scenario_window_ref') || 'occurs_at',
-            window_min_hours: Number(val('cc_scenario_window_min_hours') || 0),
-            window_max_hours: Number(val('cc_scenario_window_max_hours') || 2),
+          risk_rule_step: {
+            code: `${scenarioCode}_RISK_RULES`,
+            step_order: 0,
+            window_ref: 'occurs_at',
+            window_min_hours: 0,
+            window_max_hours: 0,
             logic_json: {
-              kind: 'trigger_rules',
-              trigger_conditions: {
-                description: trigger.source === 'editorial_decision' ? 'Scénario lancé volontairement par décision éditoriale. Le moteur ne l’attend pas depuis DATEX ; il pourra être appelé par le chef d’orchestre ou une action manuelle.' : 'Conditions d’entrée du scénario. Le moteur devra déclencher ce scénario uniquement si l’événement entrant respecte ces critères puis concerne un client éligible.',
-                trigger_type_code: trigger.code,
-                trigger_label: trigger.label,
-                event_type: trigger.event_type,
-                source: trigger.source || ctx.source,
+              kind: trigger.source === 'editorial_decision' ? 'editorial_rules' : 'risk_rules',
+              risk_conditions: {
+                description: trigger.source === 'editorial_decision'
+                  ? 'Scénario lancé volontairement par décision éditoriale.'
+                  : 'Le chef d’orchestre compare ce code avec event_boost_ia_deux.risque_routier_code.',
+                risk_code: trigger.source === 'editorial_decision' ? 'EDITORIAL_DECISION' : riskCode,
+                risk_label: trigger.label,
+                source_field: trigger.source === 'editorial_decision' ? 'manual' : 'event_boost_ia_deux.risque_routier_code',
                 zones,
                 routes,
                 min_severity: minSeverity,
-                client_zone_match_required: trigger.source !== 'editorial_decision',
-                advanced_payload_filters: {
-                  record_types: recordTypes,
-                  management_types: managementTypes,
-                  work_types: workTypes,
-                  text_query: textQuery || null,
-                  fields_checked: [
-                    'payload.event_type',
-                    'payload.record_types',
-                    'payload.management_types',
-                    'payload.construction_work_type',
-                    'payload.road_maintenance_type',
-                    'payload.description',
-                    'payload.internal_note',
-                    'payload.location_descriptor',
-                    'payload.from_town',
-                    'payload.to_town',
-                    'payload.point_town'
-                  ]
-                }
+                client_zone_match_required: trigger.source !== 'editorial_decision'
               },
-              contents: [
-                {
-                  content_code: contentCode || toComposerCode(val('cc_code')),
-                  when: oncePerEvent ? 'first_detection_for_event && cooldown_ok' : 'cooldown_ok',
-                  channel
-                }
-              ],
               dispatch_rules: {
                 once_per_event: oncePerEvent,
                 group_similar_events: groupSimilar,
                 cooldown_hours: cooldownHours,
                 max_immediate_alerts_per_client_per_day: maxAlerts,
                 max_sms_per_client_per_day: maxSms,
-                channels_allowed: {
-                  email: channel === 'email',
-                  sms: channel === 'sms'
-                },
-                sms_delivery_model: channel === 'sms' ? 'sms_with_landing_page' : null,
-                raw_sms_details_forbidden: channel === 'sms'
+                channels_allowed: { email: channel === 'email', sms: channel === 'sms' }
               }
+            }
+          },
+          message_step: {
+            code: `${scenarioCode}_STEP_1`,
+            step_order: 1,
+            window_ref: val('cc_scenario_window_ref') || 'occurs_at',
+            window_min_hours: Number(val('cc_scenario_window_min_hours') || 0),
+            window_max_hours: Number(val('cc_scenario_window_max_hours') || 2),
+            logic_json: {
+              contents: [{
+                content_code: contentCode || toComposerCode(val('cc_code')),
+                when: oncePerEvent ? 'first_detection_for_event && cooldown_ok' : 'cooldown_ok',
+                channel
+              }],
+              priority: null
             }
           }
         };
@@ -3152,38 +3077,30 @@ async function deleteScenarioStep(id) {
     function updateComposerScenarioSummary() {
       const box = document.getElementById('cc_scenario_trigger_summary');
       if (!box) return;
+      const ctx = currentComposerContext();
+      if (ctx.triggerable === false) {
+        box.innerHTML = '<strong>Pas de scénario automatique :</strong><br>Ce code signifie que l’IA ne dispose pas d’un risque exploitable. Le message peut être conservé comme contenu, mais il ne doit pas être déclenché automatiquement.';
+        return;
+      }
       const draft = buildComposerScenarioDraft(toComposerCode(val('cc_code')));
       if (!draft || !draft.scenarios || !draft.scenarios.length) {
         box.innerHTML = '<span class="muted">Aucun scénario ne sera créé avec ce message.</span>';
         return;
       }
       const first = draft.scenarios[0];
-      const c = first.first_step.logic_json.trigger_conditions;
+      const c = first.risk_rule_step.logic_json.risk_conditions;
       const zones = c.zones.length ? c.zones.join(', ') : 'toutes zones / segments clients';
       const routes = c.routes.length ? c.routes.join(', ') : 'toutes routes';
-      const triggerLabels = draft.scenarios.map(d => d.scenario.trigger_label).join(', ');
-      const advanced = [];
-      if (c.advanced_payload_filters.record_types.length) advanced.push('types DATEX : ' + c.advanced_payload_filters.record_types.join(', '));
-      if (c.advanced_payload_filters.management_types.length) advanced.push('mesures : ' + c.advanced_payload_filters.management_types.join(', '));
-      if (c.advanced_payload_filters.work_types.length) advanced.push('travaux : ' + c.advanced_payload_filters.work_types.join(', '));
-      if (c.advanced_payload_filters.text_query) advanced.push('texte : “' + c.advanced_payload_filters.text_query + '”');
-
-      if (c.source === 'editorial_decision' || c.trigger_type_code === 'EDITORIAL_DECISION') {
-        box.innerHTML = `
-          <strong>Déclenchement prévu :</strong><br>
-          Ce scénario sera lancé par <strong>décision éditoriale</strong>, pas automatiquement par DATEX.<br>
-          Cible : <strong>${escapeHtml(zones)}</strong>. Le futur chef d’orchestre ou une action manuelle décidera du moment d’envoi.
-          <br><span class="muted">Utilise ce cas pour une campagne, un rappel sécurité, un message client ou un test.</span>
-        `;
+      const labels = draft.scenarios.map(d => d.scenario.trigger_label).join(', ');
+      if (c.risk_code === 'EDITORIAL_DECISION') {
+        box.innerHTML = `<strong>Déclenchement prévu :</strong><br>Décision éditoriale manuelle. Cible : <strong>${escapeHtml(zones)}</strong>. Le futur chef d’orchestre ou une action manuelle décidera du moment d’envoi.`;
         return;
       }
-
       box.innerHTML = `
         <strong>Déclenchement prévu :</strong><br>
-        ${draft.scenarios.length} scénario(s) seront créés pour couvrir : <strong>${escapeHtml(triggerLabels)}</strong>.<br>
-        Zone : <strong>${escapeHtml(zones)}</strong> — route : <strong>${escapeHtml(routes)}</strong> — gravité minimale : <strong>${escapeHtml(c.min_severity)}</strong>.
-        ${advanced.length ? '<br>Filtres avancés : <strong>' + escapeHtml(advanced.join(' · ')) + '</strong>.' : ''}
-        <br><span class="muted">Les réglages avancés restent repliés pour garder le formulaire lisible côté rédaction.</span>
+        ${draft.scenarios.length} scénario(s) associé(s) à : <strong>${escapeHtml(labels)}</strong>.<br>
+        Le chef d’orchestre cherchera <code>event_boost_ia_deux.risque_routier_code</code> = <strong>${escapeHtml(c.risk_code)}</strong>${draft.scenarios.length > 1 ? ' (ou les autres risques sélectionnés)' : ''}.<br>
+        Zone : <strong>${escapeHtml(zones)}</strong> — route : <strong>${escapeHtml(routes)}</strong> — gravité minimale événement : <strong>${escapeHtml(c.min_severity)}</strong>.
       `;
     }
 
@@ -3198,7 +3115,7 @@ async function deleteScenarioStep(id) {
       const payload = {
         code: wanted,
         label: trigger.label || wanted,
-        source_kind: trigger.source || 'admin-composer',
+        source_kind: trigger.source || 'ai_risk_normalized',
         default_priority: Number(priority || 80),
         is_active: true
       };
@@ -3224,15 +3141,13 @@ async function deleteScenarioStep(id) {
 
       for (const item of draft.scenarios) {
         if (!item.scenario.code) throw new Error('Le code scénario est obligatoire.');
-        if (existingCodes.has(item.scenario.code)) {
-          throw new Error('Le code scénario existe déjà : ' + item.scenario.code + '. Modifiez le code générique ou décochez des déclencheurs.');
-        }
+        if (existingCodes.has(item.scenario.code)) throw new Error('Le code scénario existe déjà : ' + item.scenario.code + '.');
         existingCodes.add(item.scenario.code);
 
         const triggerTypeId = await ensureComposerTriggerType({
           code: item.scenario.trigger_type_code,
           label: item.scenario.trigger_label,
-          source: item.first_step.logic_json.trigger_conditions.source
+          source: item.risk_rule_step.logic_json.risk_conditions.source_field === 'manual' ? 'editorial_decision' : 'ai_risk_normalized'
         }, item.scenario.priority);
 
         const scenarioPayload = {
@@ -3244,29 +3159,26 @@ async function deleteScenarioStep(id) {
           active: true
         };
 
-        const { data: scenario, error: scenarioError } = await db()
-          .from('scenarios')
-          .insert(scenarioPayload)
-          .select('id,code')
-          .maybeSingle();
+        const { data: scenario, error: scenarioError } = await db().from('scenarios').insert(scenarioPayload).select('id,code').maybeSingle();
         if (scenarioError) throw scenarioError;
         if (!scenario || !scenario.id) throw new Error('Le scénario a été créé sans identifiant retourné.');
 
-        const stepPayload = {
-          scenario_id: scenario.id,
-          code: item.first_step.code,
-          step_order: 1,
-          window_ref: item.first_step.window_ref,
-          window_min_hours: item.first_step.window_min_hours,
-          window_max_hours: item.first_step.window_max_hours,
-          logic_json: item.first_step.logic_json,
-          active: true
-        };
+        for (const step of [item.risk_rule_step, item.message_step]) {
+          const payload = {
+            scenario_id: scenario.id,
+            code: step.code,
+            step_order: step.step_order,
+            window_ref: step.window_ref,
+            window_min_hours: step.window_min_hours,
+            window_max_hours: step.window_max_hours,
+            logic_json: step.logic_json,
+            active: true
+          };
+          const { error } = await db().from('scenario_steps').insert(payload);
+          if (error) throw error;
+        }
 
-        const { error: stepError } = await db().from('scenario_steps').insert(stepPayload);
-        if (stepError) throw stepError;
-
-        created.push({ scenario, step: stepPayload, draft: item });
+        created.push({ scenario, draft: item });
       }
 
       return { created, count: created.length, scenario: created[0]?.scenario, draft };
@@ -3360,44 +3272,44 @@ async function deleteScenarioStep(id) {
 
     function defaultComposerSubject(ctx, role, channel) {
       if (channel !== 'email') return '';
-      if (ctx.topic_code === 'road_closure') return 'Route fermée sur {road_number} : anticipez les déplacements';
-      if (ctx.topic_code === 'lane_closure') return 'Voie fermée sur {road_number} : prudence dans le secteur';
-      if (ctx.topic_code === 'alternating_traffic') return 'Circulation alternée sur {road_number} : adaptez votre conduite';
-      if (ctx.topic_code === 'road_detour') return 'Déviation sur {road_number} : vérifiez votre itinéraire';
-      if (ctx.topic_code === 'traffic_restriction') return 'Restriction de circulation sur {road_number}';
-      if (ctx.topic_code === 'storm') return 'Risque météo sur {zone_cible} : prudence sur la route';
-      if (ctx.topic_code === 'new_radar') return 'Nouveau radar : rappel de vigilance sur {lieu}';
-      if (ctx.topic_code === 'speed_limit_change') return 'Changement de limitation dans le {territory}';
-      return `${ctx.label} : message de prévention`;
+      const subjects = {
+        RISK_HEAVY_WEIGHT: 'Tonnage / ouvrage sur {road_number} : vérifiez l’itinéraire',
+        RISK_WORKZONE_STAFF: 'Personnel sur chaussée sur {road_number} : vigilance renforcée',
+        RISK_LANE_MERGE: 'Rabattement de voie sur {road_number} : anticipez les changements de file',
+        RISK_CONTRAFLOW: 'Circulation en contre-flux sur {road_number} : prudence',
+        RISK_LANE_NARROWING: 'Voie rétrécie sur {road_number} : attention aux heurts latéraux',
+        RISK_FALLING_ROCKS: 'Risque de chutes de pierres sur {road_number}',
+        RISK_ALTERNATE_TRAFFIC: 'Circulation alternée sur {road_number} : anticipez les arrêts',
+        RISK_RAMP_MANEUVER: 'Manœuvre / déviation sur {road_number} : vérifiez votre trajectoire',
+        RISK_NONE: 'Information routière à qualifier',
+        EDITORIAL_DECISION: 'Message de prévention MobiSûr'
+      };
+      return subjects[ctx.topic_code] || `${ctx.label} : message de prévention`;
     }
 
     function defaultComposerSmsAlert(ctx, role) {
-      if (ctx.topic_code === 'road_closure') return 'MobiSûr : route fermée sur {road_number} ({zone_cible}). Infos et consignes : {info_url}';
-      if (ctx.topic_code === 'road_detour') return 'MobiSûr : déviation signalée sur {road_number}. Infos et consignes : {info_url}';
-      if (ctx.topic_code === 'lane_closure') return 'MobiSûr : voie fermée sur {road_number}. Infos et consignes : {info_url}';
-      if (ctx.topic_code === 'alternating_traffic') return 'MobiSûr : circulation alternée sur {road_number}. Infos : {info_url}';
-      if (ctx.topic_code === 'storm') return 'MobiSûr : risque météo sur {zone_cible}. Conseils de conduite : {info_url}';
-      if (ctx.topic_code === 'new_radar') return 'MobiSûr : nouveau radar signalé sur {lieu}. Infos : {info_url}';
-      return 'MobiSûr : alerte prévention dans votre zone. Infos et consignes : {info_url}';
+      if (ctx.topic_code === 'EDITORIAL_DECISION') return 'MobiSûr : message de prévention. Infos et conseils : {info_url}';
+      if (ctx.topic_code === 'RISK_WORKZONE_STAFF') return 'MobiSûr : personnel sur chaussée sur {road_number}. Ralentissez. Infos : {info_url}';
+      if (ctx.topic_code === 'RISK_FALLING_ROCKS') return 'MobiSûr : risque de chutes de pierres sur {road_number}. Infos : {info_url}';
+      if (ctx.topic_code === 'RISK_LANE_MERGE') return 'MobiSûr : rabattement de voie sur {road_number}. Anticipez. Infos : {info_url}';
+      return `MobiSûr : ${ctx.label}. Infos et consignes : {info_url}`;
     }
 
     function defaultComposerBody(ctx, role, channel) {
+      if (ctx.topic_code === 'EDITORIAL_DECISION') {
+        return '<p>Message de prévention à destination de <strong>{audience}</strong>.</p><p>Thème : <strong>{theme}</strong>.</p><p>Adaptez ici la consigne et le contexte de votre campagne.</p>';
+      }
       const cta = role.type === 'operational_cta'
         ? 'Action recommandée : relayez cette information aux collaborateurs concernés avant leurs trajets.'
-        : 'Consigne MobiSûr : invitez les conducteurs à anticiper, réduire leur vitesse à l’approche de la zone et suivre la signalisation temporaire.';
-
+        : 'Consigne MobiSûr : invitez les conducteurs à anticiper la zone, adapter leur allure et augmenter leurs distances de sécurité.';
       const intro = channel === 'sms'
         ? '<p>Cette page détaille l’alerte envoyée par SMS.</p>'
-        : '<p>Un événement routier est signalé sur <strong>{road_number}</strong>, dans la zone <strong>{zone_cible}</strong>.</p>';
-
+        : '<p>La moulinette IA a identifié le risque <strong>{risque_routier}</strong> sur <strong>{road_number}</strong>, dans la zone <strong>{zone_cible}</strong>.</p>';
       return `${intro}
-
-<p>{description}</p>
-
+<p><strong>Cause identifiée :</strong> {cause_exacte}</p>
+<p>{message_redige}</p>
 <p><strong>Période prévue :</strong> du {start_at} au {end_at}.</p>
-
-<p>{detour_description}</p>
-
+<p>{detour_info}</p>
 <p>${cta}</p>`;
     }
 
@@ -3409,6 +3321,8 @@ async function deleteScenarioStep(id) {
       const base = {
         ...timing.policy,
         mobisur_context: ctx.topic_code,
+        risk_code: ctx.risk_code || null,
+        risk_source_field: ctx.risk_code ? 'event_boost_ia_deux.risque_routier_code' : null,
         trigger_type_code: ctx.trigger_type_code,
         role: role.type,
         exclude_realtime_traffic: true,
@@ -3507,7 +3421,7 @@ async function deleteScenarioStep(id) {
     }
 
     function clearComposerForm() {
-      ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_scenario_label', 'cc_scenario_code', 'cc_scenario_extra_trigger_codes', 'cc_scenario_zones', 'cc_scenario_routes', 'cc_scenario_record_types', 'cc_scenario_management_types', 'cc_scenario_work_types', 'cc_scenario_text_query'].forEach(id => {
+      ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_scenario_label', 'cc_scenario_code', 'cc_scenario_zones', 'cc_scenario_routes'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
@@ -3517,7 +3431,7 @@ async function deleteScenarioStep(id) {
       if (once) once.checked = true;
       const group = document.getElementById('cc_scenario_group_similar');
       if (group) group.checked = true;
-      selectComposerRoadTriggers('current');
+      selectComposerRiskTriggers('current');
       setComposerBodyValue('');
       updateComposerGeneratedFields({ preserveText: false, preserveCode: false });
       updateComposerScenarioVisibility();
@@ -3654,7 +3568,7 @@ async function deleteScenarioStep(id) {
         updatePlannerPreview();
       }
       if (e.target && e.target.id === 'cv_search_query') renderContentVersions();
-      if (e.target && ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_body', 'cc_scenario_label', 'cc_scenario_code', 'cc_scenario_extra_trigger_codes', 'cc_scenario_zones', 'cc_scenario_routes', 'cc_scenario_record_types', 'cc_scenario_management_types', 'cc_scenario_work_types', 'cc_scenario_text_query', 'cc_scenario_priority', 'cc_scenario_window_min_hours', 'cc_scenario_window_max_hours', 'cc_scenario_cooldown_hours', 'cc_scenario_max_alerts_day', 'cc_scenario_max_sms_day'].includes(e.target.id)) {
+      if (e.target && ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_body', 'cc_scenario_label', 'cc_scenario_code', 'cc_scenario_zones', 'cc_scenario_routes', 'cc_scenario_priority', 'cc_scenario_window_min_hours', 'cc_scenario_window_max_hours', 'cc_scenario_cooldown_hours', 'cc_scenario_max_alerts_day', 'cc_scenario_max_sms_day'].includes(e.target.id)) {
         updateComposerScenarioSummary();
         renderComposerPreview();
       }

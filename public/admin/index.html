@@ -293,6 +293,16 @@
     .danger-help { border-left:5px solid #b91c1c; }
     @media (max-width:1050px) { .writer-choice-row, .scenario-rule-grid, .scenario-rule-grid-2, .content-version-search, .message-library-search { grid-template-columns:1fr; } }
 
+  
+    .taxonomy-panel{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff;margin:10px 0 12px;}
+    .taxonomy-panel h5{margin:0 0 8px;font-size:14px;}
+    .taxonomy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:280px;overflow:auto;padding:2px;}
+    .taxonomy-option{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:8px;background:#fffdfa;font-weight:400;}
+    .taxonomy-option input{width:auto;margin:2px 0 0;flex:0 0 auto;}
+    .taxonomy-option strong{display:block;font-size:12px;}
+    .taxonomy-option span{display:block;color:var(--muted);font-size:11px;line-height:1.3;}
+    .rule-logic-grid{display:grid;grid-template-columns:1fr 150px;gap:10px;align-items:end;}
+    @media(max-width:900px){.taxonomy-grid,.rule-logic-grid{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
@@ -330,28 +340,24 @@
       <section id="content-composer" class="page active">
         <div id="composerNotice"></div>
         <div class="notice info danger-zone-soft">
-          <strong>Assistant de création de contenu</strong><br>
-          Cette page crée automatiquement le <strong>message</strong> dans <code>content_items</code> et sa première <strong>version</strong> dans <code>content_versions</code>. Pour les SMS, on ne rédige pas une information brute : on crée une <strong>alerte courte</strong> qui renvoie vers une <strong>page d’information HTML</strong>.
+          <strong>Assistant de création de conseils</strong><br>
+          L'information factuelle liée à l'événement sera rédigée en amont. Ici, vous créez des <strong>conseils de prévention réutilisables</strong>, puis vous pouvez les associer à un scénario déclenché par une ou plusieurs <strong>causes</strong> et <strong>conséquences possibles</strong>.
         </div>
-
         <div class="composer-layout">
           <div class="card">
-            <div class="composer-section-title">
-              <h2>Nouveau message</h2>
-              <span class="chip">production simple</span>
-            </div>
+            <div class="composer-section-title"><h2>Nouveau conseil</h2><span class="chip">contenu réutilisable</span></div>
 
             <div class="composer-step">
-              <h3><span class="number">1</span>Risque routier traité</h3>
-              <label>Risque routier normalisé</label>
+              <h3><span class="number">1</span>Type de conseil</h3>
+              <label>Conseil à préparer</label>
               <select id="cc_context"></select>
-              <div class="composer-hint">Choisis le risque routier normalisé produit par la moulinette IA. Le scénario sera ensuite associé à <code>event_boost_ia_deux.risque_routier_code</code>, quelle que soit la source ayant permis d’identifier le risque. Pour un envoi décidé manuellement par MobiSûr, choisis <strong>Décision éditoriale / envoi volontaire</strong>.</div>
+              <div class="composer-hint">Choisissez le type de conseil que vous souhaitez pouvoir réutiliser dans plusieurs scénarios.</div>
               <div id="cc_context_help" class="composer-hint"></div>
             </div>
 
             <div class="composer-step">
-              <h3><span class="number">2</span>Rôle du message</h3>
-              <label>Ce message sert à</label>
+              <h3><span class="number">2</span>Rôle du conseil</h3>
+              <label>Ce conseil sert à</label>
               <select id="cc_role"></select>
               <div id="cc_role_help" class="composer-hint"></div>
             </div>
@@ -359,184 +365,85 @@
             <div class="composer-step">
               <h3><span class="number">3</span>Canal et moment</h3>
               <div class="composer-mini-grid">
-                <div>
-                  <label>Canal</label>
-                  <select id="cc_channel">
-                    <option value="email">Email</option>
-                    <option value="sms">SMS</option>
-                  </select>
-                </div>
-                <div>
-                  <label>Moment d’utilisation</label>
-                  <select id="cc_timing"></select>
-                </div>
+                <div><label>Canal</label><select id="cc_channel"><option value="email">Email</option><option value="sms">SMS</option></select></div>
+                <div><label>Moment d'utilisation</label><select id="cc_timing"></select></div>
               </div>
               <div id="cc_timing_help" class="composer-hint"></div>
             </div>
 
             <div class="composer-step">
-              <h3><span class="number">4</span>Texte du message</h3>
-              <label>Nom interne du message</label>
-              <input id="cc_title" placeholder="Ex. Alerte route fermée pour conducteurs">
-              <label>Code technique généré</label>
-              <input id="cc_code" placeholder="ROAD_CLOSURE_RISK_EMAIL">
-              <div class="composer-hint">Le code est généré automatiquement mais reste modifiable si besoin.</div>
-
-              <div id="cc_subject_wrap">
-                <label>Objet email</label>
-                <input id="cc_subject" placeholder="Objet du message">
-              </div>
-
+              <h3><span class="number">4</span>Rédaction du conseil</h3>
+              <label>Nom interne du conseil</label><input id="cc_title" placeholder="Ex. Anticiper un rabattement de voie">
+              <label>Code technique généré</label><input id="cc_code" placeholder="ADVICE_LANE_MERGE_EMAIL">
+              <div class="composer-hint">Le code est généré automatiquement mais reste modifiable.</div>
+              <div id="cc_subject_wrap" class="hidden"><input id="cc_subject"></div>
               <div id="cc_sms_wrap" class="hidden">
-                <label>Texte court du SMS</label>
-                <textarea id="cc_sms_text" rows="3" placeholder="Ex. MobiSûr : alerte sur {road_number}. Détails : {info_url}"></textarea>
-                <div class="composer-hint">Le SMS doit rester court et renvoyer vers une page d’information. Insère toujours <code>{info_url}</code> ou <code>{short_url}</code>.</div>
+                <label>Conseil court pour SMS</label>
+                <textarea id="cc_sms_text" rows="3" placeholder="Ex. Anticipez votre rabattement, signalez votre manœuvre et évitez les changements de file tardifs."></textarea>
                 <div class="small muted" id="cc_sms_counter">0 caractère</div>
               </div>
-
-              <label id="cc_body_label">Corps du message</label>
-              <textarea id="cc_body" placeholder="Texte avec variables comme {road_number}, {description}, {start_at}"></textarea>
-              <div id="cc_body_help" class="composer-hint">Éditeur HTML TinyMCE : ce contenu sera affiché dans un navigateur, avec mise en forme.</div>
-              <div class="row">
-                <button type="button" class="secondary" onclick="fillComposerDefaultText()">Réinitialiser le texte proposé</button>
-                <button type="button" class="secondary" onclick="renderComposerPreview()">Mettre à jour l’aperçu</button>
+              <div id="cc_body_wrap">
+                <label id="cc_body_label">Texte du conseil</label>
+                <textarea id="cc_body" placeholder="Ex. Réduisez votre vitesse avant la zone et augmentez la distance de sécurité."></textarea>
+                <div id="cc_body_help" class="composer-hint">Rédigez uniquement le conseil ou la consigne de prévention. Ne répétez pas les faits de l'événement et n'utilisez pas de variables.</div>
               </div>
+              <div class="row"><button type="button" class="secondary" onclick="fillComposerDefaultText()">Proposer un exemple de conseil</button><button type="button" class="secondary" onclick="renderComposerPreview()">Mettre à jour l'aperçu</button></div>
             </div>
 
             <div class="composer-step">
-              <h3><span class="number">5</span>Déclenchement du scénario</h3>
-              <div class="composer-hint">
-                Un message peut rester un simple contenu ou devenir un scénario. Le déclenchement automatique se fait désormais sur le <strong>risque routier normalisé</strong> identifié par l’IA, et non sur la famille DATEX brute.
-              </div>
-
+              <h3><span class="number">5</span>Association à un scénario</h3>
+              <div class="composer-hint">Le scénario peut rester manuel ou être déclenché par la classification de l'événement : <strong>cause(s) détectée(s)</strong> et <strong>conséquence(s) possible(s)</strong>.</div>
               <div class="writer-choice-row">
-                <label class="writer-choice">
-                  <input type="radio" name="cc_scenario_choice" value="none" checked onchange="setComposerScenarioChoice('none')">
-                  <div><strong>Message seul</strong><span>Créer seulement le message. Aucun scénario n’est créé.</span></div>
-                </label>
-                <label class="writer-choice">
-                  <input type="radio" name="cc_scenario_choice" value="simple" onchange="setComposerScenarioChoice('simple')">
-                  <div><strong>Scénario simple</strong><span>Déclenchement sur le risque routier choisi, avec zone et route optionnelles.</span></div>
-                </label>
-                <label class="writer-choice">
-                  <input type="radio" name="cc_scenario_choice" value="advanced" onchange="setComposerScenarioChoice('advanced')">
-                  <div><strong>Plusieurs risques</strong><span>Le même message peut être associé à plusieurs risques routiers normalisés.</span></div>
-                </label>
+                <label class="writer-choice"><input type="radio" name="cc_scenario_choice" value="none" checked onchange="setComposerScenarioChoice('none')"><div><strong>Conseil seul</strong><span>Créer le conseil sans scénario.</span></div></label>
+                <label class="writer-choice"><input type="radio" name="cc_scenario_choice" value="simple" onchange="setComposerScenarioChoice('simple')"><div><strong>Scénario automatique</strong><span>Déclenché par les causes / conséquences choisies.</span></div></label>
+                <label class="writer-choice"><input type="radio" name="cc_scenario_choice" value="editorial" onchange="setComposerScenarioChoice('editorial')"><div><strong>Décision éditoriale</strong><span>Déclenchement volontaire, sans classification automatique.</span></div></label>
               </div>
               <input type="checkbox" id="cc_make_scenario" class="hidden">
-
               <div id="cc_scenario_wrap" class="composer-scenario-box hidden">
                 <div class="writer-rule-summary" id="cc_scenario_trigger_summary"></div>
-
+                <div class="composer-scenario-grid-2">
+                  <div><label>Nom du scénario</label><input id="cc_scenario_label" placeholder="Ex. Rabattement + collision latérale"></div>
+                  <div><label>Code scénario</label><input id="cc_scenario_code" placeholder="SC_CAUSE_CONSEQ_EMAIL"></div>
+                </div>
+                <div id="cc_ai_rule_zone">
+                  <div class="taxonomy-panel">
+                    <div class="rule-logic-grid"><h5>Causes à détecter</h5><div><label>Condition</label><select id="cc_cause_operator"><option value="any">Au moins une (ANY)</option><option value="all">Toutes (ALL)</option></select></div></div>
+                    <div id="cc_cause_catalog" class="taxonomy-grid"></div>
+                  </div>
+                  <div class="taxonomy-panel">
+                    <div class="rule-logic-grid"><h5>Conséquences possibles</h5><div><label>Condition</label><select id="cc_consequence_operator"><option value="any">Au moins une (ANY)</option><option value="all">Toutes (ALL)</option></select></div></div>
+                    <div id="cc_consequence_catalog" class="taxonomy-grid"></div>
+                  </div>
+                  <div class="help">Une dimension laissée vide n'est pas filtrante. Si vous sélectionnez causes + conséquences, les deux dimensions doivent correspondre.</div>
+                </div>
                 <div class="writer-soft-zone">
-                  <h4>Quand ce scénario se déclenche-t-il ?</h4>
-                  <div class="composer-scenario-grid-2">
-                    <div>
-                      <label>Nom du scénario</label>
-                      <input id="cc_scenario_label" placeholder="Ex. Rabattement de voie — IDF">
-                    </div>
-                    <div>
-                      <label>Code scénario</label>
-                      <input id="cc_scenario_code" placeholder="SC_RISK_LANE_MERGE_EMAIL">
-                    </div>
-                  </div>
-
-                  <label>Départements / zones concernés</label>
-                  <input id="cc_scenario_zones" placeholder="Ex. 95,75 — laisser vide pour toutes les zones client compatibles">
-                  <div class="composer-scenario-muted">Plusieurs valeurs possibles, séparées par virgule ou point-virgule. Vide = toutes les zones compatibles avec le client.</div>
-
-                  <label>Routes concernées</label>
-                  <input id="cc_scenario_routes" placeholder="Ex. N118,N20 — laisser vide pour toutes les routes">
-
+                  <div class="composer-scenario-grid-2"><div><label>Départements / zones</label><input id="cc_scenario_zones" placeholder="Ex. 95,75 — vide = toutes"></div><div><label>Routes</label><input id="cc_scenario_routes" placeholder="Ex. N118,N20 — vide = toutes"></div></div>
                   <div class="composer-scenario-grid">
-                    <div>
-                      <label>Gravité minimale</label>
-                      <select id="cc_scenario_min_severity">
-                        <option value="info">Information</option>
-                        <option value="low">Faible</option>
-                        <option value="medium" selected>Moyenne</option>
-                        <option value="high">Élevée</option>
-                        <option value="critical">Critique</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label>Type de scénario</label>
-                      <select id="cc_scenario_mode">
-                        <option value="single">Message simple</option>
-                        <option value="sequence">Séquence temporelle</option>
-                        <option value="digest">Regroupement quotidien</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label>Priorité</label>
-                      <input id="cc_scenario_priority" type="number" min="0" max="100" value="80">
-                    </div>
+                    <div><label>Gravité minimale</label><select id="cc_scenario_min_severity"><option value="info">Information</option><option value="low">Faible</option><option value="medium" selected>Moyenne</option><option value="high">Élevée</option><option value="critical">Critique</option></select></div>
+                    <div><label>Type de scénario</label><select id="cc_scenario_mode"><option value="single">Conseil seul</option><option value="sequence">Séquence temporelle</option><option value="digest">Regroupement quotidien</option></select></div>
+                    <div><label>Priorité</label><input id="cc_scenario_priority" type="number" min="0" max="100" value="80"></div>
                   </div>
                 </div>
-
-                <div class="writer-soft-zone" id="cc_trigger_simple_zone">
-                  <h4>Risque déclencheur</h4>
-                  <div class="composer-hint">En scénario simple, le risque choisi en haut du formulaire est utilisé. En mode « Plusieurs risques », sélectionne ici les autres risques qui doivent partager le même message.</div>
-                  <div class="composer-trigger-list" id="cc_scenario_trigger_catalog"></div>
-                  <div class="row">
-                    <button type="button" class="secondary" onclick="selectComposerRiskTriggers('current')">Seulement le risque choisi</button>
-                    <button type="button" class="secondary" onclick="selectComposerRiskTriggers('all')">Tous les risques exploitables</button>
-                    <button type="button" class="secondary" onclick="selectComposerRiskTriggers('none')">Tout décocher</button>
-                  </div>
-                </div>
-
-                <div class="writer-advanced">
-                  <details>
-                    <summary>Timing et garde-fous anti-saturation</summary>
-                    <div class="composer-scenario-grid" style="margin-top:10px;">
-                      <div>
-                        <label>Référence temporelle</label>
-                        <select id="cc_scenario_window_ref">
-                          <option value="occurs_at">Détection / mise à jour</option>
-                          <option value="predicted_start_at">Début prévu</option>
-                          <option value="predicted_end_at">Fin prévue</option>
-                          <option value="date_evenement">Date d’événement</option>
-                        </select>
-                      </div>
-                      <div><label>Fenêtre min. heures</label><input id="cc_scenario_window_min_hours" type="number" value="0"></div>
-                      <div><label>Fenêtre max. heures</label><input id="cc_scenario_window_max_hours" type="number" value="2"></div>
-                    </div>
-                    <div class="composer-scenario-grid">
-                      <div><label>Cooldown heures</label><input id="cc_scenario_cooldown_hours" type="number" min="0" value="24"></div>
-                      <div><label>Alertes max / client / jour</label><input id="cc_scenario_max_alerts_day" type="number" min="1" value="2"></div>
-                      <div><label>SMS max / client / jour</label><input id="cc_scenario_max_sms_day" type="number" min="0" value="1"></div>
-                    </div>
-                    <label class="inline-check"><input type="checkbox" id="cc_scenario_once_per_event" checked><span>Ne pas envoyer deux fois ce scénario pour le même événement</span></label>
-                    <label class="inline-check"><input type="checkbox" id="cc_scenario_group_similar" checked><span>Regrouper / limiter les événements similaires sur la même zone</span></label>
-                  </details>
-                </div>
+                <div class="writer-advanced"><details><summary>Timing et garde-fous anti-saturation</summary>
+                  <div class="composer-scenario-grid" style="margin-top:10px;"><div><label>Référence temporelle</label><select id="cc_scenario_window_ref"><option value="occurs_at">Détection / mise à jour</option><option value="predicted_start_at">Début prévu</option><option value="predicted_end_at">Fin prévue</option><option value="date_evenement">Date d'événement</option></select></div><div><label>Fenêtre min. heures</label><input id="cc_scenario_window_min_hours" type="number" value="0"></div><div><label>Fenêtre max. heures</label><input id="cc_scenario_window_max_hours" type="number" value="2"></div></div>
+                  <div class="composer-scenario-grid"><div><label>Cooldown heures</label><input id="cc_scenario_cooldown_hours" type="number" min="0" value="24"></div><div><label>Alertes max / client / jour</label><input id="cc_scenario_max_alerts_day" type="number" min="1" value="2"></div><div><label>SMS max / client / jour</label><input id="cc_scenario_max_sms_day" type="number" min="0" value="1"></div></div>
+                  <label class="inline-check"><input type="checkbox" id="cc_scenario_once_per_event" checked><span>Ne pas envoyer deux fois ce scénario pour le même événement</span></label>
+                  <label class="inline-check"><input type="checkbox" id="cc_scenario_group_similar" checked><span>Regrouper / limiter les événements similaires sur la même zone</span></label>
+                </details></div>
               </div>
             </div>
 
             <div class="composer-step">
               <h3><span class="number">6</span>Publication</h3>
-              <label>Statut de la version</label>
-              <select id="cc_status">
-                <option value="draft">Brouillon</option>
-                <option value="published" selected>Publié</option>
-              </select>
-              <div class="row">
-                <button type="button" onclick="createComposerContent()">Créer le message</button>
-                <button type="button" class="secondary" onclick="clearComposerForm()">Vider</button>
-              </div>
+              <label>Statut de la version</label><select id="cc_status"><option value="draft">Brouillon</option><option value="published" selected>Publié</option></select>
+              <div class="row"><button type="button" onclick="createComposerContent()">Créer le conseil</button><button type="button" class="secondary" onclick="clearComposerForm()">Vider</button></div>
             </div>
           </div>
-
           <aside class="card" style="position:sticky; top:18px;">
-            <h2>Variables disponibles</h2>
-            <p class="muted small">Cliquez sur une variable pour l’insérer dans le champ actuellement sélectionné.</p>
-            <div id="cc_variables" class="composer-vars"></div>
-
-            <h3 style="margin-top:18px;">Aperçu avec exemple</h3>
-            <div id="cc_preview" class="composer-preview">L’aperçu apparaîtra ici.</div>
-
-            <h3 style="margin-top:18px;">Règles générées</h3>
-            <div id="cc_policy_preview" class="mono composer-policy">{}</div>
+            <h2>Aperçu du conseil</h2>
+            <p class="muted small">L'information factuelle de l'événement sera ajoutée séparément au moment de l'envoi. Ici, vérifiez uniquement la qualité du conseil réutilisable.</p>
+            <div id="cc_preview" class="composer-preview">L'aperçu apparaîtra ici.</div>
+            <h3 style="margin-top:18px;">Règle du scénario</h3><div id="cc_policy_preview" class="mono composer-policy">{}</div>
           </aside>
         </div>
       </section>
@@ -547,9 +454,9 @@
           <strong>Comment utiliser l’interface</strong><br>
           1. Créez un <strong>message</strong> depuis “Créer un message”.<br>
           2. Ajoutez ensuite une <strong>version</strong> si le texte doit évoluer.<br>
-          3. La moulinette IA normalise le risque dans <code>event_boost_ia_deux.risque_routier_code</code>.<br>
-          4. Un <strong>scénario</strong> est associé à un ou plusieurs codes <code>RISK_*</code>.<br>
-          5. Ajoutez ensuite une ou plusieurs <strong>étapes d’envoi</strong>. Une décision éditoriale reste possible hors risque automatique.
+          3. L'analyse amont classe chaque événement avec une ou plusieurs <strong>causes</strong> et <strong>conséquences possibles</strong>.<br>
+          4. Un <strong>scénario</strong> définit les combinaisons de causes / conséquences qui l'activent.<br>
+          5. Ajoutez ensuite une ou plusieurs <strong>étapes d'envoi</strong>. Une décision éditoriale reste possible hors déclenchement automatique.
         </div>
         <div class="grid-3">
           <div class="card"><div class="muted">Messages</div><div class="kpi" id="kpiContents">0</div><div class="small muted">Messages créés depuis “Créer un message”</div></div>
@@ -564,7 +471,7 @@
           <h3>Chaîne métier</h3>
           <div class="grid-3">
             <div class="mono">Sources (DATEX, météo…) → événements</div>
-            <div class="mono">IA → risque_routier_code normalisé → clients concernés</div>
+            <div class="mono">Analyse → causes + conséquences → clients concernés</div>
             <div class="mono">Risque → scénario → étapes → messages → envois finaux</div>
           </div>
         </div>
@@ -584,7 +491,7 @@
           <div class="message-library-search">
             <div>
               <label>Rechercher un message</label>
-              <input id="ml_search_query" placeholder="Ex. rabattement, RISK_LANE_MERGE, conducteur…">
+              <input id="ml_search_query" placeholder="Ex. rabattement, distance de sécurité, chantier…">
             </div>
             <div>
               <label>Canal</label>
@@ -664,7 +571,7 @@
         <div class="grid-2">
           <div class="card">
             <h2>Créer un type de déclencheur</h2>
-            <div class="help">Les nouveaux scénarios automatiques utilisent les codes de risque normalisés <code>RISK_*</code>. Cette page reste disponible pour administrer les types techniques et les anciens déclencheurs.</div>
+            <div class="help">Les nouveaux scénarios automatiques utilisent le déclencheur générique <code>AI_RISK_CLASSIFICATION</code>. Les causes et conséquences sont stockées dans les règles du scénario.</div>
             <label>Code technique</label>
             <input id="tt_code" placeholder="Ex. STORM_ALERT">
             <label>Libellé</label>
@@ -689,73 +596,25 @@
         <div class="grid-2">
           <div class="card">
             <h2>Créer ou modifier un scénario</h2>
-            <div class="notice info">
-              Un scénario répond à deux questions : <strong>quel risque routier le déclenche ?</strong> puis <strong>quels messages sont envoyés ?</strong><br>
-              Le risque est lu dans <code>event_boost_ia_deux.risque_routier_code</code>. La source amont peut évoluer (DATEX, météo, autre) sans changer le scénario.
-            </div>
-
-            <label>Nom interne court</label>
-            <input id="sc_code" placeholder="Ex. SCN_RISK_LANE_MERGE_IDF">
-
-            <label>Nom visible dans l’interface</label>
-            <input id="sc_label" placeholder="Ex. Rabattement / neutralisation de voie — Île-de-France">
-
-            <label>Risque routier déclencheur</label>
-            <select id="sc_trigger_type_id"></select>
-
-            <label>Type de scénario</label>
-            <select id="sc_aggregation_mode">
-              <option>Message simple</option>
-              <option>Séquence temporelle</option>
-              <option>Regroupement quotidien</option>
-            </select>
+            <div class="notice info">Un scénario répond à deux questions : <strong>quelles causes / conséquences le déclenchent ?</strong> puis <strong>quels conseils sont envoyés ?</strong><br>Les règles lisent <code>event_boost_ia_deux.cause_codes</code> et <code>consequence_codes</code>. La source amont peut évoluer sans changer le scénario.</div>
+            <label>Nom interne court</label><input id="sc_code" placeholder="Ex. SCN_MERGE_SIDE_COLLISION_IDF">
+            <label>Nom visible dans l'interface</label><input id="sc_label" placeholder="Ex. Rabattement + risque de collision latérale — IDF">
+            <label>Mode de déclenchement</label><select id="sc_trigger_type_id"></select>
+            <label>Type de scénario</label><select id="sc_aggregation_mode"><option value="Message simple">Conseil seul</option><option>Séquence temporelle</option><option>Regroupement quotidien</option></select>
             <div id="scenarioAggregationHelp" class="notice info small"></div>
-
-            <label>Priorité</label>
-            <input id="sc_priority" type="number" value="80">
-
+            <label>Priorité</label><input id="sc_priority" type="number" value="80">
             <div class="scenario-rule-card">
               <h3>Règles de déclenchement</h3>
-              <div class="help">Exemple : le risque « rabattement / neutralisation de voie » dans les départements 95 ou 75 déclenche ce scénario. Laisser vide = toutes les valeurs compatibles.</div>
-              <div class="scenario-rule-grid">
-                <div><label>Départements / zones</label><input id="sc_rule_zones" placeholder="Ex. 95,75"></div>
-                <div><label>Routes</label><input id="sc_rule_routes" placeholder="Ex. N118,N20"></div>
-                <div>
-                  <label>Gravité minimale</label>
-                  <select id="sc_rule_min_severity">
-                    <option value="info">Information</option>
-                    <option value="low">Faible</option>
-                    <option value="medium" selected>Moyenne</option>
-                    <option value="high">Élevée</option>
-                    <option value="critical">Critique</option>
-                  </select>
-                </div>
+              <div id="sc_ai_rule_zone">
+                <div class="taxonomy-panel"><div class="rule-logic-grid"><h5>Causes</h5><div><label>Condition</label><select id="sc_cause_operator"><option value="any">Au moins une (ANY)</option><option value="all">Toutes (ALL)</option></select></div></div><div id="sc_cause_catalog" class="taxonomy-grid"></div></div>
+                <div class="taxonomy-panel"><div class="rule-logic-grid"><h5>Conséquences possibles</h5><div><label>Condition</label><select id="sc_consequence_operator"><option value="any">Au moins une (ANY)</option><option value="all">Toutes (ALL)</option></select></div></div><div id="sc_consequence_catalog" class="taxonomy-grid"></div></div>
               </div>
-
-              <details class="writer-advanced">
-                <summary>Garde-fous d’envoi</summary>
-                <div class="scenario-rule-grid" style="margin-top:12px;">
-                  <div><label>Cooldown heures</label><input id="sc_rule_cooldown_hours" type="number" min="0" value="24"></div>
-                  <div><label>Alertes max / client / jour</label><input id="sc_rule_max_alerts_day" type="number" min="1" value="2"></div>
-                  <div><label>SMS max / client / jour</label><input id="sc_rule_max_sms_day" type="number" min="0" value="1"></div>
-                </div>
-                <label class="inline-check"><input type="checkbox" id="sc_rule_once_per_event" checked><span>Ne pas envoyer deux fois pour le même événement</span></label>
-                <label class="inline-check"><input type="checkbox" id="sc_rule_group_similar" checked><span>Regrouper / limiter les événements similaires</span></label>
-              </details>
+              <div class="scenario-rule-grid"><div><label>Départements / zones</label><input id="sc_rule_zones" placeholder="Ex. 95,75"></div><div><label>Routes</label><input id="sc_rule_routes" placeholder="Ex. N118,N20"></div><div><label>Gravité minimale</label><select id="sc_rule_min_severity"><option value="info">Information</option><option value="low">Faible</option><option value="medium" selected>Moyenne</option><option value="high">Élevée</option><option value="critical">Critique</option></select></div></div>
+              <details class="writer-advanced"><summary>Garde-fous d'envoi</summary><div class="scenario-rule-grid" style="margin-top:12px;"><div><label>Cooldown heures</label><input id="sc_rule_cooldown_hours" type="number" min="0" value="24"></div><div><label>Alertes max / client / jour</label><input id="sc_rule_max_alerts_day" type="number" min="1" value="2"></div><div><label>SMS max / client / jour</label><input id="sc_rule_max_sms_day" type="number" min="0" value="1"></div></div><label class="inline-check"><input type="checkbox" id="sc_rule_once_per_event" checked><span>Ne pas envoyer deux fois pour le même événement</span></label><label class="inline-check"><input type="checkbox" id="sc_rule_group_similar" checked><span>Regrouper / limiter les événements similaires</span></label></details>
             </div>
-
-            <div class="row" style="margin-top:14px;">
-              <button id="sc_submit_btn" onclick="submitScenario()">Créer le scénario</button>
-              <button class="secondary" onclick="clearScenarioForm()">Vider</button>
-              <button id="sc_cancel_edit_btn" class="secondary hidden" onclick="cancelEditScenario()">Annuler l’édition</button>
-            </div>
+            <div class="row" style="margin-top:14px;"><button id="sc_submit_btn" onclick="submitScenario()">Créer le scénario</button><button class="secondary" onclick="clearScenarioForm()">Vider</button><button id="sc_cancel_edit_btn" class="secondary hidden" onclick="cancelEditScenario()">Annuler l'édition</button></div>
           </div>
-
-          <div class="card">
-            <h2>Scénarios existants</h2>
-            <div class="help">Les règles affichées ici sont stockées dans une ligne technique <code>scenario_steps.logic_json.kind = "risk_rules"</code>. Elles ne sont pas affichées dans la séquence d’envoi.</div>
-            <div id="scenariosList" class="list"></div>
-          </div>
+          <div class="card"><h2>Scénarios existants</h2><div class="help">Les règles sont stockées dans une ligne technique <code>scenario_steps.logic_json.kind = "cause_consequence_rules"</code>. Elles ne sont pas affichées dans la séquence d'envoi.</div><div id="scenariosList" class="list"></div></div>
         </div>
       </section>
 
@@ -905,145 +764,56 @@
       contentVersions: [],
       triggerTypes: [],
       scenarios: [],
-      scenarioSteps: []
+      scenarioSteps: [],
+      riskTaxonomy: []
     };
 
 
-    const DATEX_RISK_MAP = {
-      RISK_NONE: 'donnees_insuffisantes',
-      RISK_HEAVY_WEIGHT: 'Poids / Tonnage / Intégrité ouvrage',
-      RISK_WORKZONE_STAFF: 'Présence du personnel / Ouvriers sur chaussée',
-      RISK_LANE_MERGE: 'Rabattement / Neutralisation de voie',
-      RISK_CONTRAFLOW: 'Circulation en contre-flux / Contraflow',
-      RISK_LANE_NARROWING: 'Rétrécissement de voies / Heurts latéraux',
-      RISK_FALLING_ROCKS: 'Chutes de pierres / Blocs',
-      RISK_ALTERNATE_TRAFFIC: 'Circulation alternée / Feux',
-      RISK_RAMP_MANEUVER: 'Manœuvres sur bretelle / Déviation'
-    };
-
-    const commonRiskVariables = [
-      ['risque_routier_code', 'Code du risque normalisé'],
-      ['risque_routier', 'Libellé / explication du risque par l’IA'],
-      ['cause_exacte', 'Cause exacte identifiée'],
-      ['impact_level', 'Niveau d’impact identifié'],
-      ['message_redige', 'Message rédigé par la moulinette IA'],
-      ['message_court', 'Résumé court produit par l’IA'],
-      ['detour_info', 'Information de déviation éventuelle'],
-      ['road_number', 'Route concernée'],
-      ['zone_cible', 'Zone / département'],
-      ['description', 'Description source / événement'],
-      ['start_at', 'Début prévu'],
-      ['end_at', 'Fin prévue']
+    const BUILTIN_RISK_TAXONOMY = [
+      {kind:'cause',code:'CAUSE_WEIGHT_RESTRICTION',label:'Restriction de poids / tonnage',description:'Restriction liée au poids ou au tonnage autorisé.',sort_order:10},
+      {kind:'cause',code:'CAUSE_STRUCTURE_LIMITATION',label:'Limitation liée à un ouvrage',description:'Fragilité, gabarit ou capacité limitée d’un ouvrage.',sort_order:20},
+      {kind:'cause',code:'CAUSE_WORKZONE_STAFF',label:'Personnel sur ou près de la chaussée',description:'Présence d’agents ou d’ouvriers exposés au trafic.',sort_order:30},
+      {kind:'cause',code:'CAUSE_ROUTE_CLOSURE',label:'Route fermée / coupure',description:'Fermeture complète ou coupure imposant arrêt ou changement d’itinéraire.',sort_order:40},
+      {kind:'cause',code:'CAUSE_LANE_CLOSURE',label:'Voie neutralisée',description:'Une ou plusieurs voies sont fermées ou neutralisées.',sort_order:50},
+      {kind:'cause',code:'CAUSE_LANE_MERGE',label:'Rabattement de voie',description:'Suppression de voie imposant un rabattement ou une insertion.',sort_order:60},
+      {kind:'cause',code:'CAUSE_CONTRAFLOW',label:'Circulation en contre-flux',description:'Basculement temporaire de circulation sur des voies inhabituelles.',sort_order:70},
+      {kind:'cause',code:'CAUSE_LANE_NARROWING',label:'Rétrécissement de voie',description:'Largeur roulable réduite ou voies resserrées.',sort_order:80},
+      {kind:'cause',code:'CAUSE_FALLING_ROCKS',label:'Chutes de pierres / blocs',description:'Pierres, blocs ou matériaux susceptibles d’occuper la chaussée.',sort_order:90},
+      {kind:'cause',code:'CAUSE_ALTERNATE_TRAFFIC',label:'Circulation alternée',description:'Alternat par feux, agents ou signalisation temporaire.',sort_order:100},
+      {kind:'cause',code:'CAUSE_RAMP_MANEUVER',label:'Manœuvre inhabituelle sur bretelle / déviation',description:'Insertion, sortie ou changement de direction inhabituel.',sort_order:110},
+      {kind:'cause',code:'CAUSE_OBSTACLE_ON_ROAD',label:'Obstacle sur chaussée',description:'Obstacle ou élément présent dans la zone de circulation.',sort_order:120},
+      {kind:'consequence',code:'CONSEQ_SUDDEN_BRAKING',label:'Freinage brusque',description:'Ralentissement ou arrêt pouvant provoquer un freinage tardif.',sort_order:10},
+      {kind:'consequence',code:'CONSEQ_QUEUE_OR_STOPPED_TRAFFIC',label:'File / trafic arrêté',description:'Formation d’une file ou présence de véhicules arrêtés.',sort_order:20},
+      {kind:'consequence',code:'CONSEQ_LATE_MANEUVER',label:'Manœuvre tardive / changement de file brusque',description:'Décision tardive d’insertion, sortie ou changement de voie.',sort_order:30},
+      {kind:'consequence',code:'CONSEQ_REAR_END_COLLISION',label:'Collision arrière',description:'Risque de choc avec un véhicule précédent ou arrêté.',sort_order:40},
+      {kind:'consequence',code:'CONSEQ_SIDE_COLLISION',label:'Collision latérale',description:'Risque de heurt latéral entre véhicules.',sort_order:50},
+      {kind:'consequence',code:'CONSEQ_HEAD_ON_COLLISION',label:'Collision frontale',description:'Risque de rencontre frontale, notamment en contre-flux.',sort_order:60},
+      {kind:'consequence',code:'CONSEQ_WORKER_STRIKE',label:'Heurt d’un agent / ouvrier',description:'Risque de collision avec une personne présente sur la chaussée.',sort_order:70},
+      {kind:'consequence',code:'CONSEQ_OBSTACLE_IMPACT',label:'Heurt d’un obstacle',description:'Risque de collision avec un obstacle ou un bloc sur la chaussée.',sort_order:80},
+      {kind:'consequence',code:'CONSEQ_LOSS_OF_CONTROL',label:'Perte de contrôle',description:'Risque de perte de maîtrise ou de sortie de trajectoire.',sort_order:90},
+      {kind:'consequence',code:'CONSEQ_VEHICLE_DAMAGE',label:'Dommage au véhicule',description:'Risque de dommage matériel au véhicule.',sort_order:100},
+      {kind:'consequence',code:'CONSEQ_HEAVY_VEHICLE_BLOCKAGE',label:'Blocage / immobilisation d’un poids lourd',description:'Itinéraire ou ouvrage incompatible pouvant immobiliser un véhicule lourd.',sort_order:110}
     ];
 
-    function riskContext(code, options = {}) {
-      return {
-        label: options.label || DATEX_RISK_MAP[code] || code,
-        description: options.description || `Risque normalisé ${code}, produit par la moulinette IA puis stocké dans event_boost_ia_deux.risque_routier_code.`,
-        source: 'ai_risk_normalized',
-        topic_code: code,
-        trigger_type_code: code,
-        code_base: code,
-        risk_code: code,
-        triggerable: options.triggerable !== false,
-        variables: commonRiskVariables,
-        sample: {
-          risque_routier_code: code,
-          risque_routier: DATEX_RISK_MAP[code] || code,
-          cause_exacte: options.sampleCause || 'Situation identifiée par la moulinette IA.',
-          impact_level: options.sampleImpact || 'voie_neutralisee',
-          message_redige: options.sampleMessage || 'Un risque routier nécessite une vigilance renforcée dans ce secteur.',
-          message_court: options.sampleShort || 'Vigilance renforcée dans le secteur.',
-          detour_info: options.sampleDetour || '',
-          road_number: options.road || 'N118',
-          zone_cible: options.zone || '92',
-          description: options.sampleDescription || 'Événement analysé et qualifié par la moulinette IA.',
-          start_at: '17/09 08:00',
-          end_at: '17/09 18:00'
-        }
-      };
-    }
+    function activeTaxonomy(kind) { const rows=(state.riskTaxonomy&&state.riskTaxonomy.length?state.riskTaxonomy:BUILTIN_RISK_TAXONOMY); return rows.filter(x=>x.kind===kind&&x.active!==false&&x.is_active!==false).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)); }
+    function taxonomyLabel(code) { return (state.riskTaxonomy||[]).find(x=>x.code===code)?.label || BUILTIN_RISK_TAXONOMY.find(x=>x.code===code)?.label || code; }
 
     const composerContextTypes = {
-      RISK_HEAVY_WEIGHT: riskContext('RISK_HEAVY_WEIGHT', {
-        description: 'Risque lié au poids, au tonnage autorisé ou à l’intégrité d’un ouvrage. À utiliser lorsque l’IA estime que le gabarit/tonnage impose une vigilance ou un itinéraire adapté.',
-        sampleCause: 'Restriction de tonnage ou fragilité d’ouvrage signalée.',
-        sampleImpact: 'deviation_bretelle'
-      }),
-      RISK_WORKZONE_STAFF: riskContext('RISK_WORKZONE_STAFF', {
-        description: 'Présence d’ouvriers ou de personnel sur ou à proximité immédiate de la chaussée.',
-        sampleCause: 'Personnel de chantier présent sur la chaussée.',
-        sampleMessage: 'Des agents interviennent sur la chaussée : ralentissez nettement et augmentez les distances de sécurité.'
-      }),
-      RISK_LANE_MERGE: riskContext('RISK_LANE_MERGE', {
-        description: 'Rabattement, suppression ou neutralisation de voie entraînant des changements de file et des conflits de trajectoire.',
-        sampleCause: 'Une voie est neutralisée et impose un rabattement.',
-        sampleImpact: 'voie_neutralisee'
-      }),
-      RISK_CONTRAFLOW: riskContext('RISK_CONTRAFLOW', {
-        description: 'Circulation basculée en contre-flux : voies inhabituelles, séparation réduite et vigilance accrue.',
-        sampleCause: 'Basculement temporaire de circulation en contre-flux.'
-      }),
-      RISK_LANE_NARROWING: riskContext('RISK_LANE_NARROWING', {
-        description: 'Rétrécissement de voie avec risque de heurt latéral, notamment pour les véhicules larges.',
-        sampleCause: 'Largeur de voie temporairement réduite.'
-      }),
-      RISK_FALLING_ROCKS: riskContext('RISK_FALLING_ROCKS', {
-        description: 'Risque de chute de pierres ou de blocs sur la chaussée.',
-        sampleCause: 'Chutes de pierres signalées sur ou à proximité de la chaussée.',
-        sampleMessage: 'Des chutes de pierres sont possibles : réduisez l’allure et restez attentif aux obstacles sur la chaussée.'
-      }),
-      RISK_ALTERNATE_TRAFFIC: riskContext('RISK_ALTERNATE_TRAFFIC', {
-        description: 'Circulation alternée, souvent régulée par feux ou agents, avec risque de freinage et de file d’attente.',
-        sampleCause: 'Alternat de circulation mis en place.',
-        sampleImpact: 'circulation_alternee'
-      }),
-      RISK_RAMP_MANEUVER: riskContext('RISK_RAMP_MANEUVER', {
-        description: 'Manœuvres inhabituelles sur bretelle, échangeur ou déviation : changements de direction, insertion ou sortie à anticiper.',
-        sampleCause: 'Déviation imposant une manœuvre inhabituelle sur une bretelle.',
-        sampleImpact: 'deviation_bretelle',
-        sampleDetour: 'Suivre la déviation locale balisée.'
-      }),
-      RISK_NONE: riskContext('RISK_NONE', {
-        label: 'Données insuffisantes / aucun risque exploitable',
-        description: 'L’IA ne dispose pas d’assez d’éléments pour qualifier un risque exploitable. Ce code ne doit pas déclencher automatiquement un scénario.',
-        triggerable: false,
-        sampleCause: 'Données insuffisantes.'
-      }),
-      editorial_decision: {
-        label: 'Décision éditoriale / envoi volontaire',
-        description: 'Message ou scénario lancé volontairement par MobiSûr. Il ne dépend pas d’un risque remonté par la moulinette IA.',
-        source: 'editorial_decision',
-        topic_code: 'EDITORIAL_DECISION',
-        trigger_type_code: 'EDITORIAL_DECISION',
-        code_base: 'EDITORIAL_DECISION',
-        risk_code: null,
-        triggerable: true,
-        variables: [['zone_cible','Zone ou segment client'],['audience','Audience visée'],['theme','Thème éditorial'],['info_url','Lien d’information'],['short_url','Lien court']],
-        sample: { zone_cible:'Tous clients', audience:'Conducteurs itinérants', theme:'Rappel prévention', info_url:'https://data.mobisur.net/i/prevention', short_url:'https://mobi.sr/prevention' }
-      }
+      ADVICE_SPEED_DISTANCE:{label:'Vitesse et distances de sécurité',description:'Conseil générique pour ralentir en amont et augmenter les distances.',source:'editorial_advice',topic_code:'ADVICE_SPEED_DISTANCE',code_base:'ADVICE_SPEED_DISTANCE'},
+      ADVICE_LANE_MERGE:{label:'Anticiper un rabattement / changement de file',description:'Conseil pour préparer la trajectoire et éviter les changements de voie tardifs.',source:'editorial_advice',topic_code:'ADVICE_LANE_MERGE',code_base:'ADVICE_LANE_MERGE'},
+      ADVICE_LATERAL_CLEARANCE:{label:'Conserver une marge latérale',description:'Conseil pour réduire les heurts latéraux dans une voie étroite ou un chantier.',source:'editorial_advice',topic_code:'ADVICE_LATERAL_CLEARANCE',code_base:'ADVICE_LATERAL_CLEARANCE'},
+      ADVICE_WORKZONE:{label:'Vigilance à l’approche d’un chantier',description:'Conseil de prudence lorsqu’il peut y avoir des agents ou du matériel sur la chaussée.',source:'editorial_advice',topic_code:'ADVICE_WORKZONE',code_base:'ADVICE_WORKZONE'},
+      ADVICE_ALTERNATE_TRAFFIC:{label:'Anticiper une circulation alternée',description:'Conseil pour anticiper arrêts, feux temporaires et redémarrages.',source:'editorial_advice',topic_code:'ADVICE_ALTERNATE_TRAFFIC',code_base:'ADVICE_ALTERNATE_TRAFFIC'},
+      ADVICE_CONTRAFLOW:{label:'Conduire en contre-flux',description:'Conseil pour rester dans sa voie, réduire l’allure et éviter les dépassements inadaptés.',source:'editorial_advice',topic_code:'ADVICE_CONTRAFLOW',code_base:'ADVICE_CONTRAFLOW'},
+      ADVICE_OBSTACLE:{label:'Réagir à un obstacle potentiel',description:'Conseil pour adapter l’allure et garder une distance permettant d’éviter un obstacle.',source:'editorial_advice',topic_code:'ADVICE_OBSTACLE',code_base:'ADVICE_OBSTACLE'},
+      ADVICE_HEAVY_VEHICLE:{label:'Vérifier itinéraire, poids et gabarit',description:'Conseil aux conducteurs de véhicules lourds pour anticiper les restrictions.',source:'editorial_advice',topic_code:'ADVICE_HEAVY_VEHICLE',code_base:'ADVICE_HEAVY_VEHICLE'},
+      ADVICE_ROUTE_PLANNING:{label:'Préparer un itinéraire / une déviation',description:'Conseil pour vérifier l’itinéraire avant le départ et éviter les manœuvres tardives.',source:'editorial_advice',topic_code:'ADVICE_ROUTE_PLANNING',code_base:'ADVICE_ROUTE_PLANNING'}
     };
-
-    const composerRiskTriggerCatalog = Object.fromEntries(
-      Object.entries(composerContextTypes)
-        .filter(([code, cfg]) => code.startsWith('RISK_') && cfg.triggerable !== false)
-        .map(([code, cfg]) => [code, {
-          code,
-          label: cfg.label,
-          risk_code: code,
-          source: 'ai_risk_normalized',
-          code_suffix: code,
-          help: cfg.description
-        }])
-    );
-
     const composerRoles = {
-      risk_alert: { label: 'Prévenir d’un risque', help: 'Alerter clairement le conducteur ou le responsable sur une situation à anticiper.', categorie: 'alert', type: 'risk_alert', code_suffix: 'RISK' },
-      safety_advice: { label: 'Donner une consigne de prudence', help: 'Transformer l’événement en consigne simple et actionnable.', categorie: 'advice', type: 'safety_advice', code_suffix: 'ADVICE' },
-      operational_cta: { label: 'Proposer une action au responsable', help: 'Aider le responsable à relayer une consigne ou organiser les déplacements.', categorie: 'cta', type: 'operational_cta', code_suffix: 'CTA' },
-      legal_info: { label: 'Expliquer une conséquence juridique', help: 'Rappeler une règle, une responsabilité ou une conséquence liée à la conduite.', categorie: 'legal', type: 'legal_info', code_suffix: 'LEGAL' },
-      intro: { label: 'Introduire une alerte', help: 'Phrase d’introduction pour un email ou un récapitulatif.', categorie: 'alert', type: 'intro', code_suffix: 'INTRO' },
-      closing: { label: 'Conclure un message', help: 'Phrase de conclusion ou rappel final de prudence.', categorie: 'cta', type: 'closing', code_suffix: 'CLOSING' }
+      safety_advice:{label:'Donner une consigne de prudence',help:'Conseil directement actionnable par le conducteur.',categorie:'advice',type:'safety_advice',code_suffix:'ADVICE'},
+      operational_cta:{label:'Donner une consigne au responsable',help:'Conseil destiné au responsable pour préparer ou relayer une mesure de prévention.',categorie:'cta',type:'operational_cta',code_suffix:'CTA'},
+      legal_info:{label:'Rappeler une règle ou une obligation',help:'Rappel sobre d’une règle utile à la situation.',categorie:'legal',type:'legal_info',code_suffix:'LEGAL'},
+      closing:{label:'Ajouter un rappel final de prudence',help:'Conclusion courte réutilisable à la fin d’un message.',categorie:'advice',type:'closing',code_suffix:'CLOSING'}
     };
 
     const composerTimings = {
@@ -1074,127 +844,30 @@
     }
 
     function getScenarioRuleStep(scenarioId) {
-      return (state.scenarioSteps || []).find(st =>
-        Number(st.scenario_id) === Number(scenarioId) &&
-        st.logic_json &&
-        (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)
-      ) || null;
+      return (state.scenarioSteps || []).find(st => Number(st.scenario_id) === Number(scenarioId) && st.logic_json && (st.logic_json.kind === 'cause_consequence_rules' || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.trigger_conditions)) || null;
     }
-
-    function buildScenarioRuleLogicFromForm(triggerTypeId) {
-      const trigger = state.triggerTypes.find(t => Number(t.id) === Number(triggerTypeId));
-      const riskCode = String(trigger?.code || '').trim();
-      return {
-        kind: riskCode === 'EDITORIAL_DECISION' ? 'editorial_rules' : 'risk_rules',
-        risk_conditions: {
-          description: riskCode === 'EDITORIAL_DECISION'
-            ? 'Scénario lancé volontairement par décision éditoriale.'
-            : 'Le chef d’orchestre doit faire correspondre ce code avec event_boost_ia_deux.risque_routier_code, puis vérifier les critères client/zone.',
-          risk_code: riskCode,
-          risk_label: trigger?.label || DATEX_RISK_MAP[riskCode] || riskCode,
-          source_field: riskCode === 'EDITORIAL_DECISION' ? 'manual' : 'event_boost_ia_deux.risque_routier_code',
-          zones: parseAdminList(val('sc_rule_zones')),
-          routes: normalizeAdminRoadList(val('sc_rule_routes')),
-          min_severity: val('sc_rule_min_severity') || 'medium',
-          client_zone_match_required: riskCode !== 'EDITORIAL_DECISION'
-        },
-        dispatch_rules: {
-          once_per_event: Boolean(document.getElementById('sc_rule_once_per_event')?.checked),
-          group_similar_events: Boolean(document.getElementById('sc_rule_group_similar')?.checked),
-          cooldown_hours: Number(val('sc_rule_cooldown_hours') || 24),
-          max_immediate_alerts_per_client_per_day: Number(val('sc_rule_max_alerts_day') || 2),
-          max_sms_per_client_per_day: Number(val('sc_rule_max_sms_day') || 1)
-        }
-      };
-    }
-
-    async function saveScenarioTriggerRules(scenarioId, scenarioCode, triggerTypeId) {
-      const logic = buildScenarioRuleLogicFromForm(triggerTypeId);
-      const existing = getScenarioRuleStep(scenarioId);
-      const payload = {
-        scenario_id: Number(scenarioId),
-        code: `${toComposerCode(scenarioCode || 'SCENARIO')}_RISK_RULES`,
-        step_order: 0,
-        window_ref: 'occurs_at',
-        window_min_hours: 0,
-        window_max_hours: 0,
-        logic_json: logic,
-        active: true
-      };
-
-      if (existing && existing.id) {
-        const { error } = await db().from('scenario_steps').update(payload).eq('id', existing.id);
-        if (error) throw error;
-        return existing.id;
-      }
-
-      const { data, error } = await db().from('scenario_steps').insert(payload).select('id').maybeSingle();
-      if (error) throw error;
-      return data?.id || null;
-    }
-
-    function fillScenarioRuleForm(scenarioId) {
-      const step = getScenarioRuleStep(scenarioId);
-      const logic = step?.logic_json || {};
-      const cond = logic.risk_conditions || logic.trigger_conditions || {};
-      const dispatch = logic.dispatch_rules || {};
-
-      const set = (id, value) => { const el = document.getElementById(id); if (el) el.value = value == null ? '' : String(value); };
-      const setCheck = (id, value, fallback = true) => { const el = document.getElementById(id); if (el) el.checked = value == null ? fallback : Boolean(value); };
-
-      set('sc_rule_zones', Array.isArray(cond.zones) ? cond.zones.join(',') : '');
-      set('sc_rule_routes', Array.isArray(cond.routes) ? cond.routes.join(',') : '');
-      set('sc_rule_min_severity', cond.min_severity || 'medium');
-      set('sc_rule_cooldown_hours', dispatch.cooldown_hours ?? 24);
-      set('sc_rule_max_alerts_day', dispatch.max_immediate_alerts_per_client_per_day ?? 2);
-      set('sc_rule_max_sms_day', dispatch.max_sms_per_client_per_day ?? 1);
-      setCheck('sc_rule_once_per_event', dispatch.once_per_event, true);
-      setCheck('sc_rule_group_similar', dispatch.group_similar_events, true);
-    }
-
-    function clearScenarioRuleForm() {
-      ['sc_rule_zones','sc_rule_routes'].forEach(id => {
-        const el = document.getElementById(id); if (el) el.value = '';
-      });
-      const min = document.getElementById('sc_rule_min_severity'); if (min) min.value = 'medium';
-      const cooldown = document.getElementById('sc_rule_cooldown_hours'); if (cooldown) cooldown.value = '24';
-      const maxAlerts = document.getElementById('sc_rule_max_alerts_day'); if (maxAlerts) maxAlerts.value = '2';
-      const maxSms = document.getElementById('sc_rule_max_sms_day'); if (maxSms) maxSms.value = '1';
-      const once = document.getElementById('sc_rule_once_per_event'); if (once) once.checked = true;
-      const group = document.getElementById('sc_rule_group_similar'); if (group) group.checked = true;
-    }
-
-    function renderScenarioRuleSummary(scenarioId) {
-      const step = getScenarioRuleStep(scenarioId);
-      if (!step || !step.logic_json) return '<div class="small muted" style="margin-top:8px;">Aucune règle de risque détaillée enregistrée.</div>';
-      const cond = step.logic_json.risk_conditions || step.logic_json.trigger_conditions || {};
-      const dispatch = step.logic_json.dispatch_rules || {};
-      const bits = [];
-      const riskCode = cond.risk_code || cond.trigger_type_code || '';
-      if (riskCode) bits.push('risque : ' + riskCode);
-      bits.push('zones : ' + (Array.isArray(cond.zones) && cond.zones.length ? cond.zones.join(', ') : 'toutes'));
-      bits.push('routes : ' + (Array.isArray(cond.routes) && cond.routes.length ? cond.routes.join(', ') : 'toutes'));
-      bits.push('gravité ≥ ' + (cond.min_severity || 'medium'));
-      bits.push('cooldown ' + (dispatch.cooldown_hours ?? 24) + 'h');
-      return '<div style="margin-top:8px;">' + bits.map(b => '<span class="rule-pill">' + escapeHtml(b) + '</span>').join('') + '</div>';
-    }
-
-    function setComposerScenarioChoice(choice) {
-      const ctx = currentComposerContext();
-      if (ctx.triggerable === false && choice !== 'none') choice = 'none';
-
-      const radio = document.querySelector(`input[name="cc_scenario_choice"][value="${choice}"]`);
-      if (radio) radio.checked = true;
-
-      const make = document.getElementById('cc_make_scenario');
-      if (make) make.checked = choice !== 'none';
-
-      if (choice === 'simple') selectComposerRiskTriggers('current');
-      else if (choice === 'advanced') selectComposerRiskTriggers('current');
-
-      updateComposerScenarioVisibility();
-      renderComposerPreview();
-    }
+    function checkedTaxonomyCodes(containerId){return Array.from(document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`)).map(el=>el.value)}
+    function setCheckedTaxonomyCodes(containerId,codes){const wanted=new Set(Array.isArray(codes)?codes:[]);document.querySelectorAll(`#${containerId} input[type="checkbox"]`).forEach(el=>{el.checked=wanted.has(el.value)})}
+    function taxonomyOptionsHtml(kind,prefix){return activeTaxonomy(kind).map(item=>`<label class="taxonomy-option"><input type="checkbox" value="${escapeHtml(item.code)}" class="${prefix}-${kind}"><div><strong>${escapeHtml(item.label)}</strong><span>${escapeHtml(item.description||item.code)}</span></div></label>`).join('')}
+    function renderScenarioTaxonomyCatalogs(){const c=document.getElementById('sc_cause_catalog');if(c)c.innerHTML=taxonomyOptionsHtml('cause','sc');const q=document.getElementById('sc_consequence_catalog');if(q)q.innerHTML=taxonomyOptionsHtml('consequence','sc')}
+    function isEditorialTriggerId(id){const t=state.triggerTypes.find(x=>Number(x.id)===Number(id));return String(t?.code||'')==='EDITORIAL_DECISION'}
+    function updateScenarioRuleModeVisibility(){const z=document.getElementById('sc_ai_rule_zone');if(z)z.classList.toggle('hidden',isEditorialTriggerId(Number(val('sc_trigger_type_id'))))}
+    function buildScenarioRuleLogicFromForm(triggerTypeId){const editorial=isEditorialTriggerId(triggerTypeId);return{kind:editorial?'editorial_rules':'cause_consequence_rules',classification_source:editorial?'manual':'event_boost_ia_deux',cause_match:editorial?null:{operator:val('sc_cause_operator')||'any',codes:checkedTaxonomyCodes('sc_cause_catalog')},consequence_match:editorial?null:{operator:val('sc_consequence_operator')||'any',codes:checkedTaxonomyCodes('sc_consequence_catalog')},scope:{zones:parseAdminList(val('sc_rule_zones')),routes:normalizeAdminRoadList(val('sc_rule_routes')),min_severity:val('sc_rule_min_severity')||'medium',client_zone_match_required:!editorial},dispatch_rules:{once_per_event:Boolean(document.getElementById('sc_rule_once_per_event')?.checked),group_similar_events:Boolean(document.getElementById('sc_rule_group_similar')?.checked),cooldown_hours:Number(val('sc_rule_cooldown_hours')||24),max_immediate_alerts_per_client_per_day:Number(val('sc_rule_max_alerts_day')||2),max_sms_per_client_per_day:Number(val('sc_rule_max_sms_day')||1)}}}
+    async function saveScenarioTriggerRules(scenarioId,scenarioCode,triggerTypeId){const logic=buildScenarioRuleLogicFromForm(triggerTypeId);if(logic.kind==='cause_consequence_rules'&&!logic.cause_match.codes.length&&!logic.consequence_match.codes.length)throw new Error('Sélectionnez au moins une cause ou une conséquence pour un scénario automatique.');const existing=getScenarioRuleStep(scenarioId);const payload={scenario_id:Number(scenarioId),code:`${toComposerCode(scenarioCode||'SCENARIO')}_CLASSIFICATION_RULES`,step_order:0,window_ref:'occurs_at',window_min_hours:0,window_max_hours:0,logic_json:logic,active:true};if(existing?.id){const{error}=await db().from('scenario_steps').update(payload).eq('id',existing.id);if(error)throw error;return existing.id}const{data,error}=await db().from('scenario_steps').insert(payload).select('id').maybeSingle();if(error)throw error;return data?.id||null}
+    const LEGACY_RISK_TO_CLASSIFICATION={
+      RISK_HEAVY_WEIGHT:{causes:['CAUSE_WEIGHT_RESTRICTION','CAUSE_STRUCTURE_LIMITATION'],consequences:['CONSEQ_HEAVY_VEHICLE_BLOCKAGE']},
+      RISK_WORKZONE_STAFF:{causes:['CAUSE_WORKZONE_STAFF'],consequences:['CONSEQ_WORKER_STRIKE']},
+      RISK_LANE_MERGE:{causes:['CAUSE_LANE_MERGE'],consequences:['CONSEQ_LATE_MANEUVER','CONSEQ_SIDE_COLLISION']},
+      RISK_CONTRAFLOW:{causes:['CAUSE_CONTRAFLOW'],consequences:['CONSEQ_HEAD_ON_COLLISION']},
+      RISK_LANE_NARROWING:{causes:['CAUSE_LANE_NARROWING'],consequences:['CONSEQ_SIDE_COLLISION']},
+      RISK_FALLING_ROCKS:{causes:['CAUSE_FALLING_ROCKS'],consequences:['CONSEQ_OBSTACLE_IMPACT','CONSEQ_VEHICLE_DAMAGE']},
+      RISK_ALTERNATE_TRAFFIC:{causes:['CAUSE_ALTERNATE_TRAFFIC'],consequences:['CONSEQ_SUDDEN_BRAKING','CONSEQ_QUEUE_OR_STOPPED_TRAFFIC','CONSEQ_REAR_END_COLLISION']},
+      RISK_RAMP_MANEUVER:{causes:['CAUSE_RAMP_MANEUVER'],consequences:['CONSEQ_LATE_MANEUVER']}
+    };
+    function fillScenarioRuleForm(scenarioId){renderScenarioTaxonomyCatalogs();const logic=getScenarioRuleStep(scenarioId)?.logic_json||{},scope=logic.scope||logic.risk_conditions||logic.trigger_conditions||{},dispatch=logic.dispatch_rules||{};const legacyCode=(logic.risk_conditions?.risk_code||logic.trigger_conditions?.trigger_type_code||'');const legacy=LEGACY_RISK_TO_CLASSIFICATION[legacyCode]||{};setCheckedTaxonomyCodes('sc_cause_catalog',logic.cause_match?.codes||legacy.causes||[]);setCheckedTaxonomyCodes('sc_consequence_catalog',logic.consequence_match?.codes||legacy.consequences||[]);const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v==null?'':String(v)};set('sc_cause_operator',logic.cause_match?.operator||'any');set('sc_consequence_operator',logic.consequence_match?.operator||'any');set('sc_rule_zones',Array.isArray(scope.zones)?scope.zones.join(','):'');set('sc_rule_routes',Array.isArray(scope.routes)?scope.routes.join(','):'');set('sc_rule_min_severity',scope.min_severity||'medium');set('sc_rule_cooldown_hours',dispatch.cooldown_hours??24);set('sc_rule_max_alerts_day',dispatch.max_immediate_alerts_per_client_per_day??2);set('sc_rule_max_sms_day',dispatch.max_sms_per_client_per_day??1);const once=document.getElementById('sc_rule_once_per_event');if(once)once.checked=dispatch.once_per_event??true;const group=document.getElementById('sc_rule_group_similar');if(group)group.checked=dispatch.group_similar_events??true;updateScenarioRuleModeVisibility()}
+    function clearScenarioRuleForm(){renderScenarioTaxonomyCatalogs();setCheckedTaxonomyCodes('sc_cause_catalog',[]);setCheckedTaxonomyCodes('sc_consequence_catalog',[]);['sc_rule_zones','sc_rule_routes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});[['sc_cause_operator','any'],['sc_consequence_operator','any'],['sc_rule_min_severity','medium'],['sc_rule_cooldown_hours','24'],['sc_rule_max_alerts_day','2'],['sc_rule_max_sms_day','1']].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});const once=document.getElementById('sc_rule_once_per_event');if(once)once.checked=true;const group=document.getElementById('sc_rule_group_similar');if(group)group.checked=true;updateScenarioRuleModeVisibility()}
+    function renderScenarioRuleSummary(scenarioId){const logic=getScenarioRuleStep(scenarioId)?.logic_json;if(!logic)return'<div class="small muted" style="margin-top:8px;">Aucune règle de classification détaillée enregistrée.</div>';const bits=[];if(logic.kind==='editorial_rules')bits.push('décision éditoriale');else{const c=logic.cause_match?.codes||[],q=logic.consequence_match?.codes||[];if(c.length)bits.push('causes '+(logic.cause_match.operator||'any').toUpperCase()+' : '+c.map(taxonomyLabel).join(', '));if(q.length)bits.push('conséquences '+(logic.consequence_match.operator||'any').toUpperCase()+' : '+q.map(taxonomyLabel).join(', '))}const scope=logic.scope||logic.risk_conditions||{};bits.push('zones : '+(scope.zones?.length?scope.zones.join(', '):'toutes'));bits.push('routes : '+(scope.routes?.length?scope.routes.join(', '):'toutes'));bits.push('gravité ≥ '+(scope.min_severity||'medium'));bits.push('cooldown '+(logic.dispatch_rules?.cooldown_hours??24)+'h');return'<div style="margin-top:8px;">'+bits.map(b=>'<span class="rule-pill">'+escapeHtml(b)+'</span>').join('')+'</div>'}
+    function setComposerScenarioChoice(choice){const radio=document.querySelector(`input[name="cc_scenario_choice"][value="${choice}"]`);if(radio)radio.checked=true;const make=document.getElementById('cc_make_scenario');if(make)make.checked=choice!=='none';updateComposerScenarioVisibility();renderComposerPreview()}
 
 
     function startEditScenario(id) {
@@ -1202,6 +875,12 @@
   if (!scenario) return;
 
   editingScenarioId = scenario.id;
+
+  const triggerSelect = document.getElementById('sc_trigger_type_id');
+  if (triggerSelect && !Array.from(triggerSelect.options).some(o => Number(o.value) === Number(scenario.trigger_type_id))) {
+    const legacyTrigger = state.triggerTypes.find(t => Number(t.id) === Number(scenario.trigger_type_id));
+    if (legacyTrigger) { const opt = document.createElement('option'); opt.value = legacyTrigger.id; opt.textContent = `Ancien déclencheur — ${legacyTrigger.code}`; triggerSelect.appendChild(opt); }
+  }
 
   document.getElementById('sc_code').value = scenario.code || '';
   document.getElementById('sc_label').value = scenario.label || '';
@@ -1278,7 +957,7 @@ async function updateScenario() {
 }
 
 async function deleteScenario(id) {
-  const stepsCount = state.scenarioSteps.filter(st => Number(st.scenario_id) === Number(id) && !(st.logic_json && (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions))).length;
+  const stepsCount = state.scenarioSteps.filter(st => Number(st.scenario_id) === Number(id) && !(st.logic_json && (st.logic_json.kind === 'cause_consequence_rules' || st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions))).length;
 
   const confirmed = window.confirm(
     stepsCount > 0
@@ -1908,10 +1587,11 @@ async function deleteScenarioStep(id) {
         db().from('content_versions').select('*').order('id', { ascending: false }),
         db().from('trigger_types').select('*').order('id', { ascending: false }),
         db().from('scenarios').select('*').order('id', { ascending: false }),
-        db().from('scenario_steps').select('*').order('scenario_id').order('step_order')
+        db().from('scenario_steps').select('*').order('scenario_id').order('step_order'),
+        db().from('road_risk_taxonomy').select('*').eq('active', true).order('kind').order('sort_order')
       ]);
 
-      const firstError = requests.find(r => r.error);
+      const firstError = requests.slice(0, 5).find(r => r.error);
       if (firstError) {
         console.error(firstError.error);
         setGlobalNotice('Erreur de lecture de la base : ' + firstError.error.message, 'err');
@@ -1923,6 +1603,8 @@ async function deleteScenarioStep(id) {
       state.triggerTypes = requests[2].data || [];
       state.scenarios = requests[3].data || [];
       state.scenarioSteps = requests[4].data || [];
+      state.riskTaxonomy = requests[5] && !requests[5].error ? (requests[5].data || BUILTIN_RISK_TAXONOMY) : BUILTIN_RISK_TAXONOMY;
+      if (requests[5]?.error) console.warn('road_risk_taxonomy indisponible, référentiel intégré utilisé :', requests[5].error.message);
 
       renderDashboard();
       renderContentItems();
@@ -1931,6 +1613,8 @@ async function deleteScenarioStep(id) {
       renderTriggerTypes();
       renderScenarios();
       renderScenarioSteps();
+      renderScenarioTaxonomyCatalogs();
+      renderComposerTaxonomyCatalogs();
       populateSelects();
       updateContentVersionEditorMode();
       if (options.keepPlannerScenarioId) {
@@ -1964,19 +1648,11 @@ async function deleteScenarioStep(id) {
       }
     }
 
-    function scenarioRiskTriggerTypes() {
-      const allowed = (state.triggerTypes || []).filter(t => (String(t.code || '').startsWith('RISK_') || String(t.code || '') === 'EDITORIAL_DECISION') && String(t.code || '') !== 'RISK_NONE' && t.is_active !== false);
-      if (editingScenarioId) {
-        const current = state.scenarios.find(s => Number(s.id) === Number(editingScenarioId));
-        const legacy = current ? state.triggerTypes.find(t => Number(t.id) === Number(current.trigger_type_id)) : null;
-        if (legacy && !allowed.some(t => Number(t.id) === Number(legacy.id))) allowed.push(legacy);
-      }
-      return allowed.sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')));
-    }
+    function scenarioRiskTriggerTypes(){const allowed=(state.triggerTypes||[]).filter(t=>['AI_RISK_CLASSIFICATION','EDITORIAL_DECISION'].includes(String(t.code||''))&&t.is_active!==false);if(editingScenarioId){const current=state.scenarios.find(s=>Number(s.id)===Number(editingScenarioId));const legacy=current?state.triggerTypes.find(t=>Number(t.id)===Number(current.trigger_type_id)):null;if(legacy&&!allowed.some(t=>Number(t.id)===Number(legacy.id)))allowed.push(legacy)}return allowed}
 
     function populateSelects() {
       setOptions('cv_content_item_id', state.contentItems, 'id', i => contentItemSearchLabel(i));
-      setOptions('sc_trigger_type_id', scenarioRiskTriggerTypes(), 'id', i => `${i.code} — ${i.label || DATEX_RISK_MAP[i.code] || ''}`);
+      setOptions('sc_trigger_type_id', scenarioRiskTriggerTypes(), 'id', i => `${i.code === 'AI_RISK_CLASSIFICATION' ? 'Classification causes / conséquences' : i.code === 'EDITORIAL_DECISION' ? 'Décision éditoriale' : i.code} — ${i.label || ''}`);
       setOptions('ss_scenario_id', state.scenarios, 'id', i => i.code);
       setOptions('pv_content_item_id', state.contentItems, 'id', i => contentItemSearchLabel(i));
       syncPreviewVersions();
@@ -2087,7 +1763,7 @@ async function deleteScenarioStep(id) {
       box.innerHTML = '';
 
       if (!results.length) {
-        box.innerHTML = '<div class="content-version-empty">Aucun message trouvé. Essaie le nom éditorial, un code RISK_*, un mot du texte ou le canal.</div>';
+        box.innerHTML = '<div class="content-version-empty">Aucun conseil trouvé. Essaie le nom éditorial, un thème, un mot du texte ou le canal.</div>';
         return;
       }
 
@@ -2149,7 +1825,7 @@ async function deleteScenarioStep(id) {
           const contents = Array.isArray(logic.contents) ? logic.contents : [];
           logic.contents = contents.filter(c => String(c?.content_code || '') !== String(item.code || ''));
 
-          const isRuleStep = logic.kind === 'risk_rules' || logic.kind === 'trigger_rules' || Boolean(logic.risk_conditions) || Boolean(logic.trigger_conditions);
+          const isRuleStep = logic.kind === 'cause_consequence_rules' || logic.kind === 'risk_rules' || logic.kind === 'trigger_rules' || Boolean(logic.risk_conditions) || Boolean(logic.trigger_conditions);
           if (!isRuleStep && logic.contents.length === 0) {
             const { error } = await db().from('scenario_steps').delete().eq('id', step.id);
             if (error) throw error;
@@ -2252,7 +1928,7 @@ async function deleteScenarioStep(id) {
       state.scenarios.forEach(s => {
         const trig = state.triggerTypes.find(t => t.id === s.trigger_type_id);
         const messageSteps = state.scenarioSteps.filter(st =>
-          st.scenario_id === s.id && !(st.logic_json && (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions))
+          st.scenario_id === s.id && !(st.logic_json && (st.logic_json.kind === 'cause_consequence_rules' || st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions))
         ).length;
         const hasRules = Boolean(getScenarioRuleStep(s.id));
         const div = document.createElement('div');
@@ -2524,7 +2200,7 @@ async function deleteScenarioStep(id) {
       if (!scenarioSelect || !input) return;
       const scenarioId = Number(scenarioSelect.value);
       if (!scenarioId) return;
-      const existing = state.scenarioSteps.filter(st => st.scenario_id === scenarioId && !(st.logic_json && (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)));
+      const existing = state.scenarioSteps.filter(st => st.scenario_id === scenarioId && !(st.logic_json && (st.logic_json.kind === 'cause_consequence_rules' || st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)));
       const maxOrder = existing.length ? Math.max(...existing.map(st => Number(st.step_order) || 0)) : 0;
       input.value = String(maxOrder + 1);
     }
@@ -2775,7 +2451,7 @@ async function deleteScenarioStep(id) {
       const rows = Array.from(document.querySelectorAll('#scenarioPlannerRows .step-editor'));
       if (!rows.length) {
         const scenarioId = Number(val('pl_scenario_id'));
-        const existing = state.scenarioSteps.filter(st => Number(st.scenario_id) === scenarioId && !(st.logic_json && (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)));
+        const existing = state.scenarioSteps.filter(st => Number(st.scenario_id) === scenarioId && !(st.logic_json && (st.logic_json.kind === 'cause_consequence_rules' || st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)));
         return existing.length ? Math.max(...existing.map(st => Number(st.step_order) || 0)) + 1 : 1;
       }
       return Math.max(...rows.map(r => Number(r.querySelector('.pl_order')?.value || 0))) + 1;
@@ -2788,7 +2464,7 @@ async function deleteScenarioStep(id) {
 
       const scenarioId = Number(select.value);
       const steps = state.scenarioSteps
-        .filter(st => Number(st.scenario_id) === scenarioId && !(st.logic_json && (st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)))
+        .filter(st => Number(st.scenario_id) === scenarioId && !(st.logic_json && (st.logic_json.kind === 'cause_consequence_rules' || st.logic_json.kind === 'risk_rules' || st.logic_json.risk_conditions || st.logic_json.kind === 'editorial_rules' || st.logic_json.kind === 'trigger_rules' || st.logic_json.trigger_conditions)))
         .sort((a, b) => Number(a.step_order || 0) - Number(b.step_order || 0));
 
       wrap.innerHTML = steps.map(st => plannerRowHtml(st)).join('');
@@ -2971,735 +2647,52 @@ async function deleteScenarioStep(id) {
 
 
 
-    function initContentComposer() {
-      const contextSelect = document.getElementById('cc_context');
-      if (!contextSelect) return;
-      fillComposerSelect('cc_context', composerContextTypes);
-      fillComposerSelect('cc_role', composerRoles);
-      fillComposerSelect('cc_timing', composerTimings);
-      updateComposerContextHelp();
-      updateComposerRoleHelp();
-      updateComposerTimingHelp();
-      updateComposerChannelVisibility();
-      updateComposerGeneratedFields({ preserveText: true });
-      updateComposerScenarioDefaults({ preserveUserValues: true });
-      syncComposerTriggerSelectionWithContext(true);
-      updateComposerScenarioVisibility();
-      const advZone = document.getElementById('cc_trigger_advanced_zone'); if (advZone) advZone.classList.add('hidden');
-      renderComposerVariables();
-      renderComposerRiskCatalog();
-      if (!getComposerBodyValue()) fillComposerDefaultText();
-      renderComposerPreview();
-    }
-
-    function fillComposerSelect(id, dict) {
-      const el = document.getElementById(id);
-      if (!el || el.dataset.filled === '1') return;
-      Object.entries(dict).forEach(([code, cfg]) => {
-        const opt = document.createElement('option');
-        opt.value = code;
-        opt.textContent = cfg.label;
-        el.appendChild(opt);
-      });
-      el.dataset.filled = '1';
-    }
-
-    function currentComposerContext() { return composerContextTypes[val('cc_context')] || composerContextTypes.RISK_LANE_MERGE; }
-    function currentComposerRole() { return composerRoles[val('cc_role')] || composerRoles.risk_alert; }
-    function currentComposerTiming() { return composerTimings[val('cc_timing')] || composerTimings.detection; }
-    function currentComposerChannel() { return val('cc_channel') || 'email'; }
-
-
-    function composerScenarioEnabled() {
-      const el = document.getElementById('cc_make_scenario');
-      return Boolean(el && el.checked);
-    }
-
-    function currentComposerScenarioChoice() {
-      const checked = document.querySelector('input[name="cc_scenario_choice"]:checked');
-      return checked ? checked.value : 'none';
-    }
-
-    function normalizeComposerScenarioChoiceForContext() {
-      const ctx = currentComposerContext();
-      const simpleChoice = document.querySelector('input[name="cc_scenario_choice"][value="simple"]');
-      const advancedChoice = document.querySelector('input[name="cc_scenario_choice"][value="advanced"]');
-      const simpleCard = simpleChoice ? simpleChoice.closest('label') : null;
-      const advancedCard = advancedChoice ? advancedChoice.closest('label') : null;
-      const disabled = ctx.triggerable === false;
-      if (simpleChoice) simpleChoice.disabled = disabled;
-      if (advancedChoice) advancedChoice.disabled = disabled || ctx.topic_code === 'EDITORIAL_DECISION';
-      if (simpleCard) simpleCard.classList.toggle('hidden', disabled);
-      if (advancedCard) advancedCard.classList.toggle('hidden', disabled || ctx.topic_code === 'EDITORIAL_DECISION');
-      if (disabled && currentComposerScenarioChoice() !== 'none') {
-        const none = document.querySelector('input[name="cc_scenario_choice"][value="none"]');
-        if (none) none.checked = true;
-        const make = document.getElementById('cc_make_scenario');
-        if (make) make.checked = false;
-      }
-    }
-
-    function parseComposerList(value) {
-      return String(value || '')
-        .split(/[;,\n]/)
-        .map(v => v.trim().toUpperCase())
-        .filter(Boolean);
-    }
-
-    function normalizeComposerRoadList(value) {
-      return parseComposerList(value).map(v => v.replace(/\s+/g, ''));
-    }
-
-    function renderComposerRiskCatalog() {
-      const box = document.getElementById('cc_scenario_trigger_catalog');
-      if (!box) return;
-      box.innerHTML = Object.entries(composerRiskTriggerCatalog).map(([code, risk]) => `
-        <label class="composer-trigger-option">
-          <input type="checkbox" class="cc_scenario_trigger" value="${escapeHtml(code)}">
-          <div><strong>${escapeHtml(risk.label)}</strong><span>${escapeHtml(risk.help)}</span></div>
-        </label>
-      `).join('');
-    }
-
-    function selectComposerRiskTriggers(mode) {
-      const inputs = Array.from(document.querySelectorAll('.cc_scenario_trigger'));
-      const ctx = currentComposerContext();
-      const current = String(ctx.trigger_type_code || '').toUpperCase();
-      inputs.forEach(input => {
-        const value = String(input.value || '').toUpperCase();
-        if (mode === 'none') input.checked = false;
-        else if (mode === 'all') input.checked = true;
-        else input.checked = value === current;
-      });
-      updateComposerScenarioSummary();
-      renderComposerPolicyPreview();
-    }
-
-    function selectedComposerRiskTriggers() {
-      const ctx = currentComposerContext();
-      if (ctx.topic_code === 'EDITORIAL_DECISION') {
-        return [{ code: 'EDITORIAL_DECISION', label: ctx.label, risk_code: null, source: 'editorial_decision', code_suffix: 'EDITORIAL_DECISION', help: ctx.description }];
-      }
-      const selected = Array.from(document.querySelectorAll('.cc_scenario_trigger:checked'))
-        .map(input => composerRiskTriggerCatalog[input.value])
-        .filter(Boolean);
-      if (selected.length) return selected;
-      if (ctx.triggerable === false || currentComposerScenarioChoice() === 'advanced') return [];
-      const fallback = composerRiskTriggerCatalog[ctx.trigger_type_code];
-      return fallback ? [fallback] : [];
-    }
-
-    function syncComposerTriggerSelectionWithContext(force = false) {
-      renderComposerRiskCatalog();
-      const anyChecked = Boolean(document.querySelector('.cc_scenario_trigger:checked'));
-      if (!force && anyChecked) return;
-      selectComposerRiskTriggers('current');
-    }
-
-    function currentComposerScenarioMode() {
-      const el = document.getElementById('cc_scenario_mode');
-      return el ? el.value : 'single';
-    }
-
-    function defaultScenarioWindowForTiming(timingCode) {
-      if (timingCode === 'before_start') return { ref: 'predicted_start_at', min: -24, max: 0 };
-      if (timingCode === 'during') return { ref: 'predicted_start_at', min: 0, max: 24 };
-      if (timingCode === 'digest') return { ref: 'date_evenement', min: 0, max: 24 };
-      return { ref: 'occurs_at', min: 0, max: 2 };
-    }
-
-    function updateComposerScenarioVisibility() {
-      normalizeComposerScenarioChoiceForContext();
-      const ctx = currentComposerContext();
-      const choice = currentComposerScenarioChoice();
-      const wrap = document.getElementById('cc_scenario_wrap');
-      if (wrap) wrap.classList.toggle('hidden', !composerScenarioEnabled());
-
-      const riskZone = document.getElementById('cc_trigger_simple_zone');
-      if (riskZone) riskZone.classList.toggle('hidden', choice !== 'advanced' || ctx.topic_code === 'EDITORIAL_DECISION');
-
-      updateComposerScenarioDefaults({ preserveUserValues: true });
-      updateComposerScenarioSummary();
-      renderComposerPolicyPreview();
-    }
-
-    function updateComposerScenarioDefaults(options = {}) {
-      const ctx = currentComposerContext();
-      const role = currentComposerRole();
-      const channel = currentComposerChannel();
-      const scenarioLabel = document.getElementById('cc_scenario_label');
-      const scenarioCode = document.getElementById('cc_scenario_code');
-      const priority = document.getElementById('cc_scenario_priority');
-      const minSeverity = document.getElementById('cc_scenario_min_severity');
-      const mode = document.getElementById('cc_scenario_mode');
-      const windowRef = document.getElementById('cc_scenario_window_ref');
-      const windowMin = document.getElementById('cc_scenario_window_min_hours');
-      const windowMax = document.getElementById('cc_scenario_window_max_hours');
-      const defaultCode = nextAvailableScenarioCode(`SC_${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
-      const defaultLabel = `${ctx.label} — ${role.label}`;
-      const timingCode = val('cc_timing') || 'detection';
-      const w = defaultScenarioWindowForTiming(timingCode);
-
-      const preserve = Boolean(options.preserveUserValues);
-      if (scenarioLabel && (!scenarioLabel.value || !preserve)) scenarioLabel.value = defaultLabel;
-      if (scenarioCode && (!scenarioCode.value || !preserve)) scenarioCode.value = defaultCode;
-      if (priority && (!priority.value || !preserve)) priority.value = String(['RISK_WORKZONE_STAFF','RISK_FALLING_ROCKS','RISK_CONTRAFLOW'].includes(ctx.topic_code) ? 90 : 80);
-      if (minSeverity && (!minSeverity.value || !preserve)) minSeverity.value = 'low';
-      if (mode && (!mode.value || !preserve)) mode.value = timingCode === 'digest' ? 'digest' : 'single';
-      if (windowRef && (!windowRef.value || !preserve)) windowRef.value = w.ref;
-      if (windowMin && (!windowMin.value || !preserve)) windowMin.value = String(w.min);
-      if (windowMax && (!windowMax.value || !preserve)) windowMax.value = String(w.max);
-
-      updateComposerScenarioSummary();
-    }
-
-    function nextAvailableScenarioCode(base) {
-      const clean = toComposerCode(base);
-      const existing = new Set((state.scenarios || []).map(s => String(s.code || '').toUpperCase()));
-      if (!existing.has(clean)) return clean;
-      let n = 2;
-      while (existing.has(`${clean}_${n}`)) n++;
-      return `${clean}_${n}`;
-    }
-
-    function buildComposerScenarioDraft(contentCode) {
-      if (!composerScenarioEnabled()) return null;
-      const ctx = currentComposerContext();
-      const role = currentComposerRole();
-      const channel = currentComposerChannel();
-      const zones = parseComposerList(val('cc_scenario_zones'));
-      const routes = normalizeComposerRoadList(val('cc_scenario_routes'));
-      const baseScenarioCode = toComposerCode(val('cc_scenario_code')) || toComposerCode(`SC_${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
-      const baseScenarioLabel = val('cc_scenario_label') || `${ctx.label} — ${role.label}`;
-      const minSeverity = val('cc_scenario_min_severity') || 'low';
-      const cooldownHours = Number(val('cc_scenario_cooldown_hours') || 24);
-      const maxAlerts = Number(val('cc_scenario_max_alerts_day') || 2);
-      const maxSms = Number(val('cc_scenario_max_sms_day') || 1);
-      const oncePerEvent = Boolean(document.getElementById('cc_scenario_once_per_event')?.checked);
-      const groupSimilar = Boolean(document.getElementById('cc_scenario_group_similar')?.checked);
-      const triggers = selectedComposerRiskTriggers();
-      if (!triggers.length) return { scenarios: [] };
-      const multiple = triggers.length > 1;
-
-      const scenarios = triggers.map(trigger => {
-        const suffix = toComposerCode(trigger.code_suffix || trigger.code || 'RISK');
-        const scenarioCode = multiple ? toComposerCode(`${baseScenarioCode}_${suffix}`) : baseScenarioCode;
-        const riskCode = trigger.risk_code || trigger.code;
-        return {
-          scenario: {
-            code: scenarioCode,
-            label: multiple ? `${baseScenarioLabel} — ${trigger.label}` : baseScenarioLabel,
-            trigger_type_code: trigger.code,
-            trigger_label: trigger.label,
-            aggregation_mode: currentComposerScenarioMode(),
-            priority: Number(val('cc_scenario_priority') || 80),
-            active: true
-          },
-          risk_rule_step: {
-            code: `${scenarioCode}_RISK_RULES`,
-            step_order: 0,
-            window_ref: 'occurs_at',
-            window_min_hours: 0,
-            window_max_hours: 0,
-            logic_json: {
-              kind: trigger.source === 'editorial_decision' ? 'editorial_rules' : 'risk_rules',
-              risk_conditions: {
-                description: trigger.source === 'editorial_decision'
-                  ? 'Scénario lancé volontairement par décision éditoriale.'
-                  : 'Le chef d’orchestre compare ce code avec event_boost_ia_deux.risque_routier_code.',
-                risk_code: trigger.source === 'editorial_decision' ? 'EDITORIAL_DECISION' : riskCode,
-                risk_label: trigger.label,
-                source_field: trigger.source === 'editorial_decision' ? 'manual' : 'event_boost_ia_deux.risque_routier_code',
-                zones,
-                routes,
-                min_severity: minSeverity,
-                client_zone_match_required: trigger.source !== 'editorial_decision'
-              },
-              dispatch_rules: {
-                once_per_event: oncePerEvent,
-                group_similar_events: groupSimilar,
-                cooldown_hours: cooldownHours,
-                max_immediate_alerts_per_client_per_day: maxAlerts,
-                max_sms_per_client_per_day: maxSms,
-                channels_allowed: { email: channel === 'email', sms: channel === 'sms' }
-              }
-            }
-          },
-          message_step: {
-            code: `${scenarioCode}_STEP_1`,
-            step_order: 1,
-            window_ref: val('cc_scenario_window_ref') || 'occurs_at',
-            window_min_hours: Number(val('cc_scenario_window_min_hours') || 0),
-            window_max_hours: Number(val('cc_scenario_window_max_hours') || 2),
-            logic_json: {
-              contents: [{
-                content_code: contentCode || toComposerCode(val('cc_code')),
-                when: oncePerEvent ? 'first_detection_for_event && cooldown_ok' : 'cooldown_ok',
-                channel
-              }],
-              priority: null
-            }
-          }
-        };
-      });
-
-      return { scenarios };
-    }
-
-    function updateComposerScenarioSummary() {
-      const box = document.getElementById('cc_scenario_trigger_summary');
-      if (!box) return;
-      const ctx = currentComposerContext();
-      if (ctx.triggerable === false) {
-        box.innerHTML = '<strong>Pas de scénario automatique :</strong><br>Ce code signifie que l’IA ne dispose pas d’un risque exploitable. Le message peut être conservé comme contenu, mais il ne doit pas être déclenché automatiquement.';
-        return;
-      }
-      const draft = buildComposerScenarioDraft(toComposerCode(val('cc_code')));
-      if (!draft || !draft.scenarios || !draft.scenarios.length) {
-        box.innerHTML = '<span class="muted">Aucun scénario ne sera créé avec ce message.</span>';
-        return;
-      }
-      const first = draft.scenarios[0];
-      const c = first.risk_rule_step.logic_json.risk_conditions;
-      const zones = c.zones.length ? c.zones.join(', ') : 'toutes zones / segments clients';
-      const routes = c.routes.length ? c.routes.join(', ') : 'toutes routes';
-      const labels = draft.scenarios.map(d => d.scenario.trigger_label).join(', ');
-      if (c.risk_code === 'EDITORIAL_DECISION') {
-        box.innerHTML = `<strong>Déclenchement prévu :</strong><br>Décision éditoriale manuelle. Cible : <strong>${escapeHtml(zones)}</strong>. Le futur chef d’orchestre ou une action manuelle décidera du moment d’envoi.`;
-        return;
-      }
-      box.innerHTML = `
-        <strong>Déclenchement prévu :</strong><br>
-        ${draft.scenarios.length} scénario(s) associé(s) à : <strong>${escapeHtml(labels)}</strong>.<br>
-        Le chef d’orchestre cherchera <code>event_boost_ia_deux.risque_routier_code</code> = <strong>${escapeHtml(c.risk_code)}</strong>${draft.scenarios.length > 1 ? ' (ou les autres risques sélectionnés)' : ''}.<br>
-        Zone : <strong>${escapeHtml(zones)}</strong> — route : <strong>${escapeHtml(routes)}</strong> — gravité minimale événement : <strong>${escapeHtml(c.min_severity)}</strong>.
-      `;
-    }
-
-    async function ensureComposerTriggerType(trigger, priority) {
-      const wanted = String(trigger.code || '').trim();
-      if (!wanted) throw new Error('Type de déclencheur manquant pour cette situation.');
-
-      let existing = (state.triggerTypes || []).find(t => String(t.code || '') === wanted)
-        || (state.triggerTypes || []).find(t => String(t.code || '').toLowerCase() === wanted.toLowerCase());
-      if (existing && existing.id) return existing.id;
-
-      const payload = {
-        code: wanted,
-        label: trigger.label || wanted,
-        source_kind: trigger.source || 'ai_risk_normalized',
-        default_priority: Number(priority || 80),
-        is_active: true
-      };
-
-      const { data, error } = await db()
-        .from('trigger_types')
-        .insert(payload)
-        .select('id,code,label,source_kind,default_priority,is_active')
-        .maybeSingle();
-
-      if (error) throw error;
-      if (!data || !data.id) throw new Error('Le type de déclencheur a été créé sans identifiant retourné.');
-      state.triggerTypes.push(data);
-      return data.id;
-    }
-
-    async function createComposerScenarioForContent(contentCode) {
-      const draft = buildComposerScenarioDraft(contentCode);
-      if (!draft || !draft.scenarios || !draft.scenarios.length) return null;
-
-      const created = [];
-      const existingCodes = new Set((state.scenarios || []).map(s => String(s.code || '').toUpperCase()));
-
-      for (const item of draft.scenarios) {
-        if (!item.scenario.code) throw new Error('Le code scénario est obligatoire.');
-        if (existingCodes.has(item.scenario.code)) throw new Error('Le code scénario existe déjà : ' + item.scenario.code + '.');
-        existingCodes.add(item.scenario.code);
-
-        const triggerTypeId = await ensureComposerTriggerType({
-          code: item.scenario.trigger_type_code,
-          label: item.scenario.trigger_label,
-          source: item.risk_rule_step.logic_json.risk_conditions.source_field === 'manual' ? 'editorial_decision' : 'ai_risk_normalized'
-        }, item.scenario.priority);
-
-        const scenarioPayload = {
-          code: item.scenario.code,
-          label: item.scenario.label,
-          trigger_type_id: triggerTypeId,
-          aggregation_mode: item.scenario.aggregation_mode,
-          priority: item.scenario.priority,
-          active: true
-        };
-
-        const { data: scenario, error: scenarioError } = await db().from('scenarios').insert(scenarioPayload).select('id,code').maybeSingle();
-        if (scenarioError) throw scenarioError;
-        if (!scenario || !scenario.id) throw new Error('Le scénario a été créé sans identifiant retourné.');
-
-        for (const step of [item.risk_rule_step, item.message_step]) {
-          const payload = {
-            scenario_id: scenario.id,
-            code: step.code,
-            step_order: step.step_order,
-            window_ref: step.window_ref,
-            window_min_hours: step.window_min_hours,
-            window_max_hours: step.window_max_hours,
-            logic_json: step.logic_json,
-            active: true
-          };
-          const { error } = await db().from('scenario_steps').insert(payload);
-          if (error) throw error;
-        }
-
-        created.push({ scenario, draft: item });
-      }
-
-      return { created, count: created.length, scenario: created[0]?.scenario, draft };
-    }
-
-    function updateComposerContextHelp() {
-      const ctx = currentComposerContext();
-      const box = document.getElementById('cc_context_help');
-      if (box) box.textContent = ctx.description || '';
-      renderComposerVariables();
-    }
-
-    function updateComposerRoleHelp() {
-      const role = currentComposerRole();
-      const box = document.getElementById('cc_role_help');
-      if (box) box.textContent = role.help || '';
-    }
-
-    function updateComposerTimingHelp() {
-      const timing = currentComposerTiming();
-      const box = document.getElementById('cc_timing_help');
-      if (box) box.textContent = timing.help || '';
-    }
-
-    function updateComposerChannelVisibility() {
-      const channel = currentComposerChannel();
-      const subjectWrap = document.getElementById('cc_subject_wrap');
-      const smsWrap = document.getElementById('cc_sms_wrap');
-      const bodyHelp = document.getElementById('cc_body_help');
-      const bodyLabel = document.getElementById('cc_body_label');
-
-      if (subjectWrap) subjectWrap.classList.toggle('hidden', channel !== 'email');
-      if (smsWrap) smsWrap.classList.toggle('hidden', channel !== 'sms');
-
-      if (channel === 'sms') {
-        if (bodyLabel) bodyLabel.textContent = 'Page d’information liée au SMS';
-        if (bodyHelp) bodyHelp.textContent = 'Éditeur HTML TinyMCE : ce contenu sera affiché après clic sur le lien du SMS. Le SMS lui-même reste court.';
-      } else {
-        if (bodyLabel) bodyLabel.textContent = 'Corps du message email';
-        if (bodyHelp) bodyHelp.textContent = 'Éditeur HTML TinyMCE : ce contenu sera affiché dans un navigateur, avec mise en forme.';
-      }
-
-      ensureComposerTinyMCE();
-      renderComposerVariables();
-      updateComposerSmsCounter();
-    }
-
-    function updateComposerGeneratedFields(options = {}) {
-      const ctx = currentComposerContext();
-      const role = currentComposerRole();
-      const channel = currentComposerChannel();
-      const codeInput = document.getElementById('cc_code');
-      const titleInput = document.getElementById('cc_title');
-      const generatedCode = nextAvailableContentCode(`${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
-      if (codeInput && (!codeInput.value || !options.preserveCode)) codeInput.value = generatedCode;
-      if (titleInput && !titleInput.value) titleInput.value = `${ctx.label} — ${role.label}`;
-      if (!options.preserveText) fillComposerDefaultText();
-      updateComposerScenarioDefaults({ preserveUserValues: Boolean(options.preserveCode || options.preserveText) });
-      renderComposerPolicyPreview();
-    }
-
-    function nextAvailableContentCode(base) {
-      const clean = toComposerCode(base);
-      const existing = new Set((state.contentItems || []).map(i => String(i.code || '').toUpperCase()));
-      if (!existing.has(clean)) return clean;
-      let n = 2;
-      while (existing.has(`${clean}_${n}`)) n++;
-      return `${clean}_${n}`;
-    }
-
-    function toComposerCode(value) {
-      return String(value || '')
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .toUpperCase()
-        .replace(/[^A-Z0-9]+/g, '_')
-        .replace(/^_+|_+$/g, '')
-        .slice(0, 80);
-    }
-
-    function fillComposerDefaultText() {
-      const ctx = currentComposerContext();
-      const role = currentComposerRole();
-      const channel = currentComposerChannel();
-      const subject = document.getElementById('cc_subject');
-      if (subject) subject.value = defaultComposerSubject(ctx, role, channel);
-      setComposerSmsValue(defaultComposerSmsAlert(ctx, role));
-      setComposerBodyValue(defaultComposerBody(ctx, role, channel));
-      renderComposerPreview();
-      renderComposerPolicyPreview();
-    }
-
-    function defaultComposerSubject(ctx, role, channel) {
-      if (channel !== 'email') return '';
-      const subjects = {
-        RISK_HEAVY_WEIGHT: 'Tonnage / ouvrage sur {road_number} : vérifiez l’itinéraire',
-        RISK_WORKZONE_STAFF: 'Personnel sur chaussée sur {road_number} : vigilance renforcée',
-        RISK_LANE_MERGE: 'Rabattement de voie sur {road_number} : anticipez les changements de file',
-        RISK_CONTRAFLOW: 'Circulation en contre-flux sur {road_number} : prudence',
-        RISK_LANE_NARROWING: 'Voie rétrécie sur {road_number} : attention aux heurts latéraux',
-        RISK_FALLING_ROCKS: 'Risque de chutes de pierres sur {road_number}',
-        RISK_ALTERNATE_TRAFFIC: 'Circulation alternée sur {road_number} : anticipez les arrêts',
-        RISK_RAMP_MANEUVER: 'Manœuvre / déviation sur {road_number} : vérifiez votre trajectoire',
-        RISK_NONE: 'Information routière à qualifier',
-        EDITORIAL_DECISION: 'Message de prévention MobiSûr'
-      };
-      return subjects[ctx.topic_code] || `${ctx.label} : message de prévention`;
-    }
-
-    function defaultComposerSmsAlert(ctx, role) {
-      if (ctx.topic_code === 'EDITORIAL_DECISION') return 'MobiSûr : message de prévention. Infos et conseils : {info_url}';
-      if (ctx.topic_code === 'RISK_WORKZONE_STAFF') return 'MobiSûr : personnel sur chaussée sur {road_number}. Ralentissez. Infos : {info_url}';
-      if (ctx.topic_code === 'RISK_FALLING_ROCKS') return 'MobiSûr : risque de chutes de pierres sur {road_number}. Infos : {info_url}';
-      if (ctx.topic_code === 'RISK_LANE_MERGE') return 'MobiSûr : rabattement de voie sur {road_number}. Anticipez. Infos : {info_url}';
-      return `MobiSûr : ${ctx.label}. Infos et consignes : {info_url}`;
-    }
-
-    function defaultComposerBody(ctx, role, channel) {
-      if (ctx.topic_code === 'EDITORIAL_DECISION') {
-        return '<p>Message de prévention à destination de <strong>{audience}</strong>.</p><p>Thème : <strong>{theme}</strong>.</p><p>Adaptez ici la consigne et le contexte de votre campagne.</p>';
-      }
-      const cta = role.type === 'operational_cta'
-        ? 'Action recommandée : relayez cette information aux collaborateurs concernés avant leurs trajets.'
-        : 'Consigne MobiSûr : invitez les conducteurs à anticiper la zone, adapter leur allure et augmenter leurs distances de sécurité.';
-      const intro = channel === 'sms'
-        ? '<p>Cette page détaille l’alerte envoyée par SMS.</p>'
-        : '<p>La moulinette IA a identifié le risque <strong>{risque_routier}</strong> sur <strong>{road_number}</strong>, dans la zone <strong>{zone_cible}</strong>.</p>';
-      return `${intro}
-<p><strong>Cause identifiée :</strong> {cause_exacte}</p>
-<p>{message_redige}</p>
-<p><strong>Période prévue :</strong> du {start_at} au {end_at}.</p>
-<p>{detour_info}</p>
-<p>${cta}</p>`;
-    }
-
-    function buildComposerPolicy() {
-      const ctx = currentComposerContext();
-      const role = currentComposerRole();
-      const timing = currentComposerTiming();
-      const channel = currentComposerChannel();
-      const base = {
-        ...timing.policy,
-        mobisur_context: ctx.topic_code,
-        risk_code: ctx.risk_code || null,
-        risk_source_field: ctx.risk_code ? 'event_boost_ia_deux.risque_routier_code' : null,
-        trigger_type_code: ctx.trigger_type_code,
-        role: role.type,
-        exclude_realtime_traffic: true,
-        available_variables: (ctx.variables || []).map(v => v[0])
-      };
-
-      if (channel === 'sms') {
-        return {
-          ...base,
-          delivery_model: 'sms_with_landing_page',
-          sms_alert_template: getComposerSmsValue(),
-          sms_link_variable: 'info_url',
-          landing_page_template_location: 'content_versions.corps_template',
-          sms_raw_details_forbidden: true
-        };
-      }
-
-      return {
-        ...base,
-        delivery_model: 'email_html'
-      };
-    }
-
-    function renderComposerPolicyPreview() {
-      const box = document.getElementById('cc_policy_preview');
-      if (!box) return;
-      const preview = {
-        content_item_policy: buildComposerPolicy(),
-        scenario_creation: buildComposerScenarioDraft(toComposerCode(val('cc_code')))
-      };
-      box.textContent = JSON.stringify(preview, null, 2);
-    }
-
-    function renderComposerVariables() {
-      const ctx = currentComposerContext();
-      const box = document.getElementById('cc_variables');
-      if (!box) return;
-      let vars = [...(ctx.variables || [])];
-      if (currentComposerChannel() === 'sms') {
-        vars = [...vars, ['info_url', 'Lien vers la page d’information'], ['short_url', 'Lien court SMS']];
-      }
-      box.innerHTML = vars.map(([key, label]) => `
-        <div class="var-pill">
-          <div><strong>${escapeHtml(label)}</strong><br><code>{${escapeHtml(key)}}</code></div>
-          <button type="button" class="secondary" onclick="insertComposerVariable('${escapeHtml(key)}')">Insérer</button>
-        </div>
-      `).join('');
-    }
-
-    function insertComposerVariable(key) {
-      const token = `{${key}}`;
-      const active = document.activeElement;
-
-      if (active && ['cc_subject', 'cc_title', 'cc_sms_text'].includes(active.id)) {
-        const start = active.selectionStart || 0;
-        const end = active.selectionEnd || 0;
-        active.value = active.value.slice(0, start) + token + active.value.slice(end);
-        active.focus();
-        active.selectionStart = active.selectionEnd = start + token.length;
-        renderComposerPreview();
-        return;
-      }
-
-      insertIntoComposerBody(token);
-    }
-
-    function renderComposerPreview() {
-      const ctx = currentComposerContext();
-      const channel = currentComposerChannel();
-      const subject = val('cc_subject');
-      const smsText = getComposerSmsValue();
-      const body = getComposerBodyValue();
-      const sample = { info_url: 'https://data.mobisur.net/i/exemple', short_url: 'https://mobi.sr/a1b2', ...(ctx.sample || {}) };
-      const renderedSubject = renderComposerTemplate(subject, sample);
-      const renderedSms = renderComposerTemplate(smsText, sample);
-      const renderedBody = renderComposerTemplate(body, sample);
-      const box = document.getElementById('cc_preview');
-      if (box) {
-        if (!renderedBody && !renderedSubject && !renderedSms) {
-          box.textContent = 'L’aperçu apparaîtra ici.';
-        } else if (channel === 'sms') {
-          box.innerHTML = `<div class="composer-preview-subject"><strong>SMS envoyé :</strong><br>${escapeHtml(renderedSms)}</div><div class="composer-preview-subject" style="margin-top:10px;"><strong>Page affichée après clic :</strong></div><div class="composer-preview-html">${renderedBody}</div>`;
-        } else {
-          box.innerHTML = `<div class="composer-preview-subject"><strong>Objet :</strong> ${escapeHtml(renderedSubject)}</div><div class="composer-preview-html">${renderedBody}</div>`;
-        }
-      }
-      updateComposerSmsCounter();
-      renderComposerPolicyPreview();
-    }
-
-    function renderComposerTemplate(template, context) {
-      return String(template || '').replace(/\{([a-zA-Z0-9_]+)\}/g, (m, key) => {
-        const value = context[key];
-        return value === undefined || value === null || value === '' ? m : String(value);
-      });
-    }
-
-    function clearComposerForm() {
-      ['cc_title', 'cc_code', 'cc_subject', 'cc_sms_text', 'cc_scenario_label', 'cc_scenario_code', 'cc_scenario_zones', 'cc_scenario_routes'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-      });
-      const makeScenario = document.getElementById('cc_make_scenario');
-      if (makeScenario) makeScenario.checked = false;
-      const once = document.getElementById('cc_scenario_once_per_event');
-      if (once) once.checked = true;
-      const group = document.getElementById('cc_scenario_group_similar');
-      if (group) group.checked = true;
-      selectComposerRiskTriggers('current');
-      setComposerBodyValue('');
-      updateComposerGeneratedFields({ preserveText: false, preserveCode: false });
-      updateComposerScenarioVisibility();
-      setComposerNotice('', 'info');
-    }
-
-    function setComposerNotice(text, type) {
-      const box = document.getElementById('composerNotice');
-      if (!box) return;
-      box.innerHTML = text ? `<div class="notice ${type}">${escapeHtml(text)}</div>` : '';
-    }
-
-    async function createComposerContent() {
-      try {
-        if (!db()) throw new Error('Connexion Supabase non disponible.');
-        const ctx = currentComposerContext();
-        const role = currentComposerRole();
-        const channel = currentComposerChannel();
-        const code = toComposerCode(val('cc_code'));
-        const title = val('cc_title') || `${ctx.label} — ${role.label}`;
-        const subject = channel === 'email' ? val('cc_subject') : null;
-        const smsAlert = channel === 'sms' ? getComposerSmsValue() : '';
-        const body = getComposerBodyValue();
-        const status = val('cc_status') || 'draft';
-
-        if (!code) throw new Error('Le code technique est obligatoire.');
-        if ((state.contentItems || []).some(i => String(i.code || '').toUpperCase() === code)) {
-          throw new Error('Ce code existe déjà. Modifiez le code ou videz le formulaire pour en générer un nouveau.');
-        }
-        if (!body) throw new Error(channel === 'sms' ? 'La page d’information liée au SMS est obligatoire.' : 'Le corps du message est obligatoire.');
-        if (channel === 'email' && !subject) throw new Error('L’objet email est obligatoire pour un contenu email.');
-        if (channel === 'sms' && !smsAlert) throw new Error('Le texte court du SMS est obligatoire.');
-        if (channel === 'sms' && !/\{(info_url|short_url)\}/.test(smsAlert)) {
-          throw new Error('Le SMS doit contenir {info_url} ou {short_url}, car les détails ne seront pas envoyés directement par SMS.');
-        }
-
-        setComposerNotice('Création du message en cours…', 'info');
-
-        const itemPayload = {
-          code,
-          categorie: role.categorie,
-          sujet: title,
-          type: role.type,
-          source: ctx.source,
-          topic_code: ctx.topic_code,
-          channel,
-          policy: buildComposerPolicy(),
-          active: true
-        };
-
-        const { data: item, error: itemError } = await db()
-          .from('content_items')
-          .insert(itemPayload)
-          .select('id,code')
-          .maybeSingle();
-        if (itemError) throw itemError;
-        if (!item || !item.id) throw new Error('Le message a été créé sans identifiant retourné. Vérifiez les droits Supabase.');
-
-        const versionPayload = {
-          content_item_id: item.id,
-          version_no: 1,
-          sujet_template: subject,
-          corps_template: body,
-          status,
-          source_ref: 'admin-composer',
-          change_note: 'création depuis l’assistant de contenu'
-        };
-
-        const { error: versionError } = await db().from('content_versions').insert(versionPayload);
-        if (versionError) throw versionError;
-
-        let scenarioResult = null;
-        if (composerScenarioEnabled()) {
-          setComposerNotice('Message créé. Création du scénario associé…', 'info');
-          scenarioResult = await createComposerScenarioForContent(code);
-        }
-
-        const scenarioText = scenarioResult ? ` ${scenarioResult.count} scénario(s) créé(s) : ${scenarioResult.created.map(x => x.scenario.code).join(', ')}.` : '';
-        setComposerNotice(`Message créé : ${code}.${scenarioText}`, 'ok');
-        setGlobalNotice(`Message créé : ${code}.${scenarioText}`, 'ok');
-        await refreshAll();
-        const codeInput = document.getElementById('cc_code');
-        if (codeInput) codeInput.value = nextAvailableContentCode(`${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
-        const scenarioCodeInput = document.getElementById('cc_scenario_code');
-        if (scenarioCodeInput) scenarioCodeInput.value = nextAvailableScenarioCode(`SC_${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);
-      } catch (e) {
-        console.error('Erreur createComposerContent()', e);
-        setComposerNotice(e.message || 'Erreur lors de la création du message.', 'err');
-        setGlobalNotice(e.message || 'Erreur lors de la création du message.', 'err');
-      }
-    }
+    function initContentComposer(){const el=document.getElementById('cc_context');if(!el)return;fillComposerSelect('cc_context',composerContextTypes);fillComposerSelect('cc_role',composerRoles);fillComposerSelect('cc_timing',composerTimings);updateComposerContextHelp();updateComposerRoleHelp();updateComposerTimingHelp();updateComposerChannelVisibility();updateComposerGeneratedFields({preserveText:true});renderComposerTaxonomyCatalogs();updateComposerScenarioVisibility();if(!getComposerBodyValue()&&!getComposerSmsValue())fillComposerDefaultText();renderComposerPreview()}
+    function fillComposerSelect(id,dict){const el=document.getElementById(id);if(!el||el.dataset.filled==='1')return;Object.entries(dict).forEach(([code,cfg])=>{const opt=document.createElement('option');opt.value=code;opt.textContent=cfg.label;el.appendChild(opt)});el.dataset.filled='1'}
+    function currentComposerContext(){return composerContextTypes[val('cc_context')]||composerContextTypes.ADVICE_SPEED_DISTANCE}
+    function currentComposerRole(){return composerRoles[val('cc_role')]||composerRoles.safety_advice}
+    function currentComposerTiming(){return composerTimings[val('cc_timing')]||composerTimings.detection}
+    function currentComposerChannel(){return val('cc_channel')||'email'}
+    function composerScenarioEnabled(){return Boolean(document.getElementById('cc_make_scenario')?.checked)}
+    function currentComposerScenarioChoice(){return document.querySelector('input[name="cc_scenario_choice"]:checked')?.value||'none'}
+    function parseComposerList(value){return String(value||'').split(/[;,\n]/).map(v=>v.trim().toUpperCase()).filter(Boolean)}
+    function normalizeComposerRoadList(value){return parseComposerList(value).map(v=>v.replace(/\s+/g,''))}
+    function renderComposerTaxonomyCatalogs(){const c=document.getElementById('cc_cause_catalog');if(c)c.innerHTML=taxonomyOptionsHtml('cause','cc');const q=document.getElementById('cc_consequence_catalog');if(q)q.innerHTML=taxonomyOptionsHtml('consequence','cc')}
+    function selectedComposerCauseCodes(){return checkedTaxonomyCodes('cc_cause_catalog')}
+    function selectedComposerConsequenceCodes(){return checkedTaxonomyCodes('cc_consequence_catalog')}
+    function currentComposerScenarioMode(){return document.getElementById('cc_scenario_mode')?.value||'single'}
+    function defaultScenarioWindowForTiming(t){if(t==='before_start')return{ref:'predicted_start_at',min:-24,max:0};if(t==='during')return{ref:'predicted_start_at',min:0,max:24};if(t==='digest')return{ref:'date_evenement',min:0,max:24};return{ref:'occurs_at',min:0,max:2}}
+    function updateComposerScenarioVisibility(){const choice=currentComposerScenarioChoice(),wrap=document.getElementById('cc_scenario_wrap');if(wrap)wrap.classList.toggle('hidden',choice==='none');const ai=document.getElementById('cc_ai_rule_zone');if(ai)ai.classList.toggle('hidden',choice==='editorial');const make=document.getElementById('cc_make_scenario');if(make)make.checked=choice!=='none';updateComposerScenarioDefaults({preserveUserValues:true});updateComposerScenarioSummary();renderComposerPolicyPreview()}
+    function updateComposerScenarioDefaults(options={}){const ctx=currentComposerContext(),role=currentComposerRole(),channel=currentComposerChannel(),preserve=Boolean(options.preserveUserValues),sl=document.getElementById('cc_scenario_label'),sc=document.getElementById('cc_scenario_code');if(sl&&(!sl.value||!preserve))sl.value=`${ctx.label} — ${role.label}`;if(sc&&(!sc.value||!preserve))sc.value=nextAvailableScenarioCode(`SC_${ctx.code_base}_${channel.toUpperCase()}`);const w=defaultScenarioWindowForTiming(val('cc_timing')||'detection');[['cc_scenario_window_ref',w.ref],['cc_scenario_window_min_hours',w.min],['cc_scenario_window_max_hours',w.max]].forEach(([id,v])=>{const e=document.getElementById(id);if(e&&(!e.value||!preserve))e.value=String(v)});updateComposerScenarioSummary()}
+    function nextAvailableScenarioCode(base){const clean=toComposerCode(base),existing=new Set((state.scenarios||[]).map(s=>String(s.code||'').toUpperCase()));if(!existing.has(clean))return clean;let n=2;while(existing.has(`${clean}_${n}`))n++;return`${clean}_${n}`}
+    function buildComposerScenarioDraft(contentCode){if(!composerScenarioEnabled())return null;const editorial=currentComposerScenarioChoice()==='editorial',causes=selectedComposerCauseCodes(),consequences=selectedComposerConsequenceCodes();if(!editorial&&!causes.length&&!consequences.length)return{error:'Sélectionnez au moins une cause ou une conséquence.'};const scenarioCode=toComposerCode(val('cc_scenario_code'))||nextAvailableScenarioCode('SC_ADVICE'),logic={kind:editorial?'editorial_rules':'cause_consequence_rules',classification_source:editorial?'manual':'event_boost_ia_deux',cause_match:editorial?null:{operator:val('cc_cause_operator')||'any',codes:causes},consequence_match:editorial?null:{operator:val('cc_consequence_operator')||'any',codes:consequences},scope:{zones:parseComposerList(val('cc_scenario_zones')),routes:normalizeComposerRoadList(val('cc_scenario_routes')),min_severity:val('cc_scenario_min_severity')||'medium',client_zone_match_required:!editorial},dispatch_rules:{once_per_event:Boolean(document.getElementById('cc_scenario_once_per_event')?.checked),group_similar_events:Boolean(document.getElementById('cc_scenario_group_similar')?.checked),cooldown_hours:Number(val('cc_scenario_cooldown_hours')||24),max_immediate_alerts_per_client_per_day:Number(val('cc_scenario_max_alerts_day')||2),max_sms_per_client_per_day:Number(val('cc_scenario_max_sms_day')||1)}};return{scenario:{code:scenarioCode,label:val('cc_scenario_label')||scenarioCode,trigger_type_code:editorial?'EDITORIAL_DECISION':'AI_RISK_CLASSIFICATION',aggregation_mode:currentComposerScenarioMode(),priority:Number(val('cc_scenario_priority')||80),active:true},rule_step:{code:`${scenarioCode}_CLASSIFICATION_RULES`,step_order:0,window_ref:'occurs_at',window_min_hours:0,window_max_hours:0,logic_json:logic,active:true},message_step:{code:`${scenarioCode}_STEP_1`,step_order:1,window_ref:val('cc_scenario_window_ref')||'occurs_at',window_min_hours:Number(val('cc_scenario_window_min_hours')||0),window_max_hours:Number(val('cc_scenario_window_max_hours')||2),logic_json:{contents:[{content_code:contentCode,when:'cooldown_ok',channel:currentComposerChannel()}],priority:null},active:true}}}
+    function updateComposerScenarioSummary(){const box=document.getElementById('cc_scenario_trigger_summary');if(!box)return;const draft=buildComposerScenarioDraft(toComposerCode(val('cc_code')));if(!draft){box.innerHTML='<span class="muted">Aucun scénario ne sera créé avec ce conseil.</span>';return}if(draft.error){box.innerHTML='<span class="muted">'+escapeHtml(draft.error)+'</span>';return}if(draft.rule_step.logic_json.kind==='editorial_rules'){box.innerHTML='<strong>Déclenchement :</strong> décision éditoriale volontaire.';return}const l=draft.rule_step.logic_json,c=l.cause_match.codes.map(taxonomyLabel),q=l.consequence_match.codes.map(taxonomyLabel);box.innerHTML=`<strong>Déclenchement automatique :</strong><br>${c.length?'Causes '+l.cause_match.operator.toUpperCase()+' : <strong>'+escapeHtml(c.join(', '))+'</strong><br>':''}${q.length?'Conséquences '+l.consequence_match.operator.toUpperCase()+' : <strong>'+escapeHtml(q.join(', '))+'</strong>':''}`}
+    async function ensureComposerTriggerType(code,priority){let existing=(state.triggerTypes||[]).find(t=>String(t.code||'')===code);if(existing?.id)return existing.id;const label=code==='EDITORIAL_DECISION'?'Décision éditoriale':'Classification causes / conséquences';const{data,error}=await db().from('trigger_types').insert({code,label,source_kind:code==='EDITORIAL_DECISION'?'editorial_decision':'ai_classification',default_priority:Number(priority||80),is_active:true}).select('id,code,label,source_kind,default_priority,is_active').maybeSingle();if(error)throw error;if(!data?.id)throw new Error('Type de déclencheur créé sans identifiant.');state.triggerTypes.push(data);return data.id}
+    async function createComposerScenarioForContent(contentCode){const draft=buildComposerScenarioDraft(contentCode);if(!draft)return null;if(draft.error)throw new Error(draft.error);if((state.scenarios||[]).some(s=>String(s.code||'').toUpperCase()===draft.scenario.code))throw new Error('Le code scénario existe déjà : '+draft.scenario.code);const triggerTypeId=await ensureComposerTriggerType(draft.scenario.trigger_type_code,draft.scenario.priority);const{data:scenario,error}=await db().from('scenarios').insert({code:draft.scenario.code,label:draft.scenario.label,trigger_type_id:triggerTypeId,aggregation_mode:draft.scenario.aggregation_mode,priority:draft.scenario.priority,active:true}).select('id,code').maybeSingle();if(error)throw error;if(!scenario?.id)throw new Error('Scénario créé sans identifiant.');for(const step of[draft.rule_step,draft.message_step]){const{error:se}=await db().from('scenario_steps').insert({...step,scenario_id:scenario.id});if(se)throw se}return{count:1,created:[{scenario}],scenario,draft}}
+    function updateComposerContextHelp(){const b=document.getElementById('cc_context_help');if(b)b.textContent=currentComposerContext().description||''}
+    function updateComposerRoleHelp(){const b=document.getElementById('cc_role_help');if(b)b.textContent=currentComposerRole().help||''}
+    function updateComposerTimingHelp(){const b=document.getElementById('cc_timing_help');if(b)b.textContent=currentComposerTiming().help||''}
+    function updateComposerChannelVisibility(){const channel=currentComposerChannel(),sms=document.getElementById('cc_sms_wrap'),bodyWrap=document.getElementById('cc_body_wrap');if(sms)sms.classList.toggle('hidden',channel!=='sms');if(bodyWrap)bodyWrap.classList.toggle('hidden',channel==='sms');if(channel==='email')ensureComposerTinyMCE();updateComposerSmsCounter()}
+    function updateComposerGeneratedFields(options={}){const ctx=currentComposerContext(),role=currentComposerRole(),channel=currentComposerChannel(),code=document.getElementById('cc_code'),title=document.getElementById('cc_title');if(code&&(!code.value||!options.preserveCode))code.value=nextAvailableContentCode(`${ctx.code_base}_${role.code_suffix}_${channel.toUpperCase()}`);if(title&&!title.value)title.value=ctx.label;if(!options.preserveText)fillComposerDefaultText();updateComposerScenarioDefaults({preserveUserValues:Boolean(options.preserveCode||options.preserveText)});renderComposerPolicyPreview()}
+    function nextAvailableContentCode(base){const clean=toComposerCode(base),existing=new Set((state.contentItems||[]).map(i=>String(i.code||'').toUpperCase()));if(!existing.has(clean))return clean;let n=2;while(existing.has(`${clean}_${n}`))n++;return`${clean}_${n}`}
+    function toComposerCode(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,80)}
+    function adviceExample(code,channel){const map={ADVICE_SPEED_DISTANCE:'Réduisez votre vitesse avant d’entrer dans la zone et augmentez la distance avec le véhicule qui vous précède.',ADVICE_LANE_MERGE:'Anticipez votre rabattement, signalez votre manœuvre et évitez les changements de file tardifs.',ADVICE_LATERAL_CLEARANCE:'Réduisez l’allure et conservez une marge latérale suffisante avec les autres véhicules et les équipements de chantier.',ADVICE_WORKZONE:'À l’approche d’un chantier, ralentissez nettement et restez attentif aux personnes susceptibles d’être présentes sur la chaussée.',ADVICE_ALTERNATE_TRAFFIC:'Anticipez un éventuel arrêt, respectez les feux temporaires ou les consignes des agents et gardez une distance suffisante.',ADVICE_CONTRAFLOW:'Restez strictement dans votre voie, réduisez votre vitesse et augmentez vos distances de sécurité.',ADVICE_OBSTACLE:'Adaptez votre vitesse pour conserver une distance d’arrêt suffisante et pouvoir éviter un obstacle sans manœuvre brusque.',ADVICE_HEAVY_VEHICLE:'Avant le départ, vérifiez que l’itinéraire est compatible avec le poids, le gabarit et les restrictions applicables à votre véhicule.',ADVICE_ROUTE_PLANNING:'Vérifiez l’itinéraire avant le départ et anticipez les sorties ou changements de direction afin d’éviter toute manœuvre tardive.'};let text=map[code]||'Adaptez votre conduite à la situation et conservez une marge de sécurité suffisante.';if(channel==='sms'&&text.length>250)text=text.slice(0,247)+'…';return text}
+    function fillComposerDefaultText(){const text=adviceExample(currentComposerContext().topic_code,currentComposerChannel());if(currentComposerChannel()==='sms')setComposerSmsValue(text);else setComposerBodyValue('<p>'+escapeHtml(text)+'</p>');renderComposerPreview();renderComposerPolicyPreview()}
+    function buildComposerPolicy(){return{timing:currentComposerTiming().policy?.timing||'detection',content_role:'reusable_safety_advice',advice_topic:currentComposerContext().topic_code,no_event_variables:true,event_information_separate:true}}
+    function renderComposerPolicyPreview(){const b=document.getElementById('cc_policy_preview');if(b)b.textContent=JSON.stringify({content_item_policy:buildComposerPolicy(),scenario_creation:buildComposerScenarioDraft(toComposerCode(val('cc_code')))},null,2)}
+    function renderComposerVariables(){}
+    function insertComposerVariable(){}
+    function renderComposerPreview(){const b=document.getElementById('cc_preview');if(!b)return;const body=currentComposerChannel()==='sms'?getComposerSmsValue():getComposerBodyValue();b.innerHTML=currentComposerChannel()==='sms'?`<div class="composer-preview-subject"><strong>Conseil SMS :</strong><br>${escapeHtml(body)}</div>`:`<div class="composer-preview-html">${body||'<span class="muted">Aucun conseil rédigé.</span>'}</div>`;updateComposerSmsCounter();renderComposerPolicyPreview()}
+    function renderComposerTemplate(template){return String(template||'')}
+    function clearComposerForm(){['cc_title','cc_code','cc_subject','cc_sms_text','cc_scenario_label','cc_scenario_code','cc_scenario_zones','cc_scenario_routes'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});setCheckedTaxonomyCodes('cc_cause_catalog',[]);setCheckedTaxonomyCodes('cc_consequence_catalog',[]);const none=document.querySelector('input[name="cc_scenario_choice"][value="none"]');if(none)none.checked=true;const make=document.getElementById('cc_make_scenario');if(make)make.checked=false;setComposerBodyValue('');updateComposerGeneratedFields({preserveText:false,preserveCode:false});updateComposerScenarioVisibility();setComposerNotice('','info')}
+    function setComposerNotice(text,type){const b=document.getElementById('composerNotice');if(b)b.innerHTML=text?`<div class="notice ${type}">${escapeHtml(text)}</div>`:''}
+    async function createComposerContent(){try{if(!db())throw new Error('Connexion Supabase non disponible.');const ctx=currentComposerContext(),role=currentComposerRole(),channel=currentComposerChannel(),code=toComposerCode(val('cc_code')),title=val('cc_title')||ctx.label,status=val('cc_status')||'draft',body=channel==='sms'?getComposerSmsValue():getComposerBodyValue();if(!code)throw new Error('Le code technique est obligatoire.');if((state.contentItems||[]).some(i=>String(i.code||'').toUpperCase()===code))throw new Error('Ce code existe déjà.');if(!body)throw new Error('Le texte du conseil est obligatoire.');setComposerNotice('Création du conseil en cours…','info');const{data:item,error:itemError}=await db().from('content_items').insert({code,categorie:role.categorie,sujet:title,type:role.type,source:'editorial_advice',topic_code:ctx.topic_code,channel,policy:buildComposerPolicy(),active:true}).select('id,code').maybeSingle();if(itemError)throw itemError;if(!item?.id)throw new Error('Conseil créé sans identifiant.');const{error:versionError}=await db().from('content_versions').insert({content_item_id:item.id,version_no:1,sujet_template:null,corps_template:body,status,source_ref:'admin-advice-composer',change_note:'création du conseil réutilisable'});if(versionError)throw versionError;let scenarioResult=null;if(composerScenarioEnabled())scenarioResult=await createComposerScenarioForContent(code);const scenarioText=scenarioResult?` Scénario créé : ${scenarioResult.scenario.code}.`:'';setComposerNotice(`Conseil créé : ${code}.${scenarioText}`,'ok');setGlobalNotice(`Conseil créé : ${code}.${scenarioText}`,'ok');await refreshAll()}catch(e){console.error('Erreur createComposerContent()',e);setComposerNotice(e.message||'Erreur lors de la création du conseil.','err');setGlobalNotice(e.message||'Erreur lors de la création du conseil.','err')}}
 
 
     document.addEventListener('change', e => {
       if (e.target && e.target.id === 'pv_content_item_id') syncPreviewVersions();
       if (e.target && e.target.id === 'sc_aggregation_mode') updateScenarioAggregationHelp();
+      if (e.target && e.target.id === 'sc_trigger_type_id') updateScenarioRuleModeVisibility();
       if (e.target && e.target.id === 'ss_window_ref') updateStepWindowHelp();
       if (e.target && e.target.id === 'ss_scenario_id') updateNextStepOrder();
       if (e.target && ['ml_search_channel', 'ml_search_status'].includes(e.target.id)) renderMessageLibrary();
@@ -3724,7 +2717,7 @@ async function deleteScenarioStep(id) {
         updateComposerScenarioVisibility();
         renderComposerPreview();
       }
-      if (e.target && (['cc_make_scenario', 'cc_scenario_mode', 'cc_scenario_min_severity', 'cc_scenario_window_ref', 'cc_scenario_once_per_event', 'cc_scenario_group_similar'].includes(e.target.id) || e.target.classList?.contains('cc_scenario_trigger'))) {
+      if (e.target && (['cc_make_scenario','cc_scenario_mode','cc_scenario_min_severity','cc_scenario_window_ref','cc_scenario_once_per_event','cc_scenario_group_similar','cc_cause_operator','cc_consequence_operator'].includes(e.target.id) || e.target.closest?.('#cc_cause_catalog') || e.target.closest?.('#cc_consequence_catalog'))) {
         updateComposerScenarioVisibility();
         renderComposerPreview();
       }
